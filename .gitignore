@@ -1,0 +1,25 @@
+node_modules/
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Managed workflow (CNG): as pastas nativas sao geradas no build, nao versionadas
+/android
+/ios
+
+.env
+.env.local
+
+*.log
+npm-debug.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+.idea/
+.vscode/
+.DS_Store
