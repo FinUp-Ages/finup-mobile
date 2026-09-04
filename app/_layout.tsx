@@ -1,9 +1,21 @@
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import React from 'react';
+
 /**
- * Layout raiz do app.
- * Responsavel apenas por montar os providers globais (QueryClient, contexts, tema)
- * e por decidir entre o grupo (auth) e o grupo (tabs) conforme a sessao.
- * Nenhuma tela ou regra de negocio deve viver aqui.
+ * ROTA - layout raiz, obrigatorio pelo Expo Router.
+ *
+ * Envolve todas as rotas do app. Providers globais (tema, auth, i18n) entram
+ * aqui. Nenhuma tela e declarada neste arquivo: telas moram em views/.
  */
 export default function RootLayout() {
-  return null;
+  return (
+    <>
+      <StatusBar style="dark" />
+      <Stack screenOptions={{ headerTitleAlign: 'center' }}>
+        <Stack.Screen name="index" options={{ title: 'FinUp' }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack>
+    </>
+  );
 }
