@@ -1,8 +1,11 @@
 import { View, Image, StyleSheet } from 'react-native';
 import Svg, { Defs, RadialGradient, Stop, Rect } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useLoadingScreenViewModel } from '@/viewmodels/useLoadingScreenViewModel';
 
 export default function LoadingScreen() {
+  useLoadingScreenViewModel();
+
   return (
     <View style={{ flex: 1 }}>
       <Svg
@@ -48,4 +51,3 @@ const styles = StyleSheet.create({
     height: 78.5,
   },
 });
-
