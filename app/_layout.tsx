@@ -11,9 +11,10 @@ import React from 'react';
 export default function RootLayout() {
   return (
     <>
-      <StatusBar style="dark" />
-      <Stack screenOptions={{ headerTitleAlign: 'center' }}>
-        <Stack.Screen name="index" options={{ title: 'FinUp' }} />
+      <StatusBar style="light" />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
     </>
