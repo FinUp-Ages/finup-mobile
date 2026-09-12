@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
-    "expo": "~57.0.18",
+    "expo": "~57.0.22",
     "expo-constants": "~57.0.16",
-    "expo-linking": "~57.0.8",
-    "expo-router": "~57.0.17",
+    "expo-linking": "~57.0.10",
+    "expo-router": "~57.0.21",
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
@@ -17,6 +17,8 @@
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
+    "eslint": "^9.39.5",
+    "eslint-config-expo": "^57.0.2",
     "prettier": "^3.9.6",
     "typescript": "~6.0.3"
   },
@@ -25,6 +27,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "private": true
