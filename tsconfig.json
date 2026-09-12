@@ -3,6 +3,9 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "strict": true,
+    "types": [
+      "expo/types"
+    ],
     "paths": {
       "@/*": [
         "./src/*"
@@ -11,6 +14,7 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    ".expo/types/**/*.ts"
   ]
 }
