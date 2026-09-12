@@ -1,1 +1,1 @@
-export { default } from '@/views/LoginPlaceholderScreen';
+﻿export { default } from '@/views/AuthInitialScreen';

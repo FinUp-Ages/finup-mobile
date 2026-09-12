@@ -1,82 +1,39 @@
-import React from 'react';
+﻿import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import Svg, { Defs, LinearGradient as SvgGradient, Path, Rect, Stop } from 'react-native-svg';
+import Svg, { G, Path } from 'react-native-svg';
 
-interface FinUpChartWatermarkProps {
-  width?: number | string;
-  height?: number | string;
-}
-
-export function FinUpChartWatermark({ width = '100%', height = '100%' }: FinUpChartWatermarkProps) {
+/**
+ * Grafismo oficial de fundo do FinUp conforme o Figma:
+ * - Seta ascendente curvada (union) ajustada mais para baixo aproximando das barras
+ * - 3 colunas / barras verticais inclinadas no posicionamento original
+ */
+export function FinUpChartWatermark() {
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-      <Svg height={height} viewBox="0 0 390 600" width={width}>
-        <Defs>
-          <SvgGradient id="barGrad" x1="0" x2="0" y1="0" y2="1">
-            <Stop offset="0" stopColor="#FFFFFF" stopOpacity="0.10" />
-            <Stop offset="1" stopColor="#FFFFFF" stopOpacity="0.02" />
-          </SvgGradient>
-          <SvgGradient id="curveGrad" x1="0" x2="1" y1="1" y2="0">
-            <Stop offset="0" stopColor="#60A5FA" stopOpacity="0.08" />
-            <Stop offset="1" stopColor="#FFFFFF" stopOpacity="0.18" />
-          </SvgGradient>
-        </Defs>
+      <Svg
+        height="100%"
+        preserveAspectRatio="xMidYMid slice"
+        style={StyleSheet.absoluteFill}
+        viewBox="0 0 412 917"
+        width="100%"
+      >
+        {/* Seta Ascendente baixada em ~42px (y=200 em vez de 158) para aproximar das barras */}
+        <G transform="translate(140.25, 200)">
+          <Path
+            d="M296.117 0.00292392C296.561 -0.0510503 297.375 0.656384 297.787 0.955072C298.427 2.63601 298.674 5.01587 298.684 6.83496C298.88 35.373 298.555 63.9176 298.725 92.457C298.747 95.7878 298.884 101.18 297.375 104.127C294.909 104.742 271.775 84.8766 269.328 81.667C263.184 89.5362 258.057 96.7815 250.277 105.669C192.276 171.929 113.97 215.496 30.6094 241.411C30.5244 241.418 30.4385 241.426 30.3535 241.434L30.0762 241.565C27.1293 242.914 21.5807 243.906 18.3584 244.871C15.3505 245.773 1.83076 251.776 0 250.097C1.02298 249.038 27.5848 237.744 30.7207 236.444C39.6095 231.659 49.6503 227.23 58.6123 222.341C67.0601 217.733 75.9309 212.595 84.1143 207.513C136.917 174.771 182.465 131.574 217.956 80.5791C221.801 75.0934 228.204 66.9673 231.43 61.498C219.696 56.784 207.613 51.3327 195.76 46.835C201.05 42.8473 209.914 39.3016 216.239 36.3545L238.252 25.8721L270.97 10.6103C277.105 7.69713 288.917 0.879867 296.117 0.00292392Z"
+            fill="#FFFFFF"
+            fillOpacity={0.08}
+          />
+        </G>
 
-        {/* Bar 1 */}
-        <Rect
-          fill="url(#barGrad)"
-          height="140"
-          rx="12"
-          width="48"
-          x="30"
-          y="360"
-        />
-
-        {/* Bar 2 */}
-        <Rect
-          fill="url(#barGrad)"
-          height="220"
-          rx="12"
-          width="48"
-          x="95"
-          y="280"
-        />
-
-        {/* Bar 3 */}
-        <Rect
-          fill="url(#barGrad)"
-          height="310"
-          rx="12"
-          width="48"
-          x="160"
-          y="190"
-        />
-
-        {/* Bar 4 */}
-        <Rect
-          fill="url(#barGrad)"
-          height="390"
-          rx="12"
-          width="48"
-          x="225"
-          y="110"
-        />
-
-        {/* Bar 5 */}
-        <Rect
-          fill="url(#barGrad)"
-          height="460"
-          rx="12"
-          width="48"
-          x="290"
-          y="40"
-        />
-
-        {/* Ascending Trend Dynamic Curve */}
-        <Path
-          d="M 10 490 C 80 470, 140 400, 190 280 C 240 160, 310 90, 380 40 L 380 75 C 310 120, 240 195, 190 310 C 140 425, 80 495, 10 520 Z"
-          fill="url(#curveGrad)"
-        />
+        {/* 3 Barras / Colunas Inclinadas de volta na posição original (x=0, y=348) */}
+        <G transform="translate(0, 348)">
+          <Path
+            d="M110.395 274.225C110.375 289.01 110.945 303.821 110.325 318.6C110.104 323.861 109.278 325.529 104.84 328.135H4.17087C2.19364 325.846 0.803698 323.706 0.676725 320.571C0.148016 307.472 -0.0276224 289.495 0.441374 276.887C0.794594 267.4 -1.29762 220.848 1.40622 216.021C9.26003 210.773 43.3902 202.718 55.1455 199.166C71.7139 194.159 94.2279 186.157 110.556 182.262L110.395 274.225ZM253.793 120.205C255.652 119.136 259.204 117.738 261.129 118.961C263.439 125.846 262.049 201.6 262.038 213.072L261.939 288.712C261.91 298.328 262.128 307.95 262.049 317.566C262.008 322.493 261.93 325.267 257.553 328.135H156.207C150.067 323.283 151.944 310.594 151.952 302.949L151.994 269.075C151.993 253.071 150.77 186.495 152.987 167.705C153.389 164.304 173.398 159.295 176.633 157.097C202.6 145.183 228.937 134.5 253.793 120.205ZM412.662 0C414.131 19.6847 413.863 36.6127 413.835 56.2881L413.623 229.661C413.567 246.49 413.851 264.111 413.427 280.855C412.196 310.998 403.407 320.235 375.106 328.135H307.353C302.534 322.02 304.189 303.896 304.349 295.206L304.273 293.53C303.939 284.98 304.248 273.925 304.26 265.511L304.279 211.195L304.191 138.57C304.168 128.49 303.055 99.8332 305.735 89.2402C306.224 87.3114 318.197 80.4999 321.17 78.4131C354.428 55.0697 383.277 27.917 412.662 0Z"
+            fill="#FFFFFF"
+            fillOpacity={0.08}
+          />
+        </G>
       </Svg>
     </View>
   );

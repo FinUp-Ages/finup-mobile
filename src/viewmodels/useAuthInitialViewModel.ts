@@ -1,15 +1,16 @@
-import { useRouter } from 'expo-router';
+﻿import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
+import { authModel } from '@/models/authModel';
 
 /**
- * VIEWMODEL - Orquestra ações e estados da tela inicial de autenticação.
+ * VIEWMODEL - Orquestra acoes e estados da tela inicial de autenticacao / login.
  *
- * Não expõe credenciais sensíveis no frontend. A View apenas observa o estado
- * e dispara os callbacks.
+ * Utiliza o authModel para execucao dos fluxos mockados e navegacao para
+ * a area logada (tabs) com seguranca.
  */
 export function useAuthInitialViewModel() {
   const router = useRouter();
-  const [loadingProvider, setLoadingProvider] = useState<'google' | 'apple' | null>(null);
+  const [loadingProvider, setLoadingProvider] = useState<'google' | 'apple' | 'customer' | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   /**
@@ -21,51 +22,66 @@ export function useAuthInitialViewModel() {
   }, [router]);
 
   /**
-   * Preparado para autenticação via Google OAuth.
+   * Autenticacao via Google (com mock de teste e persistencia segura).
    */
   const handleGoogleAuth = useCallback(async () => {
     try {
       setError(null);
       setLoadingProvider('google');
 
-      // Placeholder preparado para integração futura com fluxo OAuth / Backend
-      // Nenhuma credencial ou token privado fica embutido no frontend.
-      await new Promise((resolve) => setTimeout(resolve, 600));
+      await authModel.mockLoginGoogle();
+
+      // Navega para as abas autenticadas do aplicativo
+      router.replace('/(tabs)');
     } catch {
-      setError('Não foi possível autenticar com o Google. Tente novamente.');
+      setError('Nao foi possivel autenticar com o Google. Tente novamente.');
     } finally {
       setLoadingProvider(null);
     }
-  }, []);
+  }, [router]);
 
   /**
-   * Preparado para autenticação via Apple ID.
+   * Autenticacao via Apple ID (com mock de teste e persistencia segura).
    */
   const handleAppleAuth = useCallback(async () => {
     try {
       setError(null);
       setLoadingProvider('apple');
 
-      // Placeholder preparado para integração futura com fluxo OAuth / Backend
-      await new Promise((resolve) => setTimeout(resolve, 600));
+      await authModel.mockLoginApple();
+
+      // Navega para as abas autenticadas do aplicativo
+      router.replace('/(tabs)');
     } catch {
-      setError('Não foi possível autenticar com a Apple. Tente novamente.');
+      setError('Nao foi possivel autenticar com a Apple. Tente novamente.');
     } finally {
       setLoadingProvider(null);
     }
-  }, []);
+  }, [router]);
 
   /**
-   * Direciona para o fluxo de login de cliente existente.
+   * Fluxo "Ja sou cliente" (login mockado direto para demonstracao).
    */
-  const handleAlreadyCustomer = useCallback(() => {
-    setError(null);
-    router.push('/(auth)/login');
+  const handleAlreadyCustomer = useCallback(async () => {
+    try {
+      setError(null);
+      setLoadingProvider('customer');
+
+      await authModel.mockLoginCustomer();
+
+      // Navega para as abas autenticadas do aplicativo
+      router.replace('/(tabs)');
+    } catch {
+      setError('Falha ao autenticar cliente. Tente novamente.');
+    } finally {
+      setLoadingProvider(null);
+    }
   }, [router]);
 
   return {
     isLoadingGoogle: loadingProvider === 'google',
     isLoadingApple: loadingProvider === 'apple',
+    isLoadingCustomer: loadingProvider === 'customer',
     isAnyLoading: loadingProvider !== null,
     error,
     handleCreateAccount,
