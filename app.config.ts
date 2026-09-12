@@ -27,7 +27,29 @@ const config: ExpoConfig = {
     },
   },
 
-  plugins: ['expo-router', 'expo-secure-store'],
+  plugins: [
+    'expo-router',
+    'expo-secure-store',
+    [
+      // POC de transcricao de voz. O reconhecimento roda no proprio aparelho:
+      // o plugin declara RECORD_AUDIO no Android, as descricoes de uso no iOS e
+      // torna os servicos de reconhecimento visiveis ao app (package visibility).
+      'expo-speech-recognition',
+      {
+        microphonePermission:
+          'Permitir que o FinUp use o microfone para transcrever sua fala.',
+        speechRecognitionPermission:
+          'Permitir que o FinUp use o reconhecimento de fala do aparelho.',
+        androidSpeechServicePackages: [
+          // Primeiro o servico on-device do Android (Speech Services by Google);
+          // os demais entram como alternativa quando ele nao existe no aparelho.
+          'com.google.android.as',
+          'com.google.android.tts',
+          'com.google.android.googlequicksearchbox',
+        ],
+      },
+    ],
+  ],
 
   experiments: {
     typedRoutes: true,

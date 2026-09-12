@@ -8,6 +8,7 @@
       "@/*": ["./src/*"]
     }
   },
+  "exclude": ["node_modules", "expo-speech-recognition"],
   "include": [
     "**/*.ts",
     "**/*.tsx",

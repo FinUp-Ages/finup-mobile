@@ -4,6 +4,9 @@ dist/
 web-build/
 expo-env.d.ts
 
+# POC original da transcricao de voz: repositorio git a parte, fora deste projeto
+/expo-speech-recognition
+
 # Managed workflow (CNG): as pastas nativas sao geradas no build, nao versionadas
 /android
 /ios
