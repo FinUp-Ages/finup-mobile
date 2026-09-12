@@ -26,7 +26,6 @@ export default function AuthInitialScreen() {
   const {
     isLoadingGoogle,
     isLoadingApple,
-    isLoadingCustomer,
     isAnyLoading,
     error,
     handleCreateAccount,
@@ -134,7 +133,6 @@ export default function AuthInitialScreen() {
           <AuthButton
             accessibilityLabel="Ja sou cliente, entrar"
             disabled={isAnyLoading}
-            loading={isLoadingCustomer}
             onPress={handleAlreadyCustomer}
             testID="button-already-customer"
             title="Já sou cliente"
@@ -190,4 +188,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
 

@@ -1,4 +1,5 @@
-﻿export const STORAGE_KEYS = {
-  AUTH_TOKEN: 'finup_auth_token',
-  USER_SESSION: 'finup_user_session',
-} as const;
+﻿/**
+ * Constantes com as chaves de armazenamento.
+ * Evita string solta e colisao de chave entre features.
+ */
+export {};
