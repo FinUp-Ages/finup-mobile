@@ -4,6 +4,8 @@ Aplicativo mobile do projeto **FinUp** — AGES 2026/2.
 
 Expo SDK 52 · React Native · TypeScript · Expo Router · NativeWind · TanStack Query · Axios
 
+Arquitetura **MVVM** — ver [ADR-0007](../wiki/ADR-0007-mvvm-nos-fronts).
+
 > Esqueleto do projeto. As pastas e os arquivos de fronteira estão criados e vazios — nenhuma tela ou regra de negócio foi implementada ainda.
 
 ---
@@ -54,7 +56,7 @@ Antes de abrir um PR: `npm run lint && npm run typecheck`.
 ## Estrutura de pastas
 
 ```
-app/                      rotas (Expo Router — a estrutura de arquivos É a navegação)
+app/                      SOMENTE roteamento (Expo Router — a estrutura de arquivos É a navegação)
 ├── _layout.tsx           layout raiz: providers globais e decisão auth vs. autenticado
 ├── index.tsx             entrada: redireciona conforme a sessão
 ├── +not-found.tsx        rota inexistente
@@ -62,17 +64,16 @@ app/                      rotas (Expo Router — a estrutura de arquivos É a na
 └── (tabs)/               abas principais do app autenticado
 
 src/
+├── views/                as telas de verdade — todo o JSX de tela mora aqui
+├── viewmodels/           hooks useXViewModel: estado, orquestração, TanStack Query
+├── models/               acesso a dado: uma função por endpoint da API
 ├── components/
 │   ├── ui/               componentes visuais genéricos (Button, Input, Card)
 │   └── common/           componentes compostos do app (Header, ListItem, EmptyState)
 ├── config/               axios, QueryClient e leitura das variáveis de ambiente
-├── services/             uma função por endpoint da API
-├── hooks/                hooks customizados, incluindo os de TanStack Query
-├── contexts/             contextos globais (sessão, tema)
+├── contexts/             estado que atravessa telas (sessão, tema)
 ├── storage/              wrapper do SecureStore e chaves de armazenamento
-├── constants/            design tokens e constantes do app
-├── types/                tipos e interfaces compartilhados
-└── utils/                funções puras (formatação de moeda, data, máscaras)
+└── types/                tipos e interfaces compartilhados
 
 assets/                   ícone, splash, fontes
 ```
@@ -83,20 +84,37 @@ Pastas ainda vazias têm um `.gitkeep` com uma linha descrevendo o que vai dentr
 
 Expo Router usa **roteamento por arquivos**: criar `app/(tabs)/carteira.tsx` cria a rota `/carteira`. Os parênteses em `(auth)` e `(tabs)` marcam grupos que organizam o código **sem** aparecer na URL.
 
-Só telas ficam dentro de `app/`. Componente, hook, service e utilitário vão em `src/` — qualquer arquivo dentro de `app/` que exporte um componente por padrão vira uma rota.
+**Nenhuma tela mora dentro de `app/`.** Todo arquivo ali é uma de duas coisas: um `_layout.tsx` de navegação, ou uma linha de reexport apontando para a View real:
+
+```ts
+// app/(tabs)/carteira.tsx
+export { default } from '@/views/CarteiraScreen';
+```
+
+O motivo é uma restrição da ferramenta, não uma preferência: qualquer arquivo dentro de `app/` que exporte um componente por padrão vira rota navegável, então a pasta não pode sumir. A saída é mantê-la fina. Estado, chamada de API e árvore de JSX ficam em `src/`.
 
 ### Fluxo de dados
 
 ```
-tela  →  hook (TanStack Query)  →  service  →  httpClient (axios)  →  API
+view  →  viewmodel (TanStack Query)  →  model  →  httpClient (axios)  →  API
 ```
 
 Mesma cadeia do `finup-web`, de propósito: quem trabalha nos dois repositórios encontra o mesmo padrão.
 
-- **`src/config/httpClient.ts`** é a única instância do Axios. Concentra `baseURL`, injeção de token, tratamento de 401 e normalização de erro. **Nenhuma tela importa `axios` diretamente.**
-- **`src/services/`** tem uma função por endpoint. É o único lugar que conhece as rotas da API.
-- **`src/hooks/`** envolve os services em `useQuery` / `useMutation`.
-- **`app/`** monta as telas. Não sabe que existe rede.
+- **`src/config/httpClient.ts`** é a única instância do Axios. Concentra `baseURL`, injeção de token, tratamento de 401 e normalização de erro. **Nenhuma View importa `axios` diretamente.**
+- **`src/models/`** tem uma função por endpoint. É o único lugar que conhece as rotas da API. Módulo puro: nenhum hook do React aqui, para poder ser chamado e testado fora de um componente.
+- **`src/viewmodels/`** envolve os Models em `useQuery` / `useMutation`, guarda o estado da tela e entrega o dado já pronto para exibição, mais as ações disponíveis.
+- **`src/views/`** monta as telas. Não sabe que existe rede.
+- **`app/`** só roteia.
+
+### As regras de ouro
+
+1. **Nenhuma View importa de `models/`.** Todo dado passa por um ViewModel. Se você encontrar uma View chamando a API direto, isso é violação de camada — a chamada vai para dentro de um ViewModel.
+2. **Nenhuma View importa de `storage/`.** Vale a mesma lógica: persistência é fonte de dado, e quem orquestra fonte de dado é o ViewModel. Só ViewModel e Model podem importar `storage/`.
+3. **`components/` é passivo.** Recebe props, não busca dado, não conhece ViewModel, Model nem rota.
+4. **Nada dentro de `app/`** tem estado, chamada de API ou JSX de tela.
+
+> Por que **ViewModel** e não Controller: o hook expõe estado, e a View o **observa** e re-renderiza sozinha — ela não é avisada por um Controller imperativo, como seria no MVC clássico. O backend continua com Controller/Service/Repository, e essa divergência de nomes é deliberada. Decisão registrada na **ADR-0007**.
 
 ### Segurança — dois pontos não negociáveis
 
@@ -108,7 +126,15 @@ Mesma cadeia do `finup-web`, de propósito: quem trabalha nos dois repositórios
 - **Import alias `@/`** aponta para `src/`: use `@/components/ui/Button`.
 - **TypeScript em `strict`**, com `noUnusedLocals` e `noUnusedParameters`.
 - Estilização com **NativeWind** (classes Tailwind), mantendo os mesmos tokens do `finup-web`.
-- Telas em `kebab-case.tsx` (viram rota); componentes em `PascalCase.tsx`; hooks em `useAlgumaCoisa.ts`.
+- Nomes por camada:
+
+| Camada | Convenção | Exemplo |
+|---|---|---|
+| Rota (`app/`) | `kebab-case.tsx` | `app/(tabs)/carteira.tsx` |
+| View | `PascalCase.tsx`, sufixo `Screen` | `views/CarteiraScreen.tsx` |
+| ViewModel | `useXViewModel.ts` | `viewmodels/useCarteiraViewModel.ts` |
+| Model | `xModel.ts` | `models/carteiraModel.ts` |
+| Componente | `PascalCase.tsx` | `components/ui/Button.tsx` |
 
 ---
 
@@ -146,7 +172,7 @@ Lembre também que o mobile é o repositório de **ciclo mais lento** dos três:
 .github/
 ├── workflows/ci.yml          lint + typecheck + expo-doctor em todo PR
 ├── PULL_REQUEST_TEMPLATE.md  exige teste em Android E iOS, com evidência visual
-└── CODEOWNERS                revisão obrigatória em config/, services/, storage/, app.config.ts e eas.json
+└── CODEOWNERS                revisão obrigatória em config/, models/, storage/, app.config.ts e eas.json
 app.config.ts · eas.json · babel.config.js · metro.config.js
 eslint.config.js · .prettierrc · .editorconfig · .nvmrc
 ```
