@@ -19,7 +19,7 @@ export function useAuthInitialViewModel() {
    */
   const handleCreateAccount = useCallback(() => {
     setError(null);
-    router.push('/(auth)/register');
+    router.push('/(auth)/cadastro');
   }, [router]);
 
   /**
