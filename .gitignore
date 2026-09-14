@@ -38,6 +38,9 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# POC original da transcricao de voz: repositorio git a parte, fora deste projeto
+/expo-speech-recognition
+
 # generated native folders
 /ios
 /android
