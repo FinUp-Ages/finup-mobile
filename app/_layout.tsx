@@ -4,21 +4,22 @@ import React from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 /**
- * ROTA - layout raiz, obrigatorio pelo Expo Router.
+ * Rota raiz do Expo Router.
  *
- * Envolve todas as rotas do app. Providers globais (tema, auth, i18n) entram
- * aqui. Nenhuma tela e declarada neste arquivo: telas moram em views/.
+ * Envolve todas as rotas do app. Providers globais — como tema,
+ * autenticação e internacionalização — entram aqui.
  *
- * SafeAreaProvider precisa envolver tudo para que `useSafeAreaInsets` e
- * `SafeAreaView` (de react-native-safe-area-context) funcionem em qualquer tela.
+ * SafeAreaProvider permite o uso de useSafeAreaInsets e SafeAreaView
+ * em qualquer tela do aplicativo.
  */
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <StatusBar style="dark" />
-      <Stack screenOptions={{ headerTitleAlign: 'center', animation: 'fade' }}>
-        <Stack.Screen name="index" options={{ headerShown: false}} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <StatusBar style="light" />
+      <Stack screenOptions={{ animation: 'fade', headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(tabs)" />
       </Stack>
     </SafeAreaProvider>
   );
