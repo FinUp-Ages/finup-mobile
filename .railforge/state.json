@@ -1,9 +1,36 @@
 {
   "stage": "COMPLETED",
-  "task": null,
-  "objective": null,
-  "files_in_scope": [],
-  "validation": {},
-  "review": "not_applicable",
-  "updated_at": "2026-09-08"
+  "task": "POC de transcricao de voz offline (audio -> texto)",
+  "objective": "Validar tecnicamente a captura e a transcricao local de frases curtas de gasto em pt-BR, sem internet e sem servico de IA em nuvem. Interpretar a frase esta fora do escopo.",
+  "files_in_scope": [
+    "app.json",
+    "app/(tabs)/_layout.tsx",
+    "app/(tabs)/transcricao.tsx",
+    "src/views/TranscriptionScreen.tsx",
+    "src/viewmodels/useTranscriptionViewModel.ts",
+    "src/viewmodels/useSpeechCaptureViewModel.ts",
+    "src/models/speechRecognitionModel.ts",
+    "src/models/transcriptionTestScriptModel.ts",
+    "src/components/common/",
+    "src/types/speech.ts",
+    "src/utils/",
+    "docs/poc-transcricao-de-voz.md",
+    "package.json",
+    "package-lock.json",
+    ".gitignore",
+    "tsconfig.json",
+    "eslint.config.js"
+  ],
+  "validation": {
+    "lint": "pass (resta 1 aviso anterior a esta tarefa em useLoadingScreenViewModel)",
+    "typecheck": "pass",
+    "expo_doctor": "21/21",
+    "bundle": "expo export --platform android: ok (Hermes 2,9 MB)",
+    "config_plugin": "RECORD_AUDIO, usage descriptions do iOS e queries de com.google.android.as no manifesto introspectado",
+    "pure_functions": "speechText e transcriptionReport exercitados fora do app",
+    "device": "pendente - modulo nativo nao roda no Expo Go; exige npx expo run:android",
+    "ios": "pendente"
+  },
+  "review": "Diff revisado e entrega concluida dentro do escopo aprovado. Itens em aberto, registrados no documento: execucao do roteiro das 5 frases em aparelho fisico (secao 5.2) e verificacao no iOS - o modulo e nativo e nao roda no Expo Go. Escopo novo assumido e registrado: pasta src/utils/ para os modulos puros e a pasta expo-speech-recognition/ (repositorio a parte) excluida do tsconfig, do ESLint e do git.",
+  "updated_at": "2026-09-13"
 }
