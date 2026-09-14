@@ -1,3 +1,4 @@
+import { Link } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 
 /**
@@ -14,6 +15,10 @@ export default function ProfileScreen() {
       <Text style={styles.subtitle}>
         Tela de exemplo. A logica visual mora em views/, nunca em app/.
       </Text>
+
+      <Link href="/(auth)/cadastro" style={styles.link}>
+        Ir para o cadastro
+      </Link>
     </View>
   );
 }
@@ -23,6 +28,10 @@ const styles = StyleSheet.create({
     color: '#0f172a',
     fontSize: 24,
     fontWeight: '600',
+  },
+  link: {
+    color: '#2563eb',
+    paddingVertical: 16,
   },
   screen: {
     backgroundColor: '#f8fafc',
