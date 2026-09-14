@@ -15,7 +15,7 @@ export function useLoadingScreenViewModel() {
       if (isAuthenticated) {
         router.replace('/(tabs)/profile');
       } else {
-        router.replace('/(tabs)/profile');
+        router.replace('/(auth)');
       }
     }
 
