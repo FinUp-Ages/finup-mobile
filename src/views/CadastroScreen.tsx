@@ -1,6 +1,14 @@
 import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
+import {
+  Alert,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CadastroHeader } from '@/components/common/CadastroHeader';
 import { CadastroStepAdicionais } from '@/components/common/CadastroStepAdicionais';
@@ -54,30 +62,32 @@ export default function CadastroScreen() {
           onBack={step > 1 ? goBack : undefined}
         />
 
-        <View style={styles.content}>
-          {step === 1 ? (
-            <CadastroStepDados
-              data={data}
-              errors={errors}
-              onChange={setField}
-              onTouch={touchField}
-            />
-          ) : step === 2 ? (
-            <CadastroStepAdicionais
-              data={data}
-              errors={errors}
-              onChange={setField}
-              onTouch={touchField}
-            />
-          ) : (
-            <CadastroStepSenha
-              data={data}
-              errors={errors}
-              onChange={setField}
-              onTouch={touchField}
-            />
-          )}
-        </View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.content}>
+            {step === 1 ? (
+              <CadastroStepDados
+                data={data}
+                errors={errors}
+                onChange={setField}
+                onTouch={touchField}
+              />
+            ) : step === 2 ? (
+              <CadastroStepAdicionais
+                data={data}
+                errors={errors}
+                onChange={setField}
+                onTouch={touchField}
+              />
+            ) : (
+              <CadastroStepSenha
+                data={data}
+                errors={errors}
+                onChange={setField}
+                onTouch={touchField}
+              />
+            )}
+          </View>
+        </TouchableWithoutFeedback>
 
         <StepProgress currentStep={step} totalSteps={TOTAL_STEPS} />
 

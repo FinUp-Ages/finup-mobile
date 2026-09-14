@@ -13,9 +13,9 @@ export function useLoadingScreenViewModel() {
       const isAuthenticated = false;
 
       if (isAuthenticated) {
-        router.replace('/(tabs)/profile');
+        router.replace('/profile');
       } else {
-        router.replace('/(tabs)/profile');
+        router.replace('/profile');
       }
     }
 
