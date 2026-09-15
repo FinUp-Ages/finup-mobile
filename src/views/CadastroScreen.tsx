@@ -35,6 +35,7 @@ export default function CadastroScreen() {
     canProceed,
     submitting,
     success,
+    submitError,
     setField,
     touchField,
     goNext,
@@ -44,11 +45,17 @@ export default function CadastroScreen() {
 
   useEffect(() => {
     if (success) {
-      Alert.alert('Cadastro realizado', 'Seus dados foram enviados (simulação).', [
+      Alert.alert('Cadastro realizado', 'Seus dados foram enviados com sucesso.', [
         { text: 'OK', onPress: () => router.back() },
       ]);
     }
   }, [success, router]);
+
+  useEffect(() => {
+    if (submitError) {
+      Alert.alert('Erro no cadastro', submitError);
+    }
+  }, [submitError]);
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
