@@ -147,6 +147,7 @@ export function useCadastroViewModel() {
     canProceed,
     submitting,
     success,
+    submitError,
     setField,
     touchField,
     goNext,
