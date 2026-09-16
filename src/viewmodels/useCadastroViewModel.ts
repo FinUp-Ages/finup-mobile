@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
-import { submitCadastroMock } from '@/models/cadastroModel';
+import { HttpError } from '@/config/httpClient';
+import { submitCadastro } from '@/models/cadastroModel';
 import type { CadastroFormData, CadastroFormErrors, CadastroStep } from '@/types/cadastro';
 
 const INITIAL_DATA: CadastroFormData = {
@@ -86,6 +87,7 @@ export function useCadastroViewModel() {
   const [touched, setTouched] = useState<TouchedFields>({});
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const allErrors = useMemo(() => computeStepErrors(step, data), [step, data]);
   const canProceed = Object.keys(allErrors).length === 0;
@@ -121,11 +123,18 @@ export function useCadastroViewModel() {
   const submit = useCallback(async () => {
     if (!canProceed) return;
     setSubmitting(true);
+    setSubmitError(null);
     try {
-      await submitCadastroMock(data);
+      await submitCadastro(data);
       setSuccess(true);
       // Senha nao precisa continuar em memoria depois do envio.
       setData((prev) => ({ ...prev, senha: '', confirmarSenha: '' }));
+    } catch (error) {
+      setSubmitError(
+        error instanceof HttpError && error.status === 409
+          ? 'Este e-mail ja esta cadastrado.'
+          : 'Nao foi possivel concluir o cadastro. Tente novamente.',
+      );
     } finally {
       setSubmitting(false);
     }
