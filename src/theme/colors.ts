@@ -19,3 +19,22 @@ export const colors = {
   link: '#2563eb',
   white: '#ffffff',
 } as const;
+
+/**
+ * Paleta escura - telas autenticadas (Home e afins). Reaproveita o azul-marinho
+ * ja usado na AuthInitialScreen (mesmo `#031836` base) em vez de inventar um tom
+ * novo, para as duas telas lerem como o mesmo produto.
+ */
+export const darkColors = {
+  background: '#04102A',
+  surface: '#0B1E3D',
+  surfaceBorder: 'rgba(255, 255, 255, 0.08)',
+  textPrimary: '#ffffff',
+  textMuted: 'rgba(255, 255, 255, 0.65)',
+  textFaint: 'rgba(255, 255, 255, 0.45)',
+  accent: '#2F80FF',
+  // Gradiente do cartao de CTA do score (teal -> azul-marinho escuro).
+  scoreCardGradient: ['#123B47', '#0A1F3D'] as const,
+  // Gradiente do cartao de saldo (azul vibrante -> azul-marinho escuro).
+  balanceCardGradient: ['#3D7BEB', '#12306E'] as const,
+} as const;

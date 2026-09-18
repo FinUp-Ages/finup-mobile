@@ -37,9 +37,13 @@ export default function CadastroScreen() {
 
   useEffect(() => {
     if (success) {
-      Alert.alert('Cadastro realizado', 'Seus dados foram enviados com sucesso.', [
-        { text: 'OK', onPress: () => router.back() },
-      ]);
+      // Navegacao nao depende do alerta: no Expo Web o Alert.alert nao desenha
+      // nada (no-op da plataforma), entao o "OK" nunca dispararia e o
+      // redirecionamento ficaria preso so ali. Aqui os dois rodam em paralelo -
+      // o alerta e so uma confirmacao visual (funciona no Android/iOS, some no
+      // Web), o redirecionamento acontece de qualquer forma.
+      Alert.alert('Cadastro realizado', 'Seus dados foram enviados com sucesso.');
+      router.replace('/(tabs)/home');
     }
   }, [success, router]);
 

@@ -38,6 +38,28 @@ Depois: escaneie o QR code com o Expo Go, ou pressione `a` (Android) / `i` (iOS)
 
 Para o celular físico, o computador e o celular precisam estar na mesma rede Wi-Fi.
 
+### O IP muda toda vez que você troca de rede
+
+O valor de `EXPO_PUBLIC_API_BASE_URL` não é dinâmico — **não existe (e não está planejado) nenhum
+script de detecção automática do IP da máquina**. Isso significa que, toda vez que o computador
+onde o backend está rodando mudar de rede (Wi-Fi diferente, VPN, hotspot do celular, renovação de
+IP pelo roteador), quem for testar precisa:
+
+1. Descobrir o IP atual da máquina que está rodando o `finup-backend` (Windows: `ipconfig`, procure
+   `Endereço IPv4` do adaptador Wi-Fi/Ethernet em uso).
+2. Atualizar `EXPO_PUBLIC_API_BASE_URL` no `.env` deste projeto com esse IP (mesma tabela acima,
+   linha "Celular físico").
+3. **Reiniciar o Metro** (`Ctrl+C` e `npm start` de novo) — variáveis `EXPO_PUBLIC_*` só são lidas na
+   inicialização, um `r` de reload no terminal não é suficiente.
+
+Se for testar pela **versão web** (`npm run web`, usada como fallback quando não há dispositivo
+físico disponível na mesma rede), o `CORS_ALLOWED_ORIGINS` do `finup-backend` também precisa incluir
+a origem usada pelo navegador (`http://localhost:8081` para acesso local, ou
+`http://<IP-DA-SUA-MÁQUINA>:8081` para acesso de outro dispositivo) — ver o README do
+`finup-backend`, seção "Alternativa: subir banco + API pelo Docker". Sem isso, o navegador bloqueia
+a chamada por CORS antes mesmo dela chegar na API, e o cadastro não persiste (sem nenhum erro visível
+na tela, só no console do navegador).
+
 ## Scripts
 
 | Comando | O que faz |
