@@ -46,3 +46,4 @@ Attention states:
 ## Pull requests
 
 Before opening or updating a pull request, read `.github/PULL_REQUEST_TEMPLATE.md` and complete every applicable section. Do not create or submit a pull request without following this template.
+

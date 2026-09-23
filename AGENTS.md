@@ -40,3 +40,4 @@ Use a short kebab-case description with one of these prefixes:
 Use the format `<type>: <short description>`.
 
 Allowed types: `feat`, `fix`, `docs`, `refactor`, `test`, and `chore`.
+

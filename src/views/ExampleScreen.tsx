@@ -45,6 +45,10 @@ export default function ExampleScreen() {
       <Link href="/profile" style={styles.link}>
         Ir para o perfil
       </Link>
+
+      <Link href="/(auth)/cadastro" style={styles.link}>
+        Ir para o cadastro
+      </Link>
     </View>
   );
 }
