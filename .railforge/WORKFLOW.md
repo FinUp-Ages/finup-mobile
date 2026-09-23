@@ -42,3 +42,7 @@ Attention states:
 - For mobile interface changes, verify the affected user flow and consider relevant application and accessibility states; use Expo Go when it is available and relevant.
 - If there is material ambiguity, record the question in the state or appropriate artifact and request clarification before implementing.
 - Never commit without explicit user authorization.
+
+## Pull requests
+
+Before opening or updating a pull request, read `.github/PULL_REQUEST_TEMPLATE.md` and complete every applicable section. Do not create or submit a pull request without following this template.
