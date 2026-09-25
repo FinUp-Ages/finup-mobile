@@ -1,11 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { colors } from '@/theme/colors';
 
-/**
- * COMPONENT - indicador de progresso do wizard (barra + "0X/0Y").
- *
- * Passivo: so desenha a proporcao recebida por props.
- */
 type StepProgressProps = {
   currentStep: number;
   totalSteps: number;
@@ -17,8 +12,7 @@ export function StepProgress({ currentStep, totalSteps }: StepProgressProps) {
   return (
     <View style={styles.wrapper}>
       <View style={styles.track}>
-        <View style={[styles.fill, { flex: ratio }]} />
-        <View style={{ flex: 1 - ratio }} />
+        <View style={[styles.fill, { width: `${ratio * 100}%` }]} />
       </View>
       <Text style={styles.label}>
         {String(currentStep).padStart(2, '0')}/{String(totalSteps).padStart(2, '0')}
@@ -30,24 +24,25 @@ export function StepProgress({ currentStep, totalSteps }: StepProgressProps) {
 const styles = StyleSheet.create({
   fill: {
     backgroundColor: colors.textPrimary,
-    borderRadius: 4,
+    borderRadius: 2,
+    height: 3,
   },
   label: {
-    color: colors.textSecondary,
-    fontSize: 12,
+    color: '#1E293B',
+    fontSize: 13,
+    fontWeight: '500',
     marginTop: 8,
     textAlign: 'center',
   },
   track: {
     backgroundColor: colors.track,
-    borderRadius: 4,
-    flexDirection: 'row',
-    height: 4,
+    borderRadius: 2,
+    height: 3,
     overflow: 'hidden',
     width: '100%',
   },
   wrapper: {
+    marginBottom: 16,
     marginTop: 'auto',
-    paddingBottom: 8,
   },
 });

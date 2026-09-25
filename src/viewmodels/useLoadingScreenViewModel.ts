@@ -20,5 +20,5 @@ export function useLoadingScreenViewModel() {
     }
 
     checkSession();
-  }, []);
+  }, [router]);
 }

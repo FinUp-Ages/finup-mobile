@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
-import { submitCadastroMock } from '@/models/cadastroModel';
+import { HttpError } from '@/config/httpClient';
+import { submitCadastroCompleto } from '@/models/cadastroModel';
 import type { CadastroFormData, CadastroFormErrors, CadastroStep } from '@/types/cadastro';
 
 const INITIAL_DATA: CadastroFormData = {
@@ -15,8 +16,6 @@ const INITIAL_DATA: CadastroFormData = {
 };
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-// Letra, numero e simbolo, minimo 8 - espelha o aviso do Figma. A politica real de
-// senha vem do Cognito quando ele for configurado; isto e so validacao de UX.
 const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9\s]).{8,}$/;
 
 function computeStep1Errors(data: CadastroFormData): CadastroFormErrors {
@@ -31,9 +30,6 @@ function computeStep1Errors(data: CadastroFormData): CadastroFormErrors {
 
 function computeStep2Errors(data: CadastroFormData): CadastroFormErrors {
   const errors: CadastroFormErrors = {};
-  // Formato/data-no-passado nao precisa ser validado aqui: o calendario nativo
-  // (DateField) so permite selecionar datas ate hoje, entao um valor presente
-  // ja e garantidamente valido.
   if (!data.birthDate) errors.birthDate = true;
   if (data.monthlyIncome.trim()) {
     const value = Number(data.monthlyIncome.replace(',', '.'));
@@ -65,27 +61,13 @@ function computeStepErrors(step: CadastroStep, data: CadastroFormData): Cadastro
 
 type TouchedFields = Partial<Record<keyof CadastroFormData, boolean>>;
 
-/**
- * VIEWMODEL - estado e regras do fluxo de cadastro (3 etapas).
- *
- * Guarda os dados de todas as etapas no mesmo estado, por isso nada se perde ao
- * navegar entre elas. A validacao da etapa atual e recalculada a cada mudanca
- * (useMemo), nao so ao clicar em "Proximo" - e o que permite desabilitar o botao
- * em tempo real, conforme a pessoa digita.
- *
- * `errors` (o que a View mostra) so revela o erro de um campo depois que a
- * pessoa tocou nele e saiu (`touched`) - senao a tela inteira apareceria
- * vermelha assim que carregasse, antes de qualquer interacao, o que e agressivo
- * demais. `canProceed` (habilita o botao) usa a validacao completa, sem esse
- * filtro: o botao so libera quando os dados realmente estao validos, tocados
- * ou nao.
- */
 export function useCadastroViewModel() {
   const [step, setStep] = useState<CadastroStep>(1);
   const [data, setData] = useState<CadastroFormData>(INITIAL_DATA);
   const [touched, setTouched] = useState<TouchedFields>({});
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const allErrors = useMemo(() => computeStepErrors(step, data), [step, data]);
   const canProceed = Object.keys(allErrors).length === 0;
@@ -121,11 +103,17 @@ export function useCadastroViewModel() {
   const submit = useCallback(async () => {
     if (!canProceed) return;
     setSubmitting(true);
+    setSubmitError(null);
     try {
-      await submitCadastroMock(data);
+      await submitCadastroCompleto(data);
       setSuccess(true);
-      // Senha nao precisa continuar em memoria depois do envio.
       setData((prev) => ({ ...prev, senha: '', confirmarSenha: '' }));
+    } catch (error) {
+      setSubmitError(
+        error instanceof HttpError && error.status === 409
+          ? 'Este e-mail já está cadastrado.'
+          : 'Não foi possível concluir o cadastro e salvar os dados adicionais. Tente novamente.',
+      );
     } finally {
       setSubmitting(false);
     }
@@ -138,6 +126,7 @@ export function useCadastroViewModel() {
     canProceed,
     submitting,
     success,
+    submitError,
     setField,
     touchField,
     goNext,
