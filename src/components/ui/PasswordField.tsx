@@ -3,19 +3,17 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 import { colors } from '@/theme/colors';
 
-/**
- * COMPONENT - campo de senha com botao de "olho" pra mostrar/esconder o
- * texto digitado.
- *
- * Passivo: o unico estado que guarda e "esta revelando a senha ou nao" - o
- * valor em si, validacao e onChange continuam responsabilidade de quem usa,
- * igual ao TextField.
- */
 type PasswordFieldProps = Omit<TextInputProps, 'secureTextEntry'> & {
   error?: string | boolean;
+  showToggle?: boolean;
 };
 
-export function PasswordField({ error, style, ...inputProps }: PasswordFieldProps) {
+export function PasswordField({
+  error,
+  style,
+  showToggle = true,
+  ...inputProps
+}: PasswordFieldProps) {
   const [visible, setVisible] = useState(false);
   const hasError = Boolean(error);
   const message = typeof error === 'string' ? error : undefined;
@@ -27,20 +25,17 @@ export function PasswordField({ error, style, ...inputProps }: PasswordFieldProp
           placeholderTextColor={colors.placeholder}
           autoCapitalize="none"
           autoCorrect={false}
-          // Desliga a sugestao de "senha forte" do sistema (iOS/Android): sem
-          // isso, o SO mostra um balao sobre o teclado que, ao ser fechado,
-          // pode limpar o campo inteiro - confundindo com um bug de digitacao.
-          // Sem sentido mante-la ligada aqui, ja que nao ha Keychain/gerenciador
-          // de senha real por tras (o envio inteiro ainda e mockado).
           textContentType="oneTimeCode"
           importantForAutofill="no"
           style={[styles.input, style]}
-          secureTextEntry={!visible}
+          secureTextEntry={showToggle ? !visible : true}
           {...inputProps}
         />
-        <Pressable hitSlop={8} onPress={() => setVisible((prev) => !prev)}>
-          <Feather name={visible ? 'eye' : 'eye-off'} size={18} color={colors.icon} />
-        </Pressable>
+        {showToggle ? (
+          <Pressable hitSlop={8} onPress={() => setVisible((prev) => !prev)}>
+            <Feather name={visible ? 'eye' : 'eye-off'} size={18} color={colors.icon} />
+          </Pressable>
+        ) : null}
       </View>
       {message ? <Text style={styles.errorText}>{message}</Text> : null}
     </View>

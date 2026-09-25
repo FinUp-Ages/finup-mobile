@@ -1,4 +1,5 @@
 import { useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import {
   Alert,
@@ -16,16 +17,11 @@ import { CadastroStepDados } from '@/components/common/CadastroStepDados';
 import { CadastroStepSenha } from '@/components/common/CadastroStepSenha';
 import { StepProgress } from '@/components/common/StepProgress';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
+import { colors } from '@/theme/colors';
 import { useCadastroViewModel } from '@/viewmodels/useCadastroViewModel';
 
 const TOTAL_STEPS = 3;
 
-/**
- * VIEW - fluxo de cadastro em 3 etapas (ver Figma).
- *
- * So observa o ViewModel e distribui os dados para os componentes de cada etapa.
- * Em caso de erro, mantem o usuario na Etapa 3 sem perder os dados ja preenchidos.
- */
 export default function CadastroScreen() {
   const router = useRouter();
   const {
@@ -59,53 +55,56 @@ export default function CadastroScreen() {
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.flex}
-      >
-        <CadastroHeader
-          title="Dados cadastrais"
-          onClose={() => router.back()}
-          onBack={step > 1 ? goBack : undefined}
-        />
+      <StatusBar style="light" />
+      <View style={styles.sheet}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.flex}
+        >
+          <CadastroHeader
+            title="Dados cadastrais"
+            onClose={() => router.back()}
+            onBack={step > 1 ? goBack : undefined}
+          />
 
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.content}>
-            {step === 1 ? (
-              <CadastroStepDados
-                data={data}
-                errors={errors}
-                onChange={setField}
-                onTouch={touchField}
-              />
-            ) : step === 2 ? (
-              <CadastroStepAdicionais
-                data={data}
-                errors={errors}
-                onChange={setField}
-                onTouch={touchField}
-              />
-            ) : (
-              <CadastroStepSenha
-                data={data}
-                errors={errors}
-                onChange={setField}
-                onTouch={touchField}
-              />
-            )}
-          </View>
-        </TouchableWithoutFeedback>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.content}>
+              {step === 1 ? (
+                <CadastroStepDados
+                  data={data}
+                  errors={errors}
+                  onChange={setField}
+                  onTouch={touchField}
+                />
+              ) : step === 2 ? (
+                <CadastroStepAdicionais
+                  data={data}
+                  errors={errors}
+                  onChange={setField}
+                  onTouch={touchField}
+                />
+              ) : (
+                <CadastroStepSenha
+                  data={data}
+                  errors={errors}
+                  onChange={setField}
+                  onTouch={touchField}
+                />
+              )}
+            </View>
+          </TouchableWithoutFeedback>
 
-        <StepProgress currentStep={step} totalSteps={TOTAL_STEPS} />
+          <StepProgress currentStep={step} totalSteps={TOTAL_STEPS} />
 
-        <PrimaryButton
-          label={step < TOTAL_STEPS ? 'Próximo' : 'Salvar'}
-          icon={step < TOTAL_STEPS ? 'next' : 'save'}
-          disabled={!canProceed}
-          loading={submitting}
-          onPress={step < TOTAL_STEPS ? goNext : submit}
-        />
-      </KeyboardAvoidingView>
+          <PrimaryButton
+            label={step < TOTAL_STEPS ? 'Próximo' : 'Salvar'}
+            icon={step < TOTAL_STEPS ? 'next' : undefined}
+            disabled={!canProceed}
+            loading={submitting}
+            onPress={step < TOTAL_STEPS ? goNext : submit}
+          />
+        </KeyboardAvoidingView>
+      </View>
     </SafeAreaView>
   );
 }
@@ -118,10 +117,17 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingBottom: 16,
     paddingHorizontal: 20,
-    paddingTop: 8,
+    paddingTop: 10,
   },
   screen: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#051329',
     flex: 1,
+  },
+  sheet: {
+    backgroundColor: colors.white,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    flex: 1,
+    overflow: 'hidden',
   },
 });

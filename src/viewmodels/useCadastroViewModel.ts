@@ -16,8 +16,6 @@ const INITIAL_DATA: CadastroFormData = {
 };
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-// Letra, numero e simbolo, minimo 8 - espelha o aviso do Figma. A politica real de
-// senha vem do Cognito quando ele for configurado; isto e so validacao de UX.
 const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9\s]).{8,}$/;
 
 function computeStep1Errors(data: CadastroFormData): CadastroFormErrors {
@@ -32,9 +30,6 @@ function computeStep1Errors(data: CadastroFormData): CadastroFormErrors {
 
 function computeStep2Errors(data: CadastroFormData): CadastroFormErrors {
   const errors: CadastroFormErrors = {};
-  // Formato/data-no-passado nao precisa ser validado aqui: o calendario nativo
-  // (DateField) so permite selecionar datas ate hoje, entao um valor presente
-  // ja e garantidamente valido.
   if (!data.birthDate) errors.birthDate = true;
   if (data.monthlyIncome.trim()) {
     const value = Number(data.monthlyIncome.replace(',', '.'));
@@ -66,15 +61,6 @@ function computeStepErrors(step: CadastroStep, data: CadastroFormData): Cadastro
 
 type TouchedFields = Partial<Record<keyof CadastroFormData, boolean>>;
 
-/**
- * VIEWMODEL - estado e regras do fluxo de cadastro (3 etapas).
- *
- * Guarda os dados de todas as etapas no mesmo estado, por isso nada se perde ao
- * navegar entre elas.
- *
- * Em caso de erro na chamada da API, mantem o usuario na Etapa 3 sem limpar
- * os dados ja preenchidos (conforme criterios de aceite).
- */
 export function useCadastroViewModel() {
   const [step, setStep] = useState<CadastroStep>(1);
   const [data, setData] = useState<CadastroFormData>(INITIAL_DATA);
@@ -121,7 +107,6 @@ export function useCadastroViewModel() {
     try {
       await submitCadastroCompleto(data);
       setSuccess(true);
-      // Senha nao precisa continuar em memoria depois do envio com sucesso.
       setData((prev) => ({ ...prev, senha: '', confirmarSenha: '' }));
     } catch (error) {
       setSubmitError(
