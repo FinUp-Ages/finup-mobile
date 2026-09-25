@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
-import { submitCadastroMock } from '@/models/cadastroModel';
+import { HttpError } from '@/config/httpClient';
+import { submitCadastroCompleto } from '@/models/cadastroModel';
 import type { CadastroFormData, CadastroFormErrors, CadastroStep } from '@/types/cadastro';
 
 const INITIAL_DATA: CadastroFormData = {
@@ -69,16 +70,10 @@ type TouchedFields = Partial<Record<keyof CadastroFormData, boolean>>;
  * VIEWMODEL - estado e regras do fluxo de cadastro (3 etapas).
  *
  * Guarda os dados de todas as etapas no mesmo estado, por isso nada se perde ao
- * navegar entre elas. A validacao da etapa atual e recalculada a cada mudanca
- * (useMemo), nao so ao clicar em "Proximo" - e o que permite desabilitar o botao
- * em tempo real, conforme a pessoa digita.
+ * navegar entre elas.
  *
- * `errors` (o que a View mostra) so revela o erro de um campo depois que a
- * pessoa tocou nele e saiu (`touched`) - senao a tela inteira apareceria
- * vermelha assim que carregasse, antes de qualquer interacao, o que e agressivo
- * demais. `canProceed` (habilita o botao) usa a validacao completa, sem esse
- * filtro: o botao so libera quando os dados realmente estao validos, tocados
- * ou nao.
+ * Em caso de erro na chamada da API, mantem o usuario na Etapa 3 sem limpar
+ * os dados ja preenchidos (conforme criterios de aceite).
  */
 export function useCadastroViewModel() {
   const [step, setStep] = useState<CadastroStep>(1);
@@ -86,6 +81,7 @@ export function useCadastroViewModel() {
   const [touched, setTouched] = useState<TouchedFields>({});
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const allErrors = useMemo(() => computeStepErrors(step, data), [step, data]);
   const canProceed = Object.keys(allErrors).length === 0;
@@ -121,11 +117,18 @@ export function useCadastroViewModel() {
   const submit = useCallback(async () => {
     if (!canProceed) return;
     setSubmitting(true);
+    setSubmitError(null);
     try {
-      await submitCadastroMock(data);
+      await submitCadastroCompleto(data);
       setSuccess(true);
-      // Senha nao precisa continuar em memoria depois do envio.
+      // Senha nao precisa continuar em memoria depois do envio com sucesso.
       setData((prev) => ({ ...prev, senha: '', confirmarSenha: '' }));
+    } catch (error) {
+      setSubmitError(
+        error instanceof HttpError && error.status === 409
+          ? 'Este e-mail já está cadastrado.'
+          : 'Não foi possível concluir o cadastro e salvar os dados adicionais. Tente novamente.',
+      );
     } finally {
       setSubmitting(false);
     }
@@ -138,6 +141,7 @@ export function useCadastroViewModel() {
     canProceed,
     submitting,
     success,
+    submitError,
     setField,
     touchField,
     goNext,

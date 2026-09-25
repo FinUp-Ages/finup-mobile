@@ -24,7 +24,7 @@ const TOTAL_STEPS = 3;
  * VIEW - fluxo de cadastro em 3 etapas (ver Figma).
  *
  * So observa o ViewModel e distribui os dados para os componentes de cada etapa.
- * Nao valida campo, nao chama Model, nao sabe que o envio e mockado.
+ * Em caso de erro, mantem o usuario na Etapa 3 sem perder os dados ja preenchidos.
  */
 export default function CadastroScreen() {
   const router = useRouter();
@@ -35,6 +35,7 @@ export default function CadastroScreen() {
     canProceed,
     submitting,
     success,
+    submitError,
     setField,
     touchField,
     goNext,
@@ -44,11 +45,17 @@ export default function CadastroScreen() {
 
   useEffect(() => {
     if (success) {
-      Alert.alert('Cadastro realizado', 'Seus dados foram enviados (simulação).', [
+      Alert.alert('Cadastro realizado', 'Seus dados foram enviados com sucesso.', [
         { text: 'OK', onPress: () => router.back() },
       ]);
     }
   }, [success, router]);
+
+  useEffect(() => {
+    if (submitError) {
+      Alert.alert('Erro no cadastro', submitError);
+    }
+  }, [submitError]);
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
