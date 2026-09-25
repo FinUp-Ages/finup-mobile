@@ -4,12 +4,12 @@ import {
   FlatList,
   Modal,
   Pressable,
-  SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '@/theme/colors';
 
 const DEFAULT_OPTIONS = [
@@ -99,7 +99,7 @@ export function SelectField({
               setIsCustom(false);
             }}
           />
-          <SafeAreaView style={styles.modalContent}>
+          <SafeAreaView edges={['bottom']} style={styles.modalContent}>
             <View style={styles.modalHandle} />
             <Text style={styles.modalTitle}>{placeholder}</Text>
 
