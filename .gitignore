@@ -13,10 +13,19 @@ expo-env.d.ts
 .kotlin/
 *.orig.*
 *.jks
+*.keystore
 *.p8
 *.p12
 *.key
+*.cer
+*.certSigningRequest
 *.mobileprovision
+
+# Credenciais de assinatura e servicos
+# credentials.json guarda em texto plano os caminhos e as senhas do keystore
+# usados pelo EAS com credenciais locais.
+credentials.json
+.sentryclirc
 
 # Metro
 .metro-health-check*
@@ -31,8 +40,9 @@ yarn-error.*
 *.pem
 
 # local env files
-.env
-.env*.local
+# Amplo de proposito: ".env" e ".env*.local" sozinhos deixavam passar
+# .env.development, .env.production e .env.staging.
+.env*
 !.env.example
 
 # typescript
@@ -44,3 +54,40 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# editores e IDEs
+.idea/
+.vscode/
+.zed/
+.fleet/
+*.swp
+*.swo
+*~
+
+# sistema operacional
+._*
+.AppleDouble
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+desktop.ini
+.directory
+
+# caches e artefatos de ferramenta
+coverage/
+.eslintcache
+.prettiercache
+*.log
+logs/
+*.tgz
+
+# O projeto padroniza npm (o CI roda "npm ci"). Um segundo lockfile aqui
+# divergiria silenciosamente do package-lock.json.
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
+.yarn/
+
+# sobra de "mv node_modules node_modules_old"
+node_modules_old/
