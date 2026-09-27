@@ -1,54 +1,69 @@
-import { useRouter } from 'expo-router';
-import { useEffect } from 'react';
+import { useLocalSearchParams } from 'expo-router';
 import {
-  Alert,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
+  Text,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CadastroHeader } from '@/components/common/CadastroHeader';
 import { CadastroStepAdicionais } from '@/components/common/CadastroStepAdicionais';
+import { CadastroStepCodigo } from '@/components/common/CadastroStepCodigo';
 import { CadastroStepDados } from '@/components/common/CadastroStepDados';
 import { CadastroStepSenha } from '@/components/common/CadastroStepSenha';
 import { StepProgress } from '@/components/common/StepProgress';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
+import { colors } from '@/theme/colors';
 import { useCadastroViewModel } from '@/viewmodels/useCadastroViewModel';
 
 const TOTAL_STEPS = 3;
 
 /**
- * VIEW - fluxo de cadastro em 3 etapas (ver Figma).
+ * VIEW - fluxo de cadastro em 3 etapas (ver Figma) + confirmacao do e-mail.
  *
  * So observa o ViewModel e distribui os dados para os componentes de cada etapa.
- * Nao valida campo, nao chama Model, nao sabe que o envio e mockado.
+ * Nao valida campo, nao chama Model e nao navega sozinha.
+ *
+ * `?retomar=1` abre o cadastro na Etapa 2 para quem ja tem conta no Cognito mas
+ * ainda nao foi criado no back (ver useCadastroViewModel).
  */
 export default function CadastroScreen() {
-  const router = useRouter();
+  const { retomar } = useLocalSearchParams<{ retomar?: string }>();
   const {
     step,
+    phase,
     data,
     errors,
+    code,
     canProceed,
     submitting,
-    success,
+    resending,
+    codeResent,
+    submitError,
+    isLastStep,
+    canGoBack,
+    showProgress,
     setField,
     touchField,
+    setCode,
     goNext,
     goBack,
     submit,
-  } = useCadastroViewModel();
+    resendCode,
+    close,
+  } = useCadastroViewModel({ resume: retomar === '1' });
 
-  useEffect(() => {
-    if (success) {
-      Alert.alert('Cadastro realizado', 'Seus dados foram enviados (simulação).', [
-        { text: 'OK', onPress: () => router.back() },
-      ]);
-    }
-  }, [success, router]);
+  const isForm = phase === 'form';
+  const buttonLabel = !isForm
+    ? phase === 'code'
+      ? 'Confirmar'
+      : 'Tentar novamente'
+    : isLastStep
+      ? 'Salvar'
+      : 'Próximo';
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
@@ -57,14 +72,24 @@ export default function CadastroScreen() {
         style={styles.flex}
       >
         <CadastroHeader
-          title="Dados cadastrais"
-          onClose={() => router.back()}
-          onBack={step > 1 ? goBack : undefined}
+          title={isForm ? 'Dados cadastrais' : 'Confirmação'}
+          onClose={close}
+          onBack={canGoBack && !submitting ? goBack : undefined}
         />
 
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.content}>
-            {step === 1 ? (
+            {!isForm ? (
+              <CadastroStepCodigo
+                email={data.email}
+                code={code}
+                confirmed={phase === 'finishing'}
+                resending={resending}
+                codeResent={codeResent}
+                onChangeCode={setCode}
+                onResend={resendCode}
+              />
+            ) : step === 1 ? (
               <CadastroStepDados
                 data={data}
                 errors={errors}
@@ -89,14 +114,20 @@ export default function CadastroScreen() {
           </View>
         </TouchableWithoutFeedback>
 
-        <StepProgress currentStep={step} totalSteps={TOTAL_STEPS} />
+        {submitError ? (
+          <Text style={styles.submitError} accessibilityLiveRegion="polite">
+            {submitError}
+          </Text>
+        ) : null}
+
+        {showProgress ? <StepProgress currentStep={step} totalSteps={TOTAL_STEPS} /> : null}
 
         <PrimaryButton
-          label={step < TOTAL_STEPS ? 'Próximo' : 'Salvar'}
-          icon={step < TOTAL_STEPS ? 'next' : 'save'}
+          label={buttonLabel}
+          icon={isForm && !isLastStep ? 'next' : 'save'}
           disabled={!canProceed}
           loading={submitting}
-          onPress={step < TOTAL_STEPS ? goNext : submit}
+          onPress={isForm && !isLastStep ? goNext : submit}
         />
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -116,5 +147,11 @@ const styles = StyleSheet.create({
   screen: {
     backgroundColor: '#ffffff',
     flex: 1,
+  },
+  submitError: {
+    color: colors.error,
+    fontSize: 14,
+    marginBottom: 12,
+    textAlign: 'center',
   },
 });

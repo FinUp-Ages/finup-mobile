@@ -1,6 +1,15 @@
-import { useCallback, useMemo, useState } from 'react';
-import { submitCadastroMock } from '@/models/cadastroModel';
-import type { CadastroFormData, CadastroFormErrors, CadastroStep } from '@/types/cadastro';
+import { useRouter } from 'expo-router';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { HttpError } from '@/config/httpClient';
+import { authErrorMessage, authModel, type AuthOperation } from '@/models/authModel';
+import { toAdditionalInfo, toSignUpInput } from '@/models/cadastroModel';
+import { userModel } from '@/models/userModel';
+import type {
+  CadastroFormData,
+  CadastroFormErrors,
+  CadastroPhase,
+  CadastroStep,
+} from '@/types/cadastro';
 
 const INITIAL_DATA: CadastroFormData = {
   nome: '',
@@ -15,9 +24,11 @@ const INITIAL_DATA: CadastroFormData = {
 };
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-// Letra, numero e simbolo, minimo 8 - espelha o aviso do Figma. A politica real de
-// senha vem do Cognito quando ele for configurado; isto e so validacao de UX.
+// Letra, numero e simbolo, minimo 8 - espelha o aviso do Figma. E so validacao de
+// UX: a politica real e a do pool do Cognito, que pode ser mais forte. Nesse caso
+// o SignUp devolve InvalidPasswordException e a mensagem aparece na Etapa 3.
 const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9\s]).{8,}$/;
+const CODE_REGEX = /^\d{6}$/;
 
 function computeStep1Errors(data: CadastroFormData): CadastroFormErrors {
   const errors: CadastroFormErrors = {};
@@ -52,8 +63,7 @@ function computeStep3Errors(data: CadastroFormData): CadastroFormErrors {
     errors.senha = 'Deve conter letras, números e símbolos, com no mínimo 8 caracteres.';
   }
   if (!data.confirmarSenha) errors.confirmarSenha = true;
-  else if (data.confirmarSenha !== data.senha)
-    errors.confirmarSenha = 'As senhas não coincidem.';
+  else if (data.confirmarSenha !== data.senha) errors.confirmarSenha = 'As senhas não coincidem.';
   return errors;
 }
 
@@ -79,16 +89,44 @@ type TouchedFields = Partial<Record<keyof CadastroFormData, boolean>>;
  * demais. `canProceed` (habilita o botao) usa a validacao completa, sem esse
  * filtro: o botao so libera quando os dados realmente estao validos, tocados
  * ou nao.
+ *
+ * Envio (contrato finup-backend/contracts/auth-mobile-cognito.md, secao 4), tudo
+ * no Salvar da Etapa 3, porque o SignUp precisa da data (Etapa 2) e da senha:
+ *   form      -> SignUp no Cognito com um UUID como username
+ *   code      -> ConfirmSignUp com o codigo do e-mail (ou reenviar)
+ *   finishing -> login USER_AUTH, POST /users (409 segue), PATCH additional-info,
+ *                Home. Se falhar aqui, "Tentar novamente" retoma deste ponto sem
+ *                refazer o SignUp.
+ *
+ * A senha e o UUID ficam so em memoria. A senha e apagada logo depois do login.
+ *
+ * `resume`: a conta ja existe no Cognito, mas nao no back (GET /users/me = 404
+ * no login ou na abertura do app). Abre direto na Etapa 2 e o Salvar faz so o
+ * POST /users e o PATCH, com a sessao que ja esta no secureStorage.
  */
-export function useCadastroViewModel() {
-  const [step, setStep] = useState<CadastroStep>(1);
+export function useCadastroViewModel({ resume = false }: { resume?: boolean } = {}) {
+  const router = useRouter();
+  const firstStep: CadastroStep = resume ? 2 : 1;
+  const lastStep: CadastroStep = resume ? 2 : 3;
+
+  const [step, setStep] = useState<CadastroStep>(firstStep);
   const [data, setData] = useState<CadastroFormData>(INITIAL_DATA);
   const [touched, setTouched] = useState<TouchedFields>({});
+  const [phase, setPhase] = useState<CadastroPhase>('form');
+  const [code, setCodeValue] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [codeResent, setCodeResent] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // UUID do SignUp atual: o ConfirmSignUp e o login precisam dele.
+  const usernameRef = useRef<string | null>(null);
+  // Preenchido depois do login, para o retry nao depender mais da senha.
+  const accessTokenRef = useRef<string | null>(null);
 
   const allErrors = useMemo(() => computeStepErrors(step, data), [step, data]);
-  const canProceed = Object.keys(allErrors).length === 0;
+  const formValid = Object.keys(allErrors).length === 0;
+  const canProceed = phase === 'form' ? formValid : phase === 'code' ? CODE_REGEX.test(code) : true;
 
   const errors = useMemo(() => {
     const visible: CadastroFormErrors = {};
@@ -101,6 +139,7 @@ export function useCadastroViewModel() {
   const setField = useCallback(
     <K extends keyof CadastroFormData>(field: K, value: CadastroFormData[K]) => {
       setData((prev) => ({ ...prev, [field]: value }));
+      setSubmitError(null);
     },
     [],
   );
@@ -109,39 +148,135 @@ export function useCadastroViewModel() {
     setTouched((prev) => ({ ...prev, [field]: true }));
   }, []);
 
-  const goNext = useCallback(() => {
-    if (!canProceed) return;
-    setStep((prev) => (prev < 3 ? ((prev + 1) as CadastroStep) : prev));
-  }, [canProceed]);
-
-  const goBack = useCallback(() => {
-    setStep((prev) => (prev > 1 ? ((prev - 1) as CadastroStep) : prev));
+  const setCode = useCallback((value: string) => {
+    setCodeValue(value.replace(/\D/g, '').slice(0, 6));
+    setSubmitError(null);
   }, []);
 
-  const submit = useCallback(async () => {
+  const goNext = useCallback(() => {
     if (!canProceed) return;
+    setStep((prev) => (prev < lastStep ? ((prev + 1) as CadastroStep) : prev));
+  }, [canProceed, lastStep]);
+
+  const goBack = useCallback(() => {
+    setSubmitError(null);
+    if (phase === 'code') {
+      // Volta para a Etapa 3. Um novo Salvar faz outro SignUp com outro UUID; a
+      // conta anterior fica orfa (nao confirmada) no pool, sem efeito.
+      usernameRef.current = null;
+      setCodeValue('');
+      setCodeResent(false);
+      setPhase('form');
+      return;
+    }
+    setStep((prev) => (prev > firstStep ? ((prev - 1) as CadastroStep) : prev));
+  }, [phase, firstStep]);
+
+  const finishRegistration = useCallback(async () => {
+    if (!accessTokenRef.current) {
+      if (resume) {
+        accessTokenRef.current = await authModel.getAccessToken();
+        if (!accessTokenRef.current) {
+          throw new Error('Sessao ausente ao retomar o cadastro.');
+        }
+      } else {
+        accessTokenRef.current = await authModel.signIn(usernameRef.current ?? '', data.senha);
+        setData((prev) => ({ ...prev, senha: '', confirmarSenha: '' }));
+      }
+    }
+
+    await userModel.ensureCreated(accessTokenRef.current);
+    await userModel.updateAdditionalInfo(accessTokenRef.current, toAdditionalInfo(data));
+    router.replace('/profile');
+  }, [data, resume, router]);
+
+  const submit = useCallback(async () => {
+    if (!canProceed || submitting) return;
     setSubmitting(true);
+    setSubmitError(null);
+
+    let operation: AuthOperation = 'signIn';
     try {
-      await submitCadastroMock(data);
-      setSuccess(true);
-      // Senha nao precisa continuar em memoria depois do envio.
-      setData((prev) => ({ ...prev, senha: '', confirmarSenha: '' }));
+      if (phase === 'form' && !resume) {
+        operation = 'signUp';
+        const username = authModel.generateUsername();
+        await authModel.signUp(toSignUpInput(data, username));
+        usernameRef.current = username;
+        setPhase('code');
+        return;
+      }
+
+      if (phase === 'code') {
+        operation = 'confirmSignUp';
+        await authModel.confirmSignUp(usernameRef.current ?? '', code);
+        setPhase('finishing');
+        operation = 'signIn';
+      }
+
+      await finishRegistration();
+    } catch (error) {
+      setSubmitError(describeError(error, operation));
     } finally {
       setSubmitting(false);
     }
-  }, [canProceed, data]);
+  }, [canProceed, submitting, phase, resume, data, code, finishRegistration]);
+
+  const resendCode = useCallback(async () => {
+    if (!usernameRef.current || resending) return;
+    setResending(true);
+    setSubmitError(null);
+    setCodeResent(false);
+    try {
+      await authModel.resendCode(usernameRef.current);
+      setCodeResent(true);
+    } catch (error) {
+      setSubmitError(authErrorMessage(error, 'resendCode'));
+    } finally {
+      setResending(false);
+    }
+  }, [resending]);
+
+  const close = useCallback(async () => {
+    if (resume) {
+      // Sem os dados adicionais o cadastro nao termina: sai da conta. O proximo
+      // login cai de novo no GET /users/me = 404 e volta para ca.
+      await authModel.signOut();
+      router.replace('/(auth)');
+      return;
+    }
+    router.back();
+  }, [resume, router]);
 
   return {
     step,
+    phase,
     data,
     errors,
+    code,
     canProceed,
     submitting,
-    success,
+    resending,
+    codeResent,
+    submitError,
+    isLastStep: step === lastStep,
+    canGoBack: phase === 'code' || (phase === 'form' && step > firstStep),
+    showProgress: !resume && phase === 'form',
     setField,
     touchField,
+    setCode,
     goNext,
     goBack,
     submit,
+    resendCode,
+    close,
   };
+}
+
+function describeError(error: unknown, operation: AuthOperation): string {
+  if (error instanceof HttpError) {
+    return error.status === 400
+      ? 'Algum dado adicional é inválido. Confira e tente novamente.'
+      : 'Não foi possível salvar seus dados. Tente novamente.';
+  }
+  return authErrorMessage(error, operation);
 }

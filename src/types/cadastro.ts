@@ -21,6 +21,12 @@ export type CadastroFormData = {
 export type CadastroStep = 1 | 2 | 3;
 
 /**
+ * `form` = Etapas 1 a 3. `code` = confirmacao do e-mail (codigo do Cognito).
+ * `finishing` = e-mail confirmado; falta login + criacao no back.
+ */
+export type CadastroPhase = 'form' | 'code' | 'finishing';
+
+/**
  * `true` = campo obrigatorio vazio (so borda vermelha, sem mensagem - nao faz
  * sentido dizer "e obrigatorio" pra um campo que a pessoa ainda nem tentou
  * preencher). Uma `string` = valor preenchido mas invalido (borda vermelha COM

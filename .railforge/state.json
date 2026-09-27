@@ -1,9 +1,51 @@
 {
   "stage": "COMPLETED",
-  "task": null,
-  "objective": null,
-  "files_in_scope": [],
-  "validation": {},
-  "review": "not_applicable",
-  "updated_at": "2026-09-08"
+  "task": "ClickUp 86e3bcy5b - autenticacao real com Cognito para login e cadastro",
+  "objective": "Cadastro (SignUp, codigo, login, POST /users, PATCH additional-info), login por e-mail, sessao na abertura do app e logout com Cognito real, conforme finup-backend/contracts/auth-mobile-cognito.md",
+  "files_in_scope": [
+    ".env.example",
+    "app.json",
+    "package.json",
+    "package-lock.json",
+    "src/types/cadastro.ts",
+    "src/components/ui/PasswordField.tsx",
+    "src/config/httpClient.ts",
+    "src/config/cognitoClient.ts",
+    "src/storage/secureStorage.ts",
+    "src/storage/storageKeys.ts",
+    "src/models/authModel.ts",
+    "src/models/userModel.ts",
+    "src/models/cadastroModel.ts",
+    "src/viewmodels/useCadastroViewModel.ts",
+    "src/viewmodels/useLoginViewModel.ts",
+    "src/viewmodels/useLoadingScreenViewModel.ts",
+    "src/viewmodels/useProfileViewModel.ts",
+    "src/components/common/CadastroStepCodigo.tsx",
+    "src/views/CadastroScreen.tsx",
+    "src/views/LoginPlaceholderScreen.tsx",
+    "src/views/ProfileScreen.tsx"
+  ],
+  "decisions": [
+    "Base na develop; httpClient com a mesma assinatura do PR #10 (init opcional + patch)",
+    "Home = /profile (unica tab da develop)",
+    "Tela de codigo como fase do CadastroScreen, sem rota nova, para a senha nao passar por parametro",
+    "GET /users/me = 404 retoma o cadastro na Etapa 2; o POST /users acontece no Salvar dela (abandonar volta para ca no proximo login)",
+    "Sessao so e limpa com refresh recusado (NotAuthorizedException) ou 401 do back; falta de rede mantem os tokens",
+    "Regex de senha mantida; InvalidPasswordException tratada. Politica do pool nao confirmada no teste"
+  ],
+  "validation": {
+    "lint": "0 erros (5 warnings de BOM ja existentes na develop)",
+    "typecheck": "ok",
+    "metro_android_bundle": "ok",
+    "cognito_smoke": "InitiateAuth USER_AUTH com usuario inexistente -> NotAuthorizedException",
+    "expo_go_cadastro_do_zero": "ok (Android, +finup2): codigo por e-mail, Perfil, users com birth_date e monthly_income",
+    "expo_go_reabrir_app": "ok, abre direto no Perfil (refresh token)",
+    "expo_go_logout_e_login_email": "ok"
+  },
+  "follow_ups": [
+    "Issue #12: mascaras e validacao do formulario de cadastro (renda interpretada errado com ponto de milhar)",
+    "CI da develop falha no expo-doctor (patches expo/expo-linking/expo-router); vai falhar tambem neste PR ate ser corrigido"
+  ],
+  "review": "diff revisado: arquivos dentro do escopo, sem client ID ou IP em arquivo versionado, .env ignorado",
+  "updated_at": "2026-09-27"
 }
