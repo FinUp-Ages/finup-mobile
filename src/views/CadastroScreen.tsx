@@ -40,6 +40,7 @@ export default function CadastroScreen() {
     code,
     canProceed,
     submitting,
+    checkingEmail,
     resending,
     codeResent,
     submitError,
@@ -126,7 +127,7 @@ export default function CadastroScreen() {
           label={buttonLabel}
           icon={isForm && !isLastStep ? 'next' : 'save'}
           disabled={!canProceed}
-          loading={submitting}
+          loading={submitting || checkingEmail}
           onPress={isForm && !isLastStep ? goNext : submit}
         />
       </KeyboardAvoidingView>

@@ -48,9 +48,8 @@ export function useLoginViewModel() {
     setSubmitting(true);
     setError(null);
 
-    let accessToken: string;
     try {
-      accessToken = await authModel.signIn(email.trim().toLowerCase(), password);
+      await authModel.signIn(email.trim().toLowerCase(), password);
     } catch (signInError) {
       setError(authErrorMessage(signInError, 'signIn'));
       setSubmitting(false);
@@ -58,7 +57,7 @@ export function useLoginViewModel() {
     }
 
     try {
-      await userModel.getMe(accessToken);
+      await userModel.getMe();
       setPasswordValue('');
       router.replace('/profile');
     } catch (meError) {

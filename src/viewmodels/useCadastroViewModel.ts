@@ -29,6 +29,9 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // o SignUp devolve InvalidPasswordException e a mensagem aparece na Etapa 3.
 const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9\s]).{8,}$/;
 const CODE_REGEX = /^\d{6}$/;
+// Mesmo texto do AliasExistsException do Cognito (authModel), para a pessoa ver a
+// mesma mensagem no aviso do campo e na confirmacao do codigo.
+const EMAIL_TAKEN_MESSAGE = 'Este e-mail já está cadastrado.';
 
 function computeStep1Errors(data: CadastroFormData): CadastroFormErrors {
   const errors: CadastroFormErrors = {};
@@ -118,45 +121,112 @@ export function useCadastroViewModel({ resume = false }: { resume?: boolean } = 
   const [resending, setResending] = useState(false);
   const [codeResent, setCodeResent] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  // Consulta de e-mail ja cadastrado (Etapa 1): `emailTaken` mostra a mensagem e
+  // bloqueia o Proximo; `checkingEmail` so aparece no botao ao avancar.
+  const [emailTaken, setEmailTaken] = useState(false);
+  const [checkingEmail, setCheckingEmail] = useState(false);
 
   // UUID do SignUp atual: o ConfirmSignUp e o login precisam dele.
   const usernameRef = useRef<string | null>(null);
-  // Preenchido depois do login, para o retry nao depender mais da senha.
-  const accessTokenRef = useRef<string | null>(null);
+  // Vira true depois do login, para o retry nao depender mais da senha.
+  const signedInRef = useRef(false);
+  // Ultimo e-mail consultado e o resultado, para nao repetir a mesma consulta.
+  const emailCheckRef = useRef<{ email: string; available: boolean } | null>(null);
+  // Numera as consultas: resposta de um e-mail que ja mudou e descartada.
+  const emailRequestRef = useRef(0);
 
   const allErrors = useMemo(() => computeStepErrors(step, data), [step, data]);
   const formValid = Object.keys(allErrors).length === 0;
-  const canProceed = phase === 'form' ? formValid : phase === 'code' ? CODE_REGEX.test(code) : true;
+  const canProceed =
+    phase === 'form'
+      ? formValid && !(step === 1 && emailTaken)
+      : phase === 'code'
+        ? CODE_REGEX.test(code)
+        : true;
 
   const errors = useMemo(() => {
     const visible: CadastroFormErrors = {};
     for (const key of Object.keys(allErrors) as (keyof CadastroFormData)[]) {
       if (touched[key]) visible[key] = allErrors[key];
     }
+    if (emailTaken) visible.email = EMAIL_TAKEN_MESSAGE;
     return visible;
-  }, [allErrors, touched]);
+  }, [allErrors, touched, emailTaken]);
 
   const setField = useCallback(
     <K extends keyof CadastroFormData>(field: K, value: CadastroFormData[K]) => {
       setData((prev) => ({ ...prev, [field]: value }));
       setSubmitError(null);
+      if (field === 'email') {
+        // E-mail novo: a consulta em andamento e o aviso eram do anterior.
+        emailRequestRef.current += 1;
+        setEmailTaken(false);
+        setCheckingEmail(false);
+      }
     },
     [],
   );
 
-  const touchField = useCallback((field: keyof CadastroFormData) => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-  }, []);
+  /**
+   * Consulta se o e-mail ja esta cadastrado e devolve se a Etapa 1 pode avancar.
+   *
+   * So consulta e-mail com formato valido (o formulario ja barra o resto) e nao
+   * repete o e-mail ja consultado. Falha da consulta (sem rede, erro do back) NAO
+   * bloqueia: o aviso e so uma ajuda, e o Cognito (AliasExistsException) e o 409 do
+   * POST /users continuam sendo a barreira final. Devolve false tambem se o e-mail
+   * mudou durante a consulta: quem chamou nao deve avancar com resposta velha.
+   */
+  const checkEmail = useCallback(async (): Promise<boolean> => {
+    const email = data.email.trim().toLowerCase();
+    if (!EMAIL_REGEX.test(email)) return true;
+
+    const last = emailCheckRef.current;
+    if (last?.email === email) {
+      setEmailTaken(!last.available);
+      return last.available;
+    }
+
+    emailRequestRef.current += 1;
+    const request = emailRequestRef.current;
+    setCheckingEmail(true);
+    try {
+      const available = await userModel.isEmailAvailable(email);
+      if (request !== emailRequestRef.current) return false;
+      emailCheckRef.current = { email, available };
+      setEmailTaken(!available);
+      return available;
+    } catch (error) {
+      if (__DEV__) {
+        console.warn('[cadastro] consulta de e-mail falhou; seguindo sem bloquear.', error);
+      }
+      return request === emailRequestRef.current;
+    } finally {
+      if (request === emailRequestRef.current) setCheckingEmail(false);
+    }
+  }, [data.email]);
+
+  const touchField = useCallback(
+    (field: keyof CadastroFormData) => {
+      setTouched((prev) => ({ ...prev, [field]: true }));
+      // Ao sair do campo de e-mail, avisa na hora se ele ja existe. A retomada do
+      // cadastro abre na Etapa 2 e nao passa pelo e-mail.
+      if (field === 'email' && !resume) void checkEmail();
+    },
+    [checkEmail, resume],
+  );
 
   const setCode = useCallback((value: string) => {
     setCodeValue(value.replace(/\D/g, '').slice(0, 6));
     setSubmitError(null);
   }, []);
 
-  const goNext = useCallback(() => {
-    if (!canProceed) return;
+  const goNext = useCallback(async () => {
+    if (!canProceed || checkingEmail) return;
+    // O blur pode nao ter disparado (o toque no botao nao tira o foco do campo em
+    // todo aparelho), entao confere o e-mail antes de sair da Etapa 1.
+    if (step === 1 && !resume && !(await checkEmail())) return;
     setStep((prev) => (prev < lastStep ? ((prev + 1) as CadastroStep) : prev));
-  }, [canProceed, lastStep]);
+  }, [canProceed, checkingEmail, step, resume, checkEmail, lastStep]);
 
   const goBack = useCallback(() => {
     setSubmitError(null);
@@ -173,20 +243,20 @@ export function useCadastroViewModel({ resume = false }: { resume?: boolean } = 
   }, [phase, firstStep]);
 
   const finishRegistration = useCallback(async () => {
-    if (!accessTokenRef.current) {
+    if (!signedInRef.current) {
       if (resume) {
-        accessTokenRef.current = await authModel.getAccessToken();
-        if (!accessTokenRef.current) {
+        if (!(await authModel.hasSession())) {
           throw new Error('Sessao ausente ao retomar o cadastro.');
         }
       } else {
-        accessTokenRef.current = await authModel.signIn(usernameRef.current ?? '', data.senha);
+        await authModel.signIn(usernameRef.current ?? '', data.senha);
         setData((prev) => ({ ...prev, senha: '', confirmarSenha: '' }));
       }
+      signedInRef.current = true;
     }
 
-    await userModel.ensureCreated(accessTokenRef.current);
-    await userModel.updateAdditionalInfo(accessTokenRef.current, toAdditionalInfo(data));
+    await userModel.ensureCreated();
+    await userModel.updateAdditionalInfo(toAdditionalInfo(data));
     router.replace('/profile');
   }, [data, resume, router]);
 
@@ -255,6 +325,7 @@ export function useCadastroViewModel({ resume = false }: { resume?: boolean } = 
     code,
     canProceed,
     submitting,
+    checkingEmail,
     resending,
     codeResent,
     submitError,

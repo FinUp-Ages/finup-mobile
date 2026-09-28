@@ -18,22 +18,19 @@ async function resolveInitialRoute(): Promise<Href> {
     return '/(auth)';
   }
 
-  let accessToken: string;
   try {
-    accessToken = await authModel.refreshSession();
+    await authModel.refreshSession();
   } catch {
     return '/(auth)';
   }
 
   try {
-    await userModel.getMe(accessToken);
+    await userModel.getMe();
     return '/profile';
   } catch (error) {
+    // 401: o httpClient ja limpou a sessao.
     if (error instanceof HttpError && error.status === 404) {
       return { pathname: '/(auth)/cadastro', params: { retomar: '1' } };
-    }
-    if (error instanceof HttpError && error.status === 401) {
-      await authModel.clearSession();
     }
     return '/(auth)';
   }
