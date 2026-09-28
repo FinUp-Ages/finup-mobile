@@ -23,7 +23,11 @@
     "src/components/common/CadastroStepCodigo.tsx",
     "src/views/CadastroScreen.tsx",
     "src/views/LoginPlaceholderScreen.tsx",
-    "src/views/ProfileScreen.tsx"
+    "src/views/ProfileScreen.tsx",
+    ".github/workflows/ci.yml"
+  ],
+  "scope_changes": [
+    "2026-09-27: a pedido do usuario, o PR #13 tambem corrige o CI (expo-doctor quebrava a cada patch do SDK 57): patches do Expo atualizados e checagem de versoes movida para um passo nao bloqueante"
   ],
   "decisions": [
     "Base na develop; httpClient com a mesma assinatura do PR #10 (init opcional + patch)",
@@ -40,11 +44,12 @@
     "cognito_smoke": "InitiateAuth USER_AUTH com usuario inexistente -> NotAuthorizedException",
     "expo_go_cadastro_do_zero": "ok (Android, +finup2): codigo por e-mail, Perfil, users com birth_date e monthly_income",
     "expo_go_reabrir_app": "ok, abre direto no Perfil (refresh token)",
-    "expo_go_logout_e_login_email": "ok"
+    "expo_go_logout_e_login_email": "ok",
+    "ci_local_npm10": "npm ci, lint (0 erros), typecheck, expo-doctor 20/20 com skip e 21/21 completo, expo install --check em dia",
+    "metro_android_bundle_expo_57_0_25": "ok"
   },
   "follow_ups": [
-    "Issue #12: mascaras e validacao do formulario de cadastro (renda interpretada errado com ponto de milhar)",
-    "CI da develop falha no expo-doctor (patches expo/expo-linking/expo-router); vai falhar tambem neste PR ate ser corrigido"
+    "Issue #12: mascaras e validacao do formulario de cadastro (renda interpretada errado com ponto de milhar)"
   ],
   "review": "diff revisado: arquivos dentro do escopo, sem client ID ou IP em arquivo versionado, .env ignorado",
   "updated_at": "2026-09-27"
