@@ -66,3 +66,4 @@
   "review": "token no httpClient: diff revisado (7 arquivos), sem client ID ou IP em arquivo versionado. Riscos aceitos: 401 logo depois do login leva a /(auth) em vez de ficar na tela de login; 401 sem sessao salva nao redireciona. Checagem de e-mail: diff revisado em 2026-09-28 (9 arquivos, sem ruido de fim de linha); achado corrigido: e-mail de pessoa e IP tinham ido parar nos state.json versionados e foram trocados por texto generico. Sem revisao de acessibilidade (o texto de erro do TextField nao anuncia mudanca, padrao ja existente). Atencao: ha arquivos hs_err_pid*.log e replay_pid*.log na raiz do repo (crash do servidor Java do VS Code por falta de memoria); nao estao no .gitignore e NAO devem entrar em commit",
   "updated_at": "2026-09-28"
 }
+

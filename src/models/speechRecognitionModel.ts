@@ -1,10 +1,29 @@
 import { Platform } from 'react-native';
-import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
 import type {
   ExpoSpeechRecognitionErrorCode,
+  ExpoSpeechRecognitionNativeEventMap,
   ExpoSpeechRecognitionOptions,
 } from 'expo-speech-recognition';
 import type { DeviceSpeechSupport } from '@/types/speech';
+
+type SpeechRecognitionPackage = typeof import('expo-speech-recognition');
+
+let speechRecognitionPackage: SpeechRecognitionPackage | null = null;
+
+try {
+  // Expo Go does not contain this native module. Requiring it lazily lets the
+  // rest of the app open there while native builds keep the real implementation.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  speechRecognitionPackage = require('expo-speech-recognition') as SpeechRecognitionPackage;
+} catch {
+  speechRecognitionPackage = null;
+}
+
+const nativeModule = speechRecognitionPackage?.ExpoSpeechRecognitionModule;
+
+export function isSpeechRecognitionAvailable(): boolean {
+  return nativeModule !== undefined;
+}
 
 /**
  * MODEL - acesso ao reconhecedor de fala do aparelho.
@@ -56,15 +75,31 @@ export const VOLUME_RANGE = { max: 8, min: 0 } as const;
  * Reexportado para que nenhuma outra camada precise importar a biblioteca
  * direto — o ViewModel assina os eventos nativos por aqui.
  */
-export { useSpeechRecognitionEvent };
 export type { ExpoSpeechRecognitionErrorCode };
+
+type SpeechEventName = keyof ExpoSpeechRecognitionNativeEventMap;
+type SpeechEventListener<K extends SpeechEventName> = (
+  event: ExpoSpeechRecognitionNativeEventMap[K],
+) => void;
+
+/** Assina eventos nativos quando o app foi instalado com o módulo disponível. */
+export function useSpeechRecognitionEvent<K extends SpeechEventName>(
+  eventName: K,
+  listener: SpeechEventListener<K>,
+): void {
+  // A API nativa usa um tipo genérico correlacionado. Ao acessá-la por meio do
+  // pacote opcional, o TypeScript perde essa correlação, embora K continue
+  // restringindo o nome e o listener no contrato desta função.
+  speechRecognitionPackage?.useSpeechRecognitionEvent(eventName, listener as never);
+}
 
 /**
  * Pede microfone (e, no iOS, tambem reconhecimento de fala).
  * Retorna `false` quando o usuario nega.
  */
 export async function requestSpeechPermission(): Promise<boolean> {
-  const permission = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+  if (!nativeModule) return false;
+  const permission = await nativeModule.requestPermissionsAsync();
   return permission.granted;
 }
 
@@ -73,19 +108,23 @@ export async function requestSpeechPermission(): Promise<boolean> {
  * POC: da para transcrever sem internet neste aparelho?
  */
 export async function readDeviceSupport(): Promise<DeviceSpeechSupport> {
-  const services = ExpoSpeechRecognitionModule.getSpeechRecognitionServices();
+  if (!nativeModule) {
+    throw new Error('ExpoSpeechRecognition não está disponível neste ambiente.');
+  }
+
+  const services = nativeModule.getSpeechRecognitionServices();
   const hasOnDevicePackage = services.includes(ON_DEVICE_SERVICE_PACKAGE);
 
   let defaultService = '';
   try {
-    defaultService = ExpoSpeechRecognitionModule.getDefaultRecognitionService().packageName;
+    defaultService = nativeModule.getDefaultRecognitionService().packageName;
   } catch {
     // Nem todo aparelho expoe o servico padrao; a POC segue sem essa informacao.
   }
 
   let installedLocales: string[] = [];
   try {
-    const locales = await ExpoSpeechRecognitionModule.getSupportedLocales({
+    const locales = await nativeModule.getSupportedLocales({
       androidRecognitionServicePackage: hasOnDevicePackage ? ON_DEVICE_SERVICE_PACKAGE : undefined,
     });
     installedLocales = locales.installedLocales;
@@ -101,8 +140,8 @@ export async function readDeviceSupport(): Promise<DeviceSpeechSupport> {
     ),
     hasOnDevicePackage,
     installedLocales,
-    onDeviceSupported: ExpoSpeechRecognitionModule.supportsOnDeviceRecognition(),
-    recognitionAvailable: ExpoSpeechRecognitionModule.isRecognitionAvailable(),
+    onDeviceSupported: nativeModule.supportsOnDeviceRecognition(),
+    recognitionAvailable: nativeModule.isRecognitionAvailable(),
     services,
   };
 }
@@ -142,17 +181,17 @@ export function buildRecognitionOptions(
 
 /** Abre o microfone e comeca a reconhecer. Lanca se o servico recusar. */
 export function startTranscription(options: ExpoSpeechRecognitionOptions): void {
-  ExpoSpeechRecognitionModule.start(options);
+  nativeModule?.start(options);
 }
 
 /** Encerra a captura entregando o ultimo resultado final. */
 export function stopTranscription(): void {
-  ExpoSpeechRecognitionModule.stop();
+  nativeModule?.stop();
 }
 
 /** Encerra a captura descartando o resultado (usado ao sair da tela). */
 export function abortTranscription(): void {
-  ExpoSpeechRecognitionModule.abort();
+  nativeModule?.abort();
 }
 
 /**
@@ -160,13 +199,19 @@ export function abortTranscription(): void {
  * Em algumas versoes o sistema apenas agenda e conclui depois, no Wi-Fi.
  */
 export async function downloadOfflineModel(): Promise<{ status: string; message: string }> {
+  if (!nativeModule) {
+    return {
+      message: 'O reconhecimento de voz exige um build de desenvolvimento ou de produção.',
+      status: 'unavailable',
+    };
+  }
   if (Platform.OS !== 'android') {
     return {
       message: 'O download manual de modelo so existe no Android.',
       status: 'unsupported',
     };
   }
-  return ExpoSpeechRecognitionModule.androidTriggerOfflineModelDownload({
+  return nativeModule.androidTriggerOfflineModelDownload({
     locale: SPEECH_LOCALE,
   });
 }

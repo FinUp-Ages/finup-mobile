@@ -4,6 +4,7 @@ import {
   abortTranscription,
   buildRecognitionOptions,
   downloadOfflineModel,
+  isSpeechRecognitionAvailable,
   readDeviceSupport,
   requestSpeechPermission,
   startTranscription,
@@ -64,7 +65,7 @@ export function useSpeechCaptureViewModel({ onResult }: UseSpeechCaptureOptions 
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [support, setSupport] = useState<DeviceSpeechSupport | null>(null);
-  const [loadingSupport, setLoadingSupport] = useState(true);
+  const [loadingSupport, setLoadingSupport] = useState(isSpeechRecognitionAvailable);
 
   /**
    * Amplitude do microfone: anima direto, sem render por amostra.
@@ -81,6 +82,11 @@ export function useSpeechCaptureViewModel({ onResult }: UseSpeechCaptureOptions 
   /* ---------------- capacidades do aparelho ---------------- */
 
   const refreshSupport = useCallback(async () => {
+    if (!isSpeechRecognitionAvailable()) {
+      setSupport(null);
+      setLoadingSupport(false);
+      return;
+    }
     try {
       const next = await readDeviceSupport();
       setSupport(next);
@@ -95,6 +101,11 @@ export function useSpeechCaptureViewModel({ onResult }: UseSpeechCaptureOptions 
   // nao ha render em cascata, so a resposta de uma consulta ao sistema.
   useEffect(() => {
     let alive = true;
+    if (!isSpeechRecognitionAvailable()) {
+      return () => {
+        alive = false;
+      };
+    }
     void (async () => {
       try {
         const next = await readDeviceSupport();
@@ -204,6 +215,13 @@ export function useSpeechCaptureViewModel({ onResult }: UseSpeechCaptureOptions 
     setPartial('');
     timeline.current = { ...EMPTY_TIMELINE };
     resultDelivered.current = false;
+
+    if (!isSpeechRecognitionAvailable()) {
+      setNotice(
+        'Reconhecimento de voz indisponível no Expo Go. Use um development build para testar essa função.',
+      );
+      return;
+    }
 
     const granted = await requestSpeechPermission();
     if (!granted) {
