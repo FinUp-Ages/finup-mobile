@@ -1,56 +1,68 @@
 {
-  "stage": "COMPLETED",
-  "task": "ClickUp 86e3bcy5b - autenticacao real com Cognito para login e cadastro",
-  "objective": "Cadastro (SignUp, codigo, login, POST /users, PATCH additional-info), login por e-mail, sessao na abertura do app e logout com Cognito real, conforme finup-backend/contracts/auth-mobile-cognito.md",
+  "stage": "REVIEWING",
+  "task": "ClickUp 86e3bcy52 - [APP] Injetar Authorization no httpClient (+ checagem de e-mail ja cadastrado no cadastro, ver scope_changes)",
+  "scope_changes": [
+    "2026-09-28: a pedido do usuario, a checagem de e-mail ja cadastrado (Etapa 1 do cadastro) entra no MESMO diff e na mesma branch da tarefa do token, por escolha explicita de nao commitar a tarefa anterior antes. Depende do endpoint POST /api/v1/users/email-availability, ja feito e testado no back (finup-backend, sem commit)"
+  ],
+  "objective": "Resolver o TODO do httpClient: toda chamada ao back leva Authorization: Bearer <access token> valido (nunca o IdToken), renovando pelo refresh token quando o exp estiver vencido; 401 limpa a sessao e volta para o login",
+  "requirements": [
+    "Antes de cada request, ler o access token do secureStorage e mandar Authorization: Bearer <accessToken>",
+    "Access token com exp vencido (ou a menos de 30 s de vencer) e renovado por refreshSession(), com uma unica renovacao em andamento por vez",
+    "Refresh recusado (NotAuthorizedException) ou 401 do back: limpar a sessao, voltar para /(auth) e lancar HttpError 401",
+    "Falha de rede na renovacao mantem os tokens e nao desloga",
+    "Sem sessao salva a requisicao segue sem header; o 401 do back nao dispara redirecionamento (nao ha o que deslogar)",
+    "E-mail ja cadastrado: ao sair do campo de e-mail (Etapa 1) com formato valido, consulta POST /api/v1/users/email-availability e mostra 'Este e-mail ja esta cadastrado.' embaixo do campo; o Proximo fica desabilitado enquanto ele estiver em uso",
+    "A consulta vai sem Authorization (opcao auth:false no httpClient): o back devolve 401 ate para o endpoint publico se vier token invalido",
+    "Ao tocar em Proximo na Etapa 1 sem consulta feita para o e-mail atual, consulta antes de avancar (o blur pode nao ter disparado); resposta velha e descartada se o e-mail mudou",
+    "Falha da consulta (sem rede, 5xx) nao bloqueia: o aviso e so ajuda, o Cognito (AliasExistsException) e o 409 do POST /users continuam sendo a barreira final",
+    "Nao consulta na retomada do cadastro (resume), que abre na Etapa 2"
+  ],
+  "flow_and_states": "Fluxos afetados: abertura do app (Loading), login, cadastro (Etapa 3 e retomada na Etapa 2) e Perfil. Estados: sessao valida, access token vencido (renova), refresh recusado (volta ao login), 401 do back (volta ao login), sem rede",
   "files_in_scope": [
-    ".env.example",
-    "app.json",
-    "package.json",
-    "package-lock.json",
-    "src/types/cadastro.ts",
-    "src/components/ui/PasswordField.tsx",
     "src/config/httpClient.ts",
-    "src/config/cognitoClient.ts",
-    "src/storage/secureStorage.ts",
-    "src/storage/storageKeys.ts",
     "src/models/authModel.ts",
     "src/models/userModel.ts",
-    "src/models/cadastroModel.ts",
     "src/viewmodels/useCadastroViewModel.ts",
     "src/viewmodels/useLoginViewModel.ts",
     "src/viewmodels/useLoadingScreenViewModel.ts",
-    "src/viewmodels/useProfileViewModel.ts",
-    "src/components/common/CadastroStepCodigo.tsx",
-    "src/views/CadastroScreen.tsx",
-    "src/views/LoginPlaceholderScreen.tsx",
-    "src/views/ProfileScreen.tsx",
-    ".github/workflows/ci.yml"
-  ],
-  "scope_changes": [
-    "2026-09-27: a pedido do usuario, o PR #13 tambem corrige o CI (expo-doctor quebrava a cada patch do SDK 57): patches do Expo atualizados e checagem de versoes movida para um passo nao bloqueante"
+    "app/_layout.tsx",
+    "src/views/CadastroScreen.tsx"
   ],
   "decisions": [
-    "Base na develop; httpClient com a mesma assinatura do PR #10 (init opcional + patch)",
-    "Home = /profile (unica tab da develop)",
-    "Tela de codigo como fase do CadastroScreen, sem rota nova, para a senha nao passar por parametro",
-    "GET /users/me = 404 retoma o cadastro na Etapa 2; o POST /users acontece no Salvar dela (abandonar volta para ca no proximo login)",
-    "Sessao so e limpa com refresh recusado (NotAuthorizedException) ou 401 do back; falta de rede mantem os tokens",
-    "Regex de senha mantida; InvalidPasswordException tratada. Politica do pool nao confirmada no teste"
+    "A nota 'Atencao' da issue esta desatualizada: cadastro, login, secureStorage e refreshSession ja existem desde o #13; so falta a injecao no httpClient",
+    "Sem retry automatico depois do 401, como a issue pede: 401 desloga",
+    "O redirecionamento fica fora da camada config: o httpClient expoe setSessionExpiredHandler e o RootLayout registra router.replace('/(auth)')",
+    "userModel deixa de receber accessToken; o httpClient e a unica fonte do token"
+  ],
+  "non_goals": [
+    "Ler o corpo problem+json do erro (fields, traceId)",
+    "Mensagem propria para 503 e 400 do POST /users",
+    "Corrigir o README do mobile (ainda cita Axios) e a referencia a contracts/auth-mobile-cognito.md, que nao existe no back"
+  ],
+  "follow_ups": [
+    "Issue #12: mascaras e validacao do formulario de cadastro (renda interpretada errado com ponto de milhar)",
+    "Back: limite de requisicoes no endpoint publico de e-mail antes de producao (risco de enumeracao aceito, ver open_questions do back)",
+    "Cadastro: mensagem propria para 503 e 400 do POST /users (hoje generica)"
   ],
   "validation": {
-    "lint": "0 erros (5 warnings de BOM ja existentes na develop)",
+    "npm_ci": "node_modules estava desatualizado (faltavam expo-crypto, expo-secure-store, expo-linear-gradient); npm ci resolveu",
     "typecheck": "ok",
+    "lint": "0 erros (5 warnings de BOM ja existentes)",
     "metro_android_bundle": "ok",
-    "cognito_smoke": "InitiateAuth USER_AUTH com usuario inexistente -> NotAuthorizedException",
-    "expo_go_cadastro_do_zero": "ok (Android, +finup2): codigo por e-mail, Perfil, users com birth_date e monthly_income",
-    "expo_go_reabrir_app": "ok, abre direto no Perfil (refresh token)",
-    "expo_go_logout_e_login_email": "ok",
-    "ci_local_npm10": "npm ci, lint (0 erros), typecheck, expo-doctor 20/20 com skip e 21/21 completo, expo install --check em dia",
-    "metro_android_bundle_expo_57_0_25": "ok"
+    "cenarios_httpClient_authModel": "20 verificacoes ok em Node com fetch e secureStorage simulados: sem sessao, token valido, vencido, margem de 30 s, 3 requests concorrentes com 1 renovacao, refresh recusado, sem rede, 401 com e sem sessao, 404, token ilegivel, payload com acentos",
+    "decodificador_base64url": "6000 amostras aleatorias (0 a 299 bytes) iguais ao Buffer do Node, 0 diferencas",
+    "prettier": "codigo novo sem ajustes pendentes; os avisos restantes ja existiam (CRLF em todo o repo e <T,> no httpClient)",
+    "expo_go_cadastro_do_zero": "ok, 2026-09-28, celular fisico via Expo Go (plataforma a confirmar) contra o back com Cognito real: SignUp, codigo por e-mail, login, POST /users e PATCH aceitos (log do back) e linha em users com cognito_id = sub do Cognito, e-mail vindo do GetUser, birth_date e monthly_income",
+    "expo_go_login_email": "ok, 2026-09-28, mesmo aparelho: login por e-mail e senha, GET /users/me 200 e abriu o Perfil (tela placeholder do proprio codigo); sem recusa nova no log do back",
+    "expo_go_reabrir_e_sair": "ok, 2026-09-28, mesmo aparelho: reabrir o app com sessao abre no Perfil (refresh + GET /users/me com o token renovado) e o Sair volta para a tela inicial",
+    "expo_go_401_derruba_sessao": "ok, 2026-09-28, mesmo aparelho: back reiniciado com COGNITO_CLIENT_ID errado (temporario, ja restaurado); login no Cognito ok, o back recusou o token (log: 'The client_id claim is not valid') e o app voltou sozinho para a tela inicial de autenticacao",
+    "expo_go_renovacao_por_exp": "ok, 2026-09-28, mesmo aparelho: com EXPIRY_LEEWAY_SECONDS temporario em 3700 e um console.log na renovacao, cada abertura com sessao mostrou 2 renovacoes (Loading + httpClient antes do GET /users/me) e chegou ao Perfil; mudancas temporarias revertidas e conferidas contra a copia revisada",
+    "checagem_email_typecheck_lint_bundle": "2026-09-28: typecheck ok, lint 0 erros (5 warnings de BOM ja existentes), prettier sem ajustes no codigo novo (aviso restante e o <T,> antigo), bundle Android do Metro ok, regressao do token com 20 cenarios ok",
+    "checagem_email_contra_o_back_real": "ok, 10 verificacoes com userModel e httpClient reais contra localhost:8080 (so o secureStorage simulado): e-mail do usuario existente -> false, inexistente -> true, maiusculas -> false, nenhum Authorization mesmo com sessao invalida salva e sem derrubar a sessao, contraste com rota protegida que manda o Bearer, 400 vira HttpError",
+    "checagem_email_expo_go": "ok, 2026-09-28, mesmo aparelho, contra o back real: com o e-mail de um usuario ja cadastrado a mensagem 'Este e-mail ja esta cadastrado.' aparece embaixo do campo; o usuario confirmou que os demais casos testados (outro e-mail da base, maiusculas, editar o campo, e-mail novo) funcionam. O log de acesso do back mostra 3 chamadas do celular a email-availability com 200. Na primeira tentativa a mensagem nao apareceu por o app ainda nao ter recarregado o codigo novo; o catch da consulta ganhou um console.warn so em __DEV__ para a falha silenciosa deixar rastro. O hook useCadastroViewModel nao tem teste automatizado (o projeto nao tem runner nem renderer de hooks)",
+    "checagem_email_pendente": "modo aviao / sem rede (falha aberta) nao foi confirmado no aparelho",
+    "expo_go_pendente": "nao verificado em Android e iOS separadamente (validado em um unico celular fisico, plataforma a confirmar)"
   },
-  "follow_ups": [
-    "Issue #12: mascaras e validacao do formulario de cadastro (renda interpretada errado com ponto de milhar)"
-  ],
-  "review": "diff revisado: arquivos dentro do escopo, sem client ID ou IP em arquivo versionado, .env ignorado",
-  "updated_at": "2026-09-27"
+  "review": "token no httpClient: diff revisado (7 arquivos), sem client ID ou IP em arquivo versionado. Riscos aceitos: 401 logo depois do login leva a /(auth) em vez de ficar na tela de login; 401 sem sessao salva nao redireciona. Checagem de e-mail: diff revisado em 2026-09-28 (9 arquivos, sem ruido de fim de linha); achado corrigido: e-mail de pessoa e IP tinham ido parar nos state.json versionados e foram trocados por texto generico. Sem revisao de acessibilidade (o texto de erro do TextField nao anuncia mudanca, padrao ja existente). Atencao: ha arquivos hs_err_pid*.log e replay_pid*.log na raiz do repo (crash do servidor Java do VS Code por falta de memoria); nao estao no .gitignore e NAO devem entrar em commit",
+  "updated_at": "2026-09-28"
 }

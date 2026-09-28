@@ -3,12 +3,9 @@ import { httpClient, HttpError } from '@/config/httpClient';
 /**
  * MODEL - usuario autenticado no finup-backend.
  *
- * A identidade vem so do access token do Cognito: nenhum endpoint recebe
- * userId, e-mail ou nome do app. O POST /users le nome e e-mail do proprio
- * Cognito.
- *
- * O Authorization vai explicito em cada chamada ate a tarefa 86e3bcy52 levar
- * isso para dentro do httpClient.
+ * A identidade vem so do access token do Cognito, que o httpClient injeta em
+ * toda chamada: nenhum endpoint recebe userId, e-mail ou nome do app. O
+ * POST /users le nome e e-mail do proprio Cognito.
  */
 
 export type UserResponse = {
@@ -29,18 +26,26 @@ export type AdditionalInfoPayload = {
   monthlyIncome?: number;
 };
 
-function withToken(accessToken: string): RequestInit {
-  return { headers: { Authorization: `Bearer ${accessToken}` } };
-}
-
 export const userModel = {
-  getMe: (accessToken: string) =>
-    httpClient.get<UserResponse>('/api/v1/users/me', withToken(accessToken)),
+  /**
+   * Consulta publica (sem token: no cadastro ainda nao ha sessao). true = nenhum
+   * usuario usa o e-mail. So enxerga o banco do back e nao reserva o e-mail.
+   */
+  isEmailAvailable: async (email: string): Promise<boolean> => {
+    const { available } = await httpClient.post<{ available: boolean }>(
+      '/api/v1/users/email-availability',
+      { email },
+      { auth: false },
+    );
+    return available;
+  },
+
+  getMe: () => httpClient.get<UserResponse>('/api/v1/users/me'),
 
   /** POST /users sem corpo. 409 = usuario ja existe para esse token, e segue. */
-  ensureCreated: async (accessToken: string): Promise<void> => {
+  ensureCreated: async (): Promise<void> => {
     try {
-      await httpClient.post<UserResponse>('/api/v1/users', undefined, withToken(accessToken));
+      await httpClient.post<UserResponse>('/api/v1/users', undefined);
     } catch (error) {
       if (!(error instanceof HttpError && error.status === 409)) {
         throw error;
@@ -48,10 +53,6 @@ export const userModel = {
     }
   },
 
-  updateAdditionalInfo: (accessToken: string, payload: AdditionalInfoPayload) =>
-    httpClient.patch<UserResponse>(
-      '/api/v1/users/me/additional-info',
-      payload,
-      withToken(accessToken),
-    ),
+  updateAdditionalInfo: (payload: AdditionalInfoPayload) =>
+    httpClient.patch<UserResponse>('/api/v1/users/me/additional-info', payload),
 };

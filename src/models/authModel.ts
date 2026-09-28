@@ -53,11 +53,88 @@ function requireAuthenticationResult(response: InitiateAuthResponse): Authentica
   return response.AuthenticationResult;
 }
 
+// Renova quando faltar menos que isso para o exp: cobre relogio do aparelho
+// desregulado e a latencia ate o back validar o token.
+const EXPIRY_LEEWAY_SECONDS = 30;
+
+// Chamadas simultaneas (varias requisicoes com o token vencido) compartilham a
+// mesma renovacao: com rotacao de refresh token ligada, uma segunda chamada
+// usaria um token ja trocado.
+let refreshInFlight: Promise<string> | null = null;
+
 async function clearSession(): Promise<void> {
   await Promise.all([
     secureStorage.deleteItem(storageKeys.accessToken),
     secureStorage.deleteItem(storageKeys.refreshToken),
   ]);
+}
+
+const BASE64URL_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+
+// Base64url (formato do JWT, sem padding) para texto. Escrito a mao porque nao ha
+// atob garantido no Hermes. Cada byte vira um caractere: basta para achar o exp,
+// e um nome com acento no payload continua sendo um JSON valido.
+function decodeBase64Url(input: string): string {
+  let buffer = 0;
+  let bits = 0;
+  let output = '';
+  for (const char of input) {
+    const index = BASE64URL_ALPHABET.indexOf(char);
+    if (index < 0) break;
+    buffer = (buffer << 6) | index;
+    bits += 6;
+    if (bits >= 8) {
+      bits -= 8;
+      output += String.fromCharCode((buffer >> bits) & 0xff);
+      buffer &= (1 << bits) - 1;
+    }
+  }
+  return output;
+}
+
+// Le o claim exp (em segundos) do payload do JWT, sem validar a assinatura: quem
+// valida e o back. Token ilegivel devolve null e segue como valido, o 401 do back
+// cobre o resto.
+function readExpiry(token: string): number | null {
+  try {
+    const { exp } = JSON.parse(decodeBase64Url(token.split('.')[1])) as { exp?: unknown };
+    return typeof exp === 'number' ? exp : null;
+  } catch {
+    return null;
+  }
+}
+
+function isExpired(token: string): boolean {
+  const exp = readExpiry(token);
+  return exp !== null && exp - EXPIRY_LEEWAY_SECONDS <= Date.now() / 1000;
+}
+
+async function refreshSession(): Promise<string> {
+  const refreshToken = await secureStorage.getItem(storageKeys.refreshToken);
+  if (!refreshToken) {
+    throw new CognitoError('NoSession', 'Nenhuma sessao salva.');
+  }
+
+  let response: InitiateAuthResponse;
+  try {
+    response = await cognitoRequest<InitiateAuthResponse>('InitiateAuth', {
+      AuthFlow: 'REFRESH_TOKEN_AUTH',
+      AuthParameters: { REFRESH_TOKEN: refreshToken },
+    });
+  } catch (error) {
+    if (error instanceof CognitoError && error.code === 'NotAuthorizedException') {
+      await clearSession();
+    }
+    throw error;
+  }
+
+  const result = requireAuthenticationResult(response);
+  await secureStorage.setItem(storageKeys.accessToken, result.AccessToken);
+  // So vem um refresh token novo se o pool tiver rotacao ligada.
+  if (result.RefreshToken) {
+    await secureStorage.setItem(storageKeys.refreshToken, result.RefreshToken);
+  }
+  return result.AccessToken;
 }
 
 export const authModel = {
@@ -84,9 +161,10 @@ export const authModel = {
 
   /**
    * Login com senha. `username` e o UUID no cadastro e o e-mail no login.
-   * Guarda access e refresh token e devolve o access token.
+   * Guarda access e refresh token no secureStorage; o httpClient le o access
+   * token de la a cada requisicao.
    */
-  signIn: async (username: string, password: string): Promise<string> => {
+  signIn: async (username: string, password: string): Promise<void> => {
     const response = await cognitoRequest<InitiateAuthResponse>('InitiateAuth', {
       AuthFlow: 'USER_AUTH',
       AuthParameters: {
@@ -102,46 +180,41 @@ export const authModel = {
 
     await secureStorage.setItem(storageKeys.accessToken, result.AccessToken);
     await secureStorage.setItem(storageKeys.refreshToken, result.RefreshToken);
-    return result.AccessToken;
   },
 
   hasSession: async (): Promise<boolean> =>
     Boolean(await secureStorage.getItem(storageKeys.refreshToken)),
 
-  getAccessToken: () => secureStorage.getItem(storageKeys.accessToken),
+  /**
+   * Access token pronto para ir no Authorization, ou null sem sessao. Se o token
+   * salvo estiver vencido (claim exp), renova antes pelo refresh token.
+   *
+   * Erros da renovacao seguem para quem chamou: NotAuthorizedException (refresh
+   * expirado ou revogado, sessao ja limpa) ou falha de rede (tokens mantidos).
+   */
+  getValidAccessToken: async (): Promise<string | null> => {
+    const accessToken = await secureStorage.getItem(storageKeys.accessToken);
+    if (accessToken && !isExpired(accessToken)) {
+      return accessToken;
+    }
+    if (!(await secureStorage.getItem(storageKeys.refreshToken))) {
+      return null;
+    }
+    return authModel.refreshSession();
+  },
 
   /**
-   * Renova o access token pelo refresh token e devolve o novo.
+   * Renova o access token pelo refresh token e devolve o novo. Chamadas
+   * simultaneas dividem a mesma renovacao.
    *
    * Refresh expirado ou revogado (NotAuthorizedException) limpa a sessao. Outras
    * falhas (ex.: sem internet) mantem os tokens, para tentar de novo depois.
    */
-  refreshSession: async (): Promise<string> => {
-    const refreshToken = await secureStorage.getItem(storageKeys.refreshToken);
-    if (!refreshToken) {
-      throw new CognitoError('NoSession', 'Nenhuma sessao salva.');
-    }
-
-    let response: InitiateAuthResponse;
-    try {
-      response = await cognitoRequest<InitiateAuthResponse>('InitiateAuth', {
-        AuthFlow: 'REFRESH_TOKEN_AUTH',
-        AuthParameters: { REFRESH_TOKEN: refreshToken },
-      });
-    } catch (error) {
-      if (error instanceof CognitoError && error.code === 'NotAuthorizedException') {
-        await clearSession();
-      }
-      throw error;
-    }
-
-    const result = requireAuthenticationResult(response);
-    await secureStorage.setItem(storageKeys.accessToken, result.AccessToken);
-    // So vem um refresh token novo se o pool tiver rotacao ligada.
-    if (result.RefreshToken) {
-      await secureStorage.setItem(storageKeys.refreshToken, result.RefreshToken);
-    }
-    return result.AccessToken;
+  refreshSession: (): Promise<string> => {
+    refreshInFlight ??= refreshSession().finally(() => {
+      refreshInFlight = null;
+    });
+    return refreshInFlight;
   },
 
   clearSession,
