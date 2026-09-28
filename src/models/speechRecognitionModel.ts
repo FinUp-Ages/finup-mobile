@@ -11,8 +11,16 @@ type SpeechRecognitionPackage = typeof import('expo-speech-recognition');
 let speechRecognitionPackage: SpeechRecognitionPackage | null = null;
 
 try {
-  // Expo Go does not contain this native module. Requiring it lazily lets the
-  // rest of the app open there while native builds keep the real implementation.
+  // `expo-speech-recognition` e um modulo nativo: ele so entra no binario quando o
+  // app e compilado (development/production build). Por SO, o que falta quando o
+  // require abaixo estoura:
+  //   - iOS: o Expo Go nao embarca o pacote, entao nao existe a ponte para o
+  //     SFSpeechRecognizer do sistema;
+  //   - Android: idem, sem a ponte para o SpeechRecognizer e sem o servico
+  //     on-device `com.google.android.as`;
+  //   - Web: a plataforma nao e alvo do pacote, o modulo nunca resolve.
+  // Carregar preguicosamente deixa o resto do app abrir nesses casos, enquanto os
+  // builds nativos seguem com a implementacao real.
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   speechRecognitionPackage = require('expo-speech-recognition') as SpeechRecognitionPackage;
 } catch {
