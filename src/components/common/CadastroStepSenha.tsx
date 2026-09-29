@@ -31,7 +31,7 @@ export function CadastroStepSenha({ data, errors, onChange, onTouch }: CadastroS
           onChangeText={(value) => onChange('confirmarSenha', value)}
           onBlur={() => onTouch('confirmarSenha')}
           error={errors.confirmarSenha}
-          showToggle={false}
+          showToggle={true}
         />
       </View>
     </View>
