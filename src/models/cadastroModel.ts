@@ -1,6 +1,7 @@
 import type { SignUpInput } from '@/models/authModel';
 import type { AdditionalInfoPayload } from '@/models/userModel';
 import type { CadastroFormData } from '@/types/cadastro';
+import { parseCurrencyToNumber } from '@/utils/masks';
 
 /**
  * MODEL - traduz o formulario do cadastro para o que o Cognito e o back esperam.
@@ -22,9 +23,15 @@ export function toSignUpInput(data: CadastroFormData, username: string): SignUpI
 }
 
 export function toAdditionalInfo(data: CadastroFormData): AdditionalInfoPayload {
-  const payload: AdditionalInfoPayload = { birthDate: data.birthDate };
+  const payload: AdditionalInfoPayload = {};
+  if (data.birthDate) {
+    payload.birthDate = data.birthDate;
+  }
   if (data.monthlyIncome.trim()) {
-    payload.monthlyIncome = Number(data.monthlyIncome.replace(',', '.'));
+    const parsed = parseCurrencyToNumber(data.monthlyIncome);
+    if (parsed !== undefined) {
+      payload.monthlyIncome = parsed;
+    }
   }
   return payload;
 }

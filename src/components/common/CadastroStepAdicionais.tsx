@@ -5,6 +5,23 @@ import { TextField } from '@/components/ui/TextField';
 import type { CadastroFormData, CadastroFormErrors } from '@/types/cadastro';
 import { styles } from './cadastroStepStyles';
 
+const PROFISSAO_OPTIONS = [
+  'CLT / Carteira assinada',
+  'Autônomo / PJ',
+  'Profissional liberal',
+  'Servidor público',
+  'Empresário / Empreendedor',
+  'Estudante',
+  'Aposentado / Pensionista',
+  'Outro',
+];
+
+/**
+ * COMPONENT - campos da Etapa 2 (Dados adicionais).
+ *
+ * Coleta data de nascimento, renda mensal fixa e profissao para tracar o perfil
+ * financeiro do usuario.
+ */
 type CadastroStepAdicionaisProps = {
   data: Pick<CadastroFormData, 'birthDate' | 'monthlyIncome' | 'profissao'>;
   errors: CadastroFormErrors;
@@ -38,11 +55,13 @@ export function CadastroStepAdicionais({
           onChangeText={(value) => onChange('monthlyIncome', value)}
           onBlur={() => onTouch('monthlyIncome')}
           error={errors.monthlyIncome}
-          keyboardType="decimal-pad"
+          keyboardType="numeric"
         />
         <SelectField
           placeholder="Profissão"
           value={data.profissao}
+          options={PROFISSAO_OPTIONS}
+          customPlaceholder="Digite sua profissão"
           onChange={(value) => onChange('profissao', value)}
           onBlur={() => onTouch('profissao')}
           error={errors.profissao}

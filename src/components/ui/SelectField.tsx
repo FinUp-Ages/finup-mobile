@@ -12,21 +12,17 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '@/theme/colors';
 
-const DEFAULT_OPTIONS = [
-  'CLT / Carteira assinada',
-  'Autônomo / PJ',
-  'Profissional liberal',
-  'Servidor público',
-  'Empresário / Empreendedor',
-  'Estudante',
-  'Aposentado / Pensionista',
-  'Outro',
-];
-
+/**
+ * COMPONENT - seletor modal com lista de opcoes configuraveis via props.
+ *
+ * Exibe as opcoes passadas em `options` e permite selecao unica.
+ * Se a opcao for 'Outro' ou 'Outra', permite insercao de valor customizado.
+ */
 type SelectFieldProps = {
   placeholder: string;
   value: string;
-  options?: string[];
+  options: string[];
+  customPlaceholder?: string;
   onChange: (value: string) => void;
   onBlur?: () => void;
   error?: string | boolean;
@@ -35,7 +31,8 @@ type SelectFieldProps = {
 export function SelectField({
   placeholder,
   value,
-  options = DEFAULT_OPTIONS,
+  options,
+  customPlaceholder = 'Digite outra opção',
   onChange,
   onBlur,
   error,
@@ -48,7 +45,7 @@ export function SelectField({
   const message = typeof error === 'string' ? error : undefined;
 
   function handleSelect(option: string) {
-    if (option === 'Outro') {
+    if (option === 'Outro' || option === 'Outra') {
       setIsCustom(true);
       setCustomValue('');
     } else {
@@ -106,7 +103,7 @@ export function SelectField({
             {isCustom ? (
               <View style={styles.customContainer}>
                 <TextInput
-                  placeholder="Digite sua profissão"
+                  placeholder={customPlaceholder}
                   placeholderTextColor={colors.placeholder}
                   value={customValue}
                   onChangeText={setCustomValue}
