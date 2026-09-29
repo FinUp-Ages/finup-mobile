@@ -3,6 +3,14 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 import { colors } from '@/theme/colors';
 
+/**
+ * COMPONENT - campo de senha com botao de "olho" pra mostrar/esconder o
+ * texto digitado.
+ *
+ * Passivo: o unico estado que guarda e "esta revelando a senha ou nao" - o
+ * valor em si, validacao e onChange continuam responsabilidade de quem usa,
+ * igual ao TextField.
+ */
 type PasswordFieldProps = Omit<TextInputProps, 'secureTextEntry'> & {
   error?: string | boolean;
   showToggle?: boolean;
@@ -25,6 +33,11 @@ export function PasswordField({
           placeholderTextColor={colors.placeholder}
           autoCapitalize="none"
           autoCorrect={false}
+          // Desliga a sugestao de "senha forte" do sistema (iOS/Android): sem
+          // isso, o SO mostra um balao sobre o teclado que, ao ser fechado,
+          // pode limpar o campo inteiro - confundindo com um bug de digitacao.
+          // Quem usa pode sobrescrever (ex.: o login passa textContentType
+          // "password" para o gerenciador de senhas preencher).
           textContentType="oneTimeCode"
           importantForAutofill="no"
           style={[styles.input, style]}

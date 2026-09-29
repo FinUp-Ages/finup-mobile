@@ -2,6 +2,8 @@ This repository uses a lightweight, educational Railforge workflow based on docu
 
 This mobile variant is for a user-facing application built with React Native and Expo. Preserve the established component, navigation, state-management, and styling patterns. Use Expo Go to preview and verify affected user flows when it is available and relevant to the change. Desktop web support is outside the default scope unless the active task explicitly requires it.
 
+Before opening or updating a pull request, read `.github/PULL_REQUEST_TEMPLATE.md` and complete every applicable section. Do not create or submit a pull request without following this template.
+
 Before making a development change:
 
 1. Read `.railforge/PRINCIPLES.md` and `.railforge/WORKFLOW.md` when they are relevant to the task.
@@ -16,3 +18,26 @@ Before making a development change:
 `.railforge/state.json` is the single versioned workflow state. Keep it small and manual: record the stage, task, scope, validation results, review, and date. Do not add event logs, generated snapshots, temporary execution data, or runtime metadata.
 
 Do not create Railforge files, automation, or tooling merely to satisfy this workflow. Use only the documented files and practices that exist in this repository.
+
+## Git conventions
+
+When creating branches or commits after explicit user authorization, use the conventions below.
+
+### Branches
+
+Use a short kebab-case description with one of these prefixes:
+
+- `feat/<feature-name>`
+- `fix/<problem-name>`
+- `docs/<document-name>`
+- `refactor/<change-name>`
+- `test/<test-name>`
+
+`main` is the protected integration branch and must not be used for feature work.
+
+### Commits
+
+Use the format `<type>: <short description>`.
+
+Allowed types: `feat`, `fix`, `docs`, `refactor`, `test`, and `chore`.
+
