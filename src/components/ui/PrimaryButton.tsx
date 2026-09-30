@@ -13,12 +13,11 @@ type PrimaryButtonProps = {
   onPress: () => void;
   disabled?: boolean;
   loading?: boolean;
-  icon?: 'next' | 'save' | boolean;
+  icon?: 'next' | 'plus';
 };
 
 export function PrimaryButton({ label, onPress, disabled, loading, icon }: PrimaryButtonProps) {
   const isNonInteractive = disabled || loading;
-  const showIcon = icon === 'next' || icon === true;
 
   return (
     <Pressable
@@ -26,7 +25,7 @@ export function PrimaryButton({ label, onPress, disabled, loading, icon }: Prima
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
-        !showIcon ? styles.buttonCenter : null,
+        !icon ? styles.buttonCenter : null,
         disabled ? styles.buttonDisabled : null,
         pressed && !isNonInteractive ? styles.buttonPressed : null,
       ]}
@@ -34,10 +33,10 @@ export function PrimaryButton({ label, onPress, disabled, loading, icon }: Prima
       <Text style={[styles.label, disabled ? styles.labelDisabled : null]}>{label}</Text>
       {loading ? (
         <ActivityIndicator color={colors.white} size="small" />
-      ) : showIcon ? (
+      ) : icon ? (
         <View style={[styles.iconCircle, disabled ? styles.iconCircleDisabled : null]}>
           <Feather
-            name="plus"
+            name={icon === 'plus' ? 'plus' : 'arrow-right'}
             size={16}
             color={disabled ? colors.placeholder : colors.textPrimary}
           />

@@ -129,7 +129,7 @@ export default function CadastroScreen() {
 
             <PrimaryButton
               label={buttonLabel}
-              icon={isForm && !isLastStep ? 'next' : 'save'}
+              icon={isForm && !isLastStep ? 'plus' : undefined}
               disabled={!canProceed}
               loading={submitting || checkingEmail}
               onPress={isForm && !isLastStep ? goNext : submit}
