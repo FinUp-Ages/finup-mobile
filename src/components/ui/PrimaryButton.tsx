@@ -2,6 +2,12 @@ import { Feather } from '@expo/vector-icons';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors } from '@/theme/colors';
 
+/**
+ * COMPONENT - botao de acao principal (Proximo / Salvar).
+ *
+ * Passivo: recebe rotulo, icone e estado por props. Nao sabe se esta na Etapa 1,
+ * 2 ou 3, nem o que a acao faz.
+ */
 type PrimaryButtonProps = {
   label: string;
   onPress: () => void;

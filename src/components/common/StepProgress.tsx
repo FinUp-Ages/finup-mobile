@@ -1,6 +1,11 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { colors } from '@/theme/colors';
 
+/**
+ * COMPONENT - indicador de progresso do wizard (barra + "0X/0Y").
+ *
+ * Passivo: so desenha a proporcao recebida por props.
+ */
 type StepProgressProps = {
   currentStep: number;
   totalSteps: number;

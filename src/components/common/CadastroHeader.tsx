@@ -2,6 +2,12 @@ import { Feather } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors } from '@/theme/colors';
 
+/**
+ * COMPONENT - cabecalho fixo do fluxo de cadastro: "X" para fechar, titulo, e
+ * "< Voltar" abaixo (opcional, escondido na primeira etapa via onBack ausente).
+ *
+ * Passivo: as acoes de fechar/voltar sao responsabilidade de quem usa (a View).
+ */
 type CadastroHeaderProps = {
   title: string;
   onClose: () => void;

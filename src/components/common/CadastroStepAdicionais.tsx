@@ -19,8 +19,10 @@ const PROFISSAO_OPTIONS = [
 /**
  * COMPONENT - campos da Etapa 2 (Dados adicionais).
  *
- * Coleta data de nascimento, renda mensal fixa e profissao para tracar o perfil
- * financeiro do usuario.
+ * `birthDate` -> Users.BirthDate, `monthlyIncome` -> Users.MonthlyIncome: existem
+ * na modelagem atual. `profissao` NAO existe em nenhuma tabela documentada -
+ * aparece so para bater com o Figma, e nao e enviada em nenhum envio (ver
+ * cadastroModel).
  */
 type CadastroStepAdicionaisProps = {
   data: Pick<CadastroFormData, 'birthDate' | 'monthlyIncome' | 'profissao'>;
