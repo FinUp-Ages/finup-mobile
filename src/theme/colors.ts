@@ -8,6 +8,7 @@ export const colors = {
   background: '#ffffff',
   textPrimary: '#0f172a',
   textSecondary: '#64748b',
+  textDark: '#1e293b',
   placeholder: '#94a3b8',
   // Icones (calendario, olho) sao visivelmente mais escuros que o placeholder
   // no Figma - nao usam o mesmo tom claro do texto de exemplo dentro do campo.
@@ -18,4 +19,5 @@ export const colors = {
   error: '#ef4444',
   link: '#2563eb',
   white: '#ffffff',
+  screenBackground: '#051329',
 } as const;

@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   screen: {
-    backgroundColor: '#051329',
+    backgroundColor: colors.screenBackground,
     flex: 1,
   },
   sheet: {

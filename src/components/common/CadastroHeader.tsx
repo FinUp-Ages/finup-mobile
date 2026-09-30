@@ -29,7 +29,7 @@ export function CadastroHeader({ title, onClose, onBack }: CadastroHeaderProps) 
 
       {onBack ? (
         <Pressable hitSlop={12} onPress={onBack} style={styles.backRow}>
-          <Feather name="chevron-left" size={18} color="#1E293B" />
+          <Feather name="chevron-left" size={18} color={colors.textDark} />
           <Text style={styles.backLabel}>Voltar</Text>
         </Pressable>
       ) : null}
@@ -39,7 +39,7 @@ export function CadastroHeader({ title, onClose, onBack }: CadastroHeaderProps) 
 
 const styles = StyleSheet.create({
   backLabel: {
-    color: '#1E293B',
+    color: colors.textDark,
     fontSize: 14,
     fontWeight: '500',
     marginLeft: 2,
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     alignItems: 'center',
-    backgroundColor: '#F1F5F9',
+    backgroundColor: colors.inputBackground,
     borderRadius: 18,
     height: 36,
     justifyContent: 'center',
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
   },
   handle: {
     alignSelf: 'center',
-    backgroundColor: '#CBD5E1',
+    backgroundColor: colors.disabledIcon,
     borderRadius: 2,
     height: 4,
     marginBottom: 12,
