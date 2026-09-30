@@ -13,9 +13,15 @@ import { colors } from '@/theme/colors';
  */
 type PasswordFieldProps = Omit<TextInputProps, 'secureTextEntry'> & {
   error?: string | boolean;
+  showToggle?: boolean;
 };
 
-export function PasswordField({ error, style, ...inputProps }: PasswordFieldProps) {
+export function PasswordField({
+  error,
+  style,
+  showToggle = true,
+  ...inputProps
+}: PasswordFieldProps) {
   const [visible, setVisible] = useState(false);
   const hasError = Boolean(error);
   const message = typeof error === 'string' ? error : undefined;
@@ -35,12 +41,14 @@ export function PasswordField({ error, style, ...inputProps }: PasswordFieldProp
           textContentType="oneTimeCode"
           importantForAutofill="no"
           style={[styles.input, style]}
-          secureTextEntry={!visible}
+          secureTextEntry={showToggle ? !visible : true}
           {...inputProps}
         />
-        <Pressable hitSlop={8} onPress={() => setVisible((prev) => !prev)}>
-          <Feather name={visible ? 'eye' : 'eye-off'} size={18} color={colors.icon} />
-        </Pressable>
+        {showToggle ? (
+          <Pressable hitSlop={8} onPress={() => setVisible((prev) => !prev)}>
+            <Feather name={visible ? 'eye' : 'eye-off'} size={18} color={colors.icon} />
+          </Pressable>
+        ) : null}
       </View>
       {message ? <Text style={styles.errorText}>{message}</Text> : null}
     </View>

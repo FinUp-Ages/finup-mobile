@@ -10,6 +10,13 @@ import type {
   CadastroPhase,
   CadastroStep,
 } from '@/types/cadastro';
+import {
+  formatCurrency,
+  formatPhone,
+  parseCurrencyToNumber,
+  sanitizeEmail,
+  sanitizeName,
+} from '@/utils/masks';
 
 const INITIAL_DATA: CadastroFormData = {
   nome: '',
@@ -24,6 +31,7 @@ const INITIAL_DATA: CadastroFormData = {
 };
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const NAME_REGEX = /^[a-zA-ZÀ-ÖØ-öø-ÿ\s'-]+$/;
 // Letra, numero e simbolo, minimo 8 - espelha o aviso do Figma. E so validacao de
 // UX: a politica real e a do pool do Cognito, que pode ser mais forte. Nesse caso
 // o SignUp devolve InvalidPasswordException e a mensagem aparece na Etapa 3.
@@ -35,11 +43,32 @@ const EMAIL_TAKEN_MESSAGE = 'Este e-mail já está cadastrado.';
 
 function computeStep1Errors(data: CadastroFormData): CadastroFormErrors {
   const errors: CadastroFormErrors = {};
-  if (!data.nome.trim()) errors.nome = true;
-  if (!data.sobrenome.trim()) errors.sobrenome = true;
-  if (!data.email.trim()) errors.email = true;
-  else if (!EMAIL_REGEX.test(data.email.trim())) errors.email = 'Deve ser um e-mail válido.';
-  if (!data.celular.trim()) errors.celular = true;
+  if (!data.nome.trim()) {
+    errors.nome = true;
+  } else if (!NAME_REGEX.test(data.nome.trim())) {
+    errors.nome = 'Deve conter apenas letras, espaços, hífen ou apóstrofo.';
+  }
+
+  if (!data.sobrenome.trim()) {
+    errors.sobrenome = true;
+  } else if (!NAME_REGEX.test(data.sobrenome.trim())) {
+    errors.sobrenome = 'Deve conter apenas letras, espaços, hífen ou apóstrofo.';
+  }
+
+  if (!data.email.trim()) {
+    errors.email = true;
+  } else if (!EMAIL_REGEX.test(data.email.trim())) {
+    errors.email = 'Informe um e-mail válido (ex.: nome@exemplo.com).';
+  }
+
+  if (!data.celular.trim()) {
+    errors.celular = true;
+  } else {
+    const digits = data.celular.replace(/\D/g, '');
+    if (digits.length !== 10 && digits.length !== 11) {
+      errors.celular = 'Informe um telefone celular válido com DDD (10 ou 11 dígitos).';
+    }
+  }
   return errors;
 }
 
@@ -50,8 +79,8 @@ function computeStep2Errors(data: CadastroFormData): CadastroFormErrors {
   // ja e garantidamente valido.
   if (!data.birthDate) errors.birthDate = true;
   if (data.monthlyIncome.trim()) {
-    const value = Number(data.monthlyIncome.replace(',', '.'));
-    if (Number.isNaN(value) || value < 0) {
+    const value = parseCurrencyToNumber(data.monthlyIncome);
+    if (value === undefined || value < 0) {
       errors.monthlyIncome = 'Deve ser um valor numérico e não negativo.';
     }
   }
@@ -155,7 +184,20 @@ export function useCadastroViewModel({ resume = false }: { resume?: boolean } = 
 
   const setField = useCallback(
     <K extends keyof CadastroFormData>(field: K, value: CadastroFormData[K]) => {
-      setData((prev) => ({ ...prev, [field]: value }));
+      let formattedValue = value;
+      if (typeof value === 'string') {
+        if (field === 'nome' || field === 'sobrenome') {
+          formattedValue = sanitizeName(value) as CadastroFormData[K];
+        } else if (field === 'email') {
+          formattedValue = sanitizeEmail(value) as CadastroFormData[K];
+        } else if (field === 'celular') {
+          formattedValue = formatPhone(value) as CadastroFormData[K];
+        } else if (field === 'monthlyIncome') {
+          formattedValue = formatCurrency(value) as CadastroFormData[K];
+        }
+      }
+
+      setData((prev) => ({ ...prev, [field]: formattedValue }));
       setSubmitError(null);
       if (field === 'email') {
         // E-mail novo: a consulta em andamento e o aviso eram do anterior.
