@@ -1,19 +1,20 @@
+import { useState } from 'react';
 import { Text, View } from 'react-native';
 import { DateField } from '@/components/ui/DateField';
-import { SelectField } from '@/components/ui/SelectField';
+import { SelectField, type SelectOption } from '@/components/ui/SelectField';
 import { TextField } from '@/components/ui/TextField';
 import type { CadastroFormData, CadastroFormErrors } from '@/types/cadastro';
 import { styles } from './cadastroStepStyles';
 
-const PROFISSAO_OPTIONS = [
-  'CLT / Carteira assinada',
-  'Autônomo / PJ',
-  'Profissional liberal',
-  'Servidor público',
-  'Empresário / Empreendedor',
-  'Estudante',
-  'Aposentado / Pensionista',
-  'Outro',
+const PROFISSAO_OPTIONS: SelectOption<string>[] = [
+  { value: 'CLT / Carteira assinada', label: 'CLT / Carteira assinada' },
+  { value: 'Autônomo / PJ', label: 'Autônomo / PJ' },
+  { value: 'Profissional liberal', label: 'Profissional liberal' },
+  { value: 'Servidor público', label: 'Servidor público' },
+  { value: 'Empresário / Empreendedor', label: 'Empresário / Empreendedor' },
+  { value: 'Estudante', label: 'Estudante' },
+  { value: 'Aposentado / Pensionista', label: 'Aposentado / Pensionista' },
+  { value: 'Outro', label: 'Outro' },
 ];
 
 /**
@@ -37,6 +38,26 @@ export function CadastroStepAdicionais({
   onChange,
   onTouch,
 }: CadastroStepAdicionaisProps) {
+  const isCustomInitial = Boolean(
+    data.profissao &&
+      !PROFISSAO_OPTIONS.some((opt) => opt.value !== 'Outro' && opt.value === data.profissao)
+  );
+  const [isOtherSelected, setIsOtherSelected] = useState(isCustomInitial);
+
+  function handleSelectProfissao(selected: string) {
+    if (selected === 'Outro') {
+      setIsOtherSelected(true);
+      onChange('profissao', '');
+    } else {
+      setIsOtherSelected(false);
+      onChange('profissao', selected);
+    }
+  }
+
+  const selectValue = isOtherSelected
+    ? 'Outro'
+    : (PROFISSAO_OPTIONS.some((opt) => opt.value === data.profissao) ? data.profissao : null);
+
   return (
     <View>
       <Text style={styles.title}>Dados adicionais</Text>
@@ -58,16 +79,25 @@ export function CadastroStepAdicionais({
           onBlur={() => onTouch('monthlyIncome')}
           error={errors.monthlyIncome}
           keyboardType="numeric"
+          maxLength={18}
         />
         <SelectField
           placeholder="Profissão"
-          value={data.profissao}
+          value={selectValue}
           options={PROFISSAO_OPTIONS}
-          customPlaceholder="Digite sua profissão"
-          onChange={(value) => onChange('profissao', value)}
-          onBlur={() => onTouch('profissao')}
-          error={errors.profissao}
+          onChange={handleSelectProfissao}
+          onTouch={() => onTouch('profissao')}
+          error={!isOtherSelected ? errors.profissao : undefined}
         />
+        {isOtherSelected ? (
+          <TextField
+            placeholder="Digite sua profissão"
+            value={data.profissao}
+            onChangeText={(value) => onChange('profissao', value)}
+            onBlur={() => onTouch('profissao')}
+            error={errors.profissao}
+          />
+        ) : null}
       </View>
     </View>
   );
