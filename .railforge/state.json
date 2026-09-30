@@ -1,12 +1,13 @@
 {
-  "stage": "DISCOVERY",
+  "stage": "VALIDATING",
   "task": "Aba Chatbot integrada ao backend",
   "objective": "Registrar a aba autenticada e integrar o chatbot aos contratos de conversa disponiveis no backend.",
   "requirements": [
     "Registrar Chatbot como terceira aba ao lado de Perfil e Transcricao",
     "Carregar o historico autenticado em GET /api/v1/assistant/conversations",
     "Enviar mensagens e exibir respostas, com carregamento e erro",
-    "Acessar a aba apenas com sessao autenticada"
+    "Acessar a aba apenas com sessao autenticada",
+    "Manter o componente ChatbotMark em conformidade com o lint react-hooks/refs"
   ],
   "files_in_scope": [
     "app/_layout.tsx",
@@ -20,15 +21,18 @@
   ],
   "decisions": [
     "O httpClient ja injeta o access token e trata 401 com retorno ao fluxo de autenticacao.",
-    "O backend inspecionado possui apenas GET /api/v1/assistant/conversations, retornando id, title e updatedAt."
+    "O backend inspecionado possui apenas GET /api/v1/assistant/conversations, retornando id, title e updatedAt.",
+    "Os valores Animated.Value do ChatbotMark sao inicializados com useState para permanecerem estaveis sem leitura de ref durante a renderizacao."
   ],
   "non_goals": [
     "Implementar no mobile contratos de envio ou leitura de mensagens que ainda nao existem no backend"
   ],
   "validation": {
-    "backend_contract": "GET /api/v1/assistant/conversations confirmado; nao ha POST de conversa/mensagem nem GET de mensagens por conversa"
+    "backend_contract": "GET /api/v1/assistant/conversations confirmado; nao ha POST de conversa/mensagem nem GET de mensagens por conversa",
+    "lint": "Passou localmente sem erros; permanecem cinco avisos preexistentes de Unicode BOM fora do escopo do chatbot.",
+    "typecheck": "Passou localmente com tsc --noEmit; execucao remota do CI pendente."
   },
   "review": "A rota foi movida para o grupo (tabs) e protegida por sessao. A integracao de mensagens continua pendente: o backend nao expoe contrato para envio, resposta ou leitura das mensagens.",
-  "updated_at": "2026-09-29"
+  "updated_at": "2026-09-30"
 }
 

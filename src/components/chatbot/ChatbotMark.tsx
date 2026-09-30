@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Animated, Easing, Image, StyleSheet, View } from 'react-native';
 import Svg, { Defs, Ellipse, FeGaussianBlur, Filter, G, LinearGradient, Path, RadialGradient, Stop } from 'react-native-svg';
 
@@ -29,8 +29,8 @@ export function ChatbotMark({
   const sphereSize = size * 2.8 * Math.max(glowExpansion, 0.1);
   const glowCanvasSize = sphereSize * 3;
   const glowCanvasOffset = glowCanvasSize / 2;
-  const pulse = useRef(new Animated.Value(0)).current;
-  const flameRotation = useRef(new Animated.Value(0)).current;
+  const [pulse] = useState(() => new Animated.Value(0));
+  const [flameRotation] = useState(() => new Animated.Value(0));
   const minimumOpacity = Math.max(0, Math.min(glowOpacity * 0.62, 1));
   const maximumOpacity = Math.max(0, Math.min(glowOpacity, 1));
 
