@@ -68,72 +68,74 @@ export default function CadastroScreen() {
       : 'Próximo';
 
   return (
-    <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.screen} edges={['top']}>
       <StatusBar style="light" />
       <View style={styles.sheet}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.flex}
-        >
-          <CadastroHeader
-            title={isForm ? 'Dados cadastrais' : 'Confirmação'}
-            onClose={close}
-            onBack={canGoBack && !submitting ? goBack : undefined}
-          />
+        <SafeAreaView style={styles.innerSafe} edges={['bottom']}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            style={styles.flex}
+          >
+            <CadastroHeader
+              title={isForm ? 'Dados cadastrais' : 'Confirmação'}
+              onClose={close}
+              onBack={canGoBack && !submitting ? goBack : undefined}
+            />
 
-          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={styles.content}>
-              {!isForm ? (
-                <CadastroStepCodigo
-                  email={data.email}
-                  code={code}
-                  confirmed={phase === 'finishing'}
-                  resending={resending}
-                  codeResent={codeResent}
-                  onChangeCode={setCode}
-                  onResend={resendCode}
-                />
-              ) : step === 1 ? (
-                <CadastroStepDados
-                  data={data}
-                  errors={errors}
-                  onChange={setField}
-                  onTouch={touchField}
-                />
-              ) : step === 2 ? (
-                <CadastroStepAdicionais
-                  data={data}
-                  errors={errors}
-                  onChange={setField}
-                  onTouch={touchField}
-                />
-              ) : (
-                <CadastroStepSenha
-                  data={data}
-                  errors={errors}
-                  onChange={setField}
-                  onTouch={touchField}
-                />
-              )}
-            </View>
-          </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <View style={styles.content}>
+                {!isForm ? (
+                  <CadastroStepCodigo
+                    email={data.email}
+                    code={code}
+                    confirmed={phase === 'finishing'}
+                    resending={resending}
+                    codeResent={codeResent}
+                    onChangeCode={setCode}
+                    onResend={resendCode}
+                  />
+                ) : step === 1 ? (
+                  <CadastroStepDados
+                    data={data}
+                    errors={errors}
+                    onChange={setField}
+                    onTouch={touchField}
+                  />
+                ) : step === 2 ? (
+                  <CadastroStepAdicionais
+                    data={data}
+                    errors={errors}
+                    onChange={setField}
+                    onTouch={touchField}
+                  />
+                ) : (
+                  <CadastroStepSenha
+                    data={data}
+                    errors={errors}
+                    onChange={setField}
+                    onTouch={touchField}
+                  />
+                )}
+              </View>
+            </TouchableWithoutFeedback>
 
-          {submitError ? (
-            <Text style={styles.submitError} accessibilityLiveRegion="polite">
-              {submitError}
-            </Text>
-          ) : null}
+            {submitError ? (
+              <Text style={styles.submitError} accessibilityLiveRegion="polite">
+                {submitError}
+              </Text>
+            ) : null}
 
-          {showProgress ? <StepProgress currentStep={step} totalSteps={TOTAL_STEPS} /> : null}
+            {showProgress ? <StepProgress currentStep={step} totalSteps={TOTAL_STEPS} /> : null}
 
-          <PrimaryButton
-            label={buttonLabel}
-            icon={isForm && !isLastStep ? 'next' : 'save'}
-            disabled={!canProceed}
-            loading={submitting || checkingEmail}
-            onPress={isForm && !isLastStep ? goNext : submit}
-          />
-        </KeyboardAvoidingView>
+            <PrimaryButton
+              label={buttonLabel}
+              icon={isForm && !isLastStep ? 'next' : 'save'}
+              disabled={!canProceed}
+              loading={submitting || checkingEmail}
+              onPress={isForm && !isLastStep ? goNext : submit}
+            />
+          </KeyboardAvoidingView>
+        </SafeAreaView>
       </View>
     </SafeAreaView>
   );
@@ -148,6 +150,10 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     paddingHorizontal: 20,
     paddingTop: 10,
+  },
+  innerSafe: {
+    backgroundColor: colors.white,
+    flex: 1,
   },
   screen: {
     backgroundColor: colors.screenBackground,

@@ -30,7 +30,6 @@ export function CadastroStepSenha({ data, errors, onChange, onTouch }: CadastroS
           onChangeText={(value) => onChange('senha', value)}
           onBlur={() => onTouch('senha')}
           error={errors.senha}
-          showToggle={true}
         />
         <PasswordField
           placeholder="Confirme a senha"
@@ -38,7 +37,6 @@ export function CadastroStepSenha({ data, errors, onChange, onTouch }: CadastroS
           onChangeText={(value) => onChange('confirmarSenha', value)}
           onBlur={() => onTouch('confirmarSenha')}
           error={errors.confirmarSenha}
-          showToggle={true}
         />
       </View>
     </View>
