@@ -5,3 +5,9 @@ export interface ChatMessage {
   role: ChatMessageRole;
   text: string;
 }
+
+export interface Conversation {
+  id: string;
+  title: string | null;
+  updatedAt: string;
+}

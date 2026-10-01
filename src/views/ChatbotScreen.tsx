@@ -29,7 +29,7 @@ export default function ChatbotScreen() {
       <StatusBar style="light" />
       <KeyboardAvoidingView behavior={Platform.select({ ios: 'padding', default: undefined })} style={styles.keyboard}>
         <View style={[styles.content, { paddingTop: insets.top + 13, paddingBottom: Math.max(insets.bottom + 14, 22) }]}>
-          <ChatbotHeader onOpenMenu={() => vm.setIsMenuOpen(true)} showModel={hasConversation} />
+          <ChatbotHeader onOpenMenu={vm.openMenu} showModel={hasConversation} />
 
           {hasConversation ? (
             <ScrollView
@@ -55,7 +55,15 @@ export default function ChatbotScreen() {
           <ChatbotComposer draft={vm.draft} isSending={vm.isSending} onChangeDraft={vm.setDraft} onSend={vm.sendMessage} />
         </View>
       </KeyboardAvoidingView>
-      <ChatbotSideMenu onClose={() => vm.setIsMenuOpen(false)} visible={vm.isMenuOpen} />
+      <ChatbotSideMenu
+        conversations={vm.conversations}
+        currentConversationId={vm.currentConversationId}
+        isLoading={vm.isLoadingConversations}
+        onClose={vm.closeMenu}
+        onNewConversation={vm.startNewConversation}
+        onSelectConversation={vm.selectConversation}
+        visible={vm.isMenuOpen}
+      />
     </LinearGradient>
   );
 }
