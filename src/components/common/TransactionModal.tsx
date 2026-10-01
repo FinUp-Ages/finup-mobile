@@ -105,7 +105,7 @@ function TransactionModalContent({ onClose, onSuccess }: TransactionModalContent
               value: paymentMethod.id,
               label: paymentMethod.name,
               icon:
-                paymentMethod.id === 'mock-apple-pay' ? (
+                paymentMethod.name.toLowerCase() === 'apple pay' ? (
                   <AppleIcon color={colors.icon} size={16} />
                 ) : undefined,
             }))}

@@ -1,10 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { friendlyMessageFromError } from '@/config/httpClient';
 import { categoriesModel } from '@/models/categoriesModel';
-import { currentUserModel } from '@/models/currentUserModel';
-import { listPaymentMethodsMock } from '@/models/paymentMethodsModel';
-import { transactionModel } from '@/models/transactionModel';
+import { paymentMethodsModel } from '@/models/paymentMethodsModel';
+import { transactionErrorMessage, transactionModel } from '@/models/transactionModel';
+import { userModel } from '@/models/userModel';
 import type { Category, PaymentMethod, TransactionType } from '@/types/transaction';
+
+// fetch() rejeita com TypeError quando nao ha rede (mesmo criterio do authModel).
+function loadErrorMessage(error: unknown): string {
+  return error instanceof TypeError
+    ? 'Sem conexão com a internet. Verifique e tente novamente.'
+    : 'Não foi possível carregar os dados do formulário.';
+}
 
 type Params = {
   onClose: () => void;
@@ -52,14 +58,14 @@ export function useTransactionModalViewModel({ onClose, onSuccess }: Params) {
   useEffect(() => {
     let cancelled = false;
 
-    // allSettled (nao all): categorias/usuario dependem de rede (podem falhar
-    // se o backend nao tiver as branches certas) mas metodos de pagamento sao
-    // mock local e sempre resolvem - um Promise.all faria a falha de rede
-    // apagar tambem os metodos de pagamento, que nao tem nada a ver com isso.
+    // allSettled (nao all): categorias, metodos de pagamento e usuario sao
+    // requisicoes independentes - um Promise.all faria a falha de uma apagar
+    // as outras duas, que nao tem nada a ver com isso (ex.: metodos de
+    // pagamento indisponivel nao deveria impedir a escolha da categoria).
     Promise.allSettled([
       categoriesModel.listAvailable(),
-      listPaymentMethodsMock(),
-      currentUserModel.getCurrent(),
+      paymentMethodsModel.listAvailable(),
+      userModel.getMe(),
     ]).then(([categoriesResult, paymentMethodsResult, currentUserResult]) => {
       if (cancelled) return;
 
@@ -71,12 +77,7 @@ export function useTransactionModalViewModel({ onClose, onSuccess }: Params) {
         (result) => result.status === 'rejected',
       );
       if (firstRejected && firstRejected.status === 'rejected') {
-        setLoadError(
-          friendlyMessageFromError(
-            firstRejected.reason,
-            'Não foi possível carregar os dados do formulário.',
-          ),
-        );
+        setLoadError(loadErrorMessage(firstRejected.reason));
       }
 
       setLoading(false);
@@ -123,7 +124,7 @@ export function useTransactionModalViewModel({ onClose, onSuccess }: Params) {
         onSuccess?.();
         onClose();
       } catch (error) {
-        setSubmitError(friendlyMessageFromError(error));
+        setSubmitError(transactionErrorMessage(error));
       } finally {
         setSubmitting(false);
         setSubmittingType(null);
