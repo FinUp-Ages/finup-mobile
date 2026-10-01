@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { colors } from '@/theme/colors';
 import type { Conversation } from '@/types/chatbot';
 
 interface ChatbotSideMenuProps {
@@ -64,7 +65,7 @@ export function ChatbotSideMenu({
             onPress={onClose}
             style={styles.closeBtn}
           >
-            <Ionicons color="#FFFFFF" name="close" size={26} />
+            <Ionicons color={colors.white} name="close" size={26} />
           </Pressable>
 
           {/* Subtitulo da secao */}
@@ -74,7 +75,7 @@ export function ChatbotSideMenu({
           {/* Conteudo da Lista */}
           {isLoading && conversations.length === 0 ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator color="#A1A1AA" size="small" />
+              <ActivityIndicator color={colors.textMuted} size="small" />
             </View>
           ) : conversations.length === 0 ? (
             <View style={styles.emptyContainer}>
@@ -135,7 +136,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   drawer: {
-    backgroundColor: '#121212',
+    backgroundColor: colors.drawerBackground,
     bottom: 0,
     left: 0,
     paddingHorizontal: 20,
@@ -147,7 +148,7 @@ const styles = StyleSheet.create({
     paddingVertical: 24,
   },
   emptyText: {
-    color: '#71717A',
+    color: colors.textMuted,
     fontSize: 14,
   },
   itemRow: {
@@ -163,12 +164,12 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   itemText: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontSize: 14,
     fontWeight: '500',
   },
   itemTextActive: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontWeight: '700',
   },
   list: {
@@ -187,7 +188,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sectionTitle: {
-    color: '#A1A1AA',
+    color: colors.textMuted,
     fontSize: 14,
     fontWeight: '400',
     marginBottom: 16,
