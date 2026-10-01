@@ -1,5 +1,5 @@
-import { Link } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useProfileViewModel } from '@/viewmodels/useProfileViewModel';
 
 /**
  * VIEW - tela de perfil do usuario final.
@@ -9,6 +9,8 @@ import { StyleSheet, Text, View } from 'react-native';
  * TODO: implementar em tarefa futura - dados reais do perfil.
  */
 export default function ProfileScreen() {
+  const { signingOut, signOut } = useProfileViewModel();
+
   return (
     <View style={styles.screen}>
       <Text style={styles.heading}>Perfil</Text>
@@ -16,9 +18,18 @@ export default function ProfileScreen() {
         Tela de exemplo. A logica visual mora em views/, nunca em app/.
       </Text>
 
-      <Link href="/(auth)/cadastro" style={styles.link}>
-        Ir para o cadastro
-      </Link>
+      <Pressable
+        accessibilityRole="button"
+        disabled={signingOut}
+        onPress={signOut}
+        style={styles.signOutButton}
+      >
+        {signingOut ? (
+          <ActivityIndicator color="#dc2626" size="small" />
+        ) : (
+          <Text style={styles.signOutLabel}>Sair</Text>
+        )}
+      </Pressable>
     </View>
   );
 }
@@ -29,15 +40,20 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '600',
   },
-  link: {
-    color: '#2563eb',
-    paddingVertical: 16,
-  },
   screen: {
     backgroundColor: '#f8fafc',
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 16,
+  },
+  signOutButton: {
+    alignSelf: 'flex-start',
+    paddingVertical: 16,
+  },
+  signOutLabel: {
+    color: '#dc2626',
+    fontSize: 16,
+    fontWeight: '600',
   },
   subtitle: {
     color: '#64748b',

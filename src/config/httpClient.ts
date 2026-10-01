@@ -2,82 +2,79 @@
  * CONFIG - cliente HTTP unico do app.
  *
  * Todo acesso a rede passa por aqui: baseURL, headers padrao, token de
- * autenticacao e tratamento de erro. Nenhuma outra camada chama fetch() direto.
- */
-const baseURL = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
-
-/**
- * MOCK temporario de identidade autenticada, mesmo padrao do
- * MockAuthenticatedIdentityResolver do backend. Aponta pro usuario seed
- * "teste@finup.local" (finup-backend/database/init/03-test-data.sql) -
- * existe so pra desbloquear endpoints que ja exigem identidade (categories,
- * users/me) antes do login/Cognito real existir.
+ * autenticacao e tratamento de erro. Nenhuma outra camada chama fetch() direto
+ * (o cognitoClient e a excecao: fala com a AWS, nao com o back).
  *
- * Remover quando "[APP] Injetar Authorization no httpClient" implementar o
- * fluxo real: os headers X-Mock-Cognito-* saem, entra Authorization: Bearer
- * <token>. Nenhuma outra camada muda - todas chamam so httpClient.
+ * Sessao: o Authorization vai sozinho em toda requisicao. 401 do back ou refresh
+ * recusado limpam a sessao e chamam o handler de sessao expirada (volta ao login).
  */
-const MOCK_COGNITO_SUB = 'mock-sub-usuario-teste';
-const MOCK_COGNITO_EMAIL = 'teste@finup.local';
+import { CognitoError } from '@/config/cognitoClient';
+import { authModel } from '@/models/authModel';
 
-export type ProblemDetail = {
-  title?: string;
-  detail?: string;
-  status?: number;
-  [key: string]: unknown;
-};
+const baseURL = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
 
 export class HttpError extends Error {
   readonly status: number;
-  readonly problem?: ProblemDetail;
 
-  constructor(status: number, message: string, problem?: ProblemDetail) {
+  constructor(status: number, message: string) {
     super(message);
     this.name = 'HttpError';
     this.status = status;
-    this.problem = problem;
   }
 }
 
-async function parseProblem(response: Response): Promise<ProblemDetail | undefined> {
+// Quem sabe navegar (o RootLayout) registra aqui o que fazer quando a sessao cai:
+// esta camada nao conhece rotas.
+let sessionExpiredHandler: (() => void) | null = null;
+
+export function setSessionExpiredHandler(handler: (() => void) | null): void {
+  sessionExpiredHandler = handler;
+}
+
+async function expireSession(): Promise<never> {
+  await authModel.clearSession();
+  sessionExpiredHandler?.();
+  throw new HttpError(401, 'Sessao expirada.');
+}
+
+// Access token valido para o Authorization (renova se o exp venceu). Refresh
+// recusado derruba a sessao; falha de rede na renovacao segue como esta e mantem
+// os tokens.
+async function resolveAccessToken(): Promise<string | null> {
   try {
-    return (await response.json()) as ProblemDetail;
-  } catch {
-    return undefined;
+    return await authModel.getValidAccessToken();
+  } catch (error) {
+    if (error instanceof CognitoError && error.code === 'NotAuthorizedException') {
+      return expireSession();
+    }
+    throw error;
   }
 }
 
-/**
- * Mensagem amigavel a partir de um erro de rede - generica o bastante pra
- * qualquer status atual ou futuro (400 hoje, 422 amanha) sem mudar de codigo:
- * sempre le detail/title do ProblemDetail (RFC 7807, mesmo shape do
- * ApiExceptionHandler do backend), nunca decide por response.status.
- */
-export function friendlyMessageFromError(
-  error: unknown,
-  fallback = 'Nao foi possivel concluir a operacao. Tente novamente.',
-): string {
-  if (error instanceof HttpError) {
-    return error.problem?.detail ?? error.problem?.title ?? fallback;
-  }
-  return fallback;
-}
+// `auth: false` para rota publica (ex.: consulta de e-mail no cadastro): nao manda
+// Authorization nem derruba a sessao num 401. O back recusa com 401 ate a rota
+// publica se vier um token invalido, entao quem nao precisa de token nao deve mandar.
+type RequestOptions = RequestInit & { auth?: boolean };
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+async function request<T>(path: string, { auth = true, ...init }: RequestOptions = {}): Promise<T> {
+  const accessToken = auth ? await resolveAccessToken() : null;
+
   const response = await fetch(`${baseURL}${path}`, {
     ...init,
     headers: {
       'Content-Type': 'application/json',
-      'X-Mock-Cognito-Sub': MOCK_COGNITO_SUB,
-      'X-Mock-Cognito-Email': MOCK_COGNITO_EMAIL,
-      ...init?.headers,
+      // Sempre o access token: o IdToken (token_use=id) o back recusa com 401.
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      ...init.headers,
     },
   });
 
+  if (auth && response.status === 401 && (await authModel.hasSession())) {
+    return expireSession();
+  }
+
   if (!response.ok) {
-    const problem = await parseProblem(response);
-    const message = problem?.detail ?? problem?.title ?? `Falha na requisicao: ${response.status}`;
-    throw new HttpError(response.status, message, problem);
+    throw new HttpError(response.status, `Falha na requisicao: ${response.status}`);
   }
 
   if (response.status === 204) {
@@ -88,10 +85,13 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const httpClient = {
-  get: <T,>(path: string) => request<T>(path),
-  post: <T,>(path: string, body: unknown) =>
-    request<T>(path, { method: 'POST', body: JSON.stringify(body) }),
-  put: <T,>(path: string, body: unknown) =>
-    request<T>(path, { method: 'PUT', body: JSON.stringify(body) }),
-  delete: <T,>(path: string) => request<T>(path, { method: 'DELETE' }),
+  get: <T,>(path: string, init?: RequestOptions) => request<T>(path, init),
+  post: <T,>(path: string, body: unknown, init?: RequestOptions) =>
+    request<T>(path, { method: 'POST', body: JSON.stringify(body), ...init }),
+  put: <T,>(path: string, body: unknown, init?: RequestOptions) =>
+    request<T>(path, { method: 'PUT', body: JSON.stringify(body), ...init }),
+  patch: <T,>(path: string, body: unknown, init?: RequestOptions) =>
+    request<T>(path, { method: 'PATCH', body: JSON.stringify(body), ...init }),
+  delete: <T,>(path: string, init?: RequestOptions) =>
+    request<T>(path, { method: 'DELETE', ...init }),
 };

@@ -19,7 +19,18 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
+      # A checagem de versoes do expo-doctor compara o lock com o ultimo patch
+      # publicado pela Expo e quebrava o CI a cada patch novo do SDK, sem ninguem
+      # mudar dependencia. Os demais checks do expo-doctor continuam bloqueando.
       - run: npx expo-doctor
+        env:
+          EXPO_DOCTOR_SKIP_DEPENDENCY_VERSION_CHECK: '1'
+
+      # Aviso (nao bloqueia): lista pacotes atras das versoes esperadas pelo SDK.
+      # Para alinhar: npx expo install --fix
+      - name: Dependencias desatualizadas (aviso)
+        run: npx expo install --check
+        continue-on-error: true
 
       # O build do app (EAS) roda fora do CI padrao e exige credenciais.
       # TODO: adicionar workflow de build EAS quando as credenciais estiverem configuradas.

@@ -13,9 +13,15 @@ import { colors } from '@/theme/colors';
  */
 type PasswordFieldProps = Omit<TextInputProps, 'secureTextEntry'> & {
   error?: string | boolean;
+  showToggle?: boolean;
 };
 
-export function PasswordField({ error, style, ...inputProps }: PasswordFieldProps) {
+export function PasswordField({
+  error,
+  style,
+  showToggle = true,
+  ...inputProps
+}: PasswordFieldProps) {
   const [visible, setVisible] = useState(false);
   const hasError = Boolean(error);
   const message = typeof error === 'string' ? error : undefined;
@@ -30,17 +36,19 @@ export function PasswordField({ error, style, ...inputProps }: PasswordFieldProp
           // Desliga a sugestao de "senha forte" do sistema (iOS/Android): sem
           // isso, o SO mostra um balao sobre o teclado que, ao ser fechado,
           // pode limpar o campo inteiro - confundindo com um bug de digitacao.
-          // Sem sentido mante-la ligada aqui, ja que nao ha Keychain/gerenciador
-          // de senha real por tras (o envio inteiro ainda e mockado).
+          // Quem usa pode sobrescrever (ex.: o login passa textContentType
+          // "password" para o gerenciador de senhas preencher).
           textContentType="oneTimeCode"
           importantForAutofill="no"
           style={[styles.input, style]}
-          secureTextEntry={!visible}
+          secureTextEntry={showToggle ? !visible : true}
           {...inputProps}
         />
-        <Pressable hitSlop={8} onPress={() => setVisible((prev) => !prev)}>
-          <Feather name={visible ? 'eye' : 'eye-off'} size={18} color={colors.icon} />
-        </Pressable>
+        {showToggle ? (
+          <Pressable hitSlop={8} onPress={() => setVisible((prev) => !prev)}>
+            <Feather name={visible ? 'eye' : 'eye-off'} size={18} color={colors.icon} />
+          </Pressable>
+        ) : null}
       </View>
       {message ? <Text style={styles.errorText}>{message}</Text> : null}
     </View>

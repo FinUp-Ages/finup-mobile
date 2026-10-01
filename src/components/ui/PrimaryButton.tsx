@@ -1,3 +1,4 @@
+import { Feather } from '@expo/vector-icons';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors } from '@/theme/colors';
 
@@ -12,7 +13,7 @@ type PrimaryButtonProps = {
   onPress: () => void;
   disabled?: boolean;
   loading?: boolean;
-  icon?: 'next' | 'save';
+  icon?: 'next' | 'plus';
 };
 
 export function PrimaryButton({ label, onPress, disabled, loading, icon }: PrimaryButtonProps) {
@@ -24,6 +25,7 @@ export function PrimaryButton({ label, onPress, disabled, loading, icon }: Prima
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
+        !icon ? styles.buttonCenter : null,
         disabled ? styles.buttonDisabled : null,
         pressed && !isNonInteractive ? styles.buttonPressed : null,
       ]}
@@ -33,9 +35,11 @@ export function PrimaryButton({ label, onPress, disabled, loading, icon }: Prima
         <ActivityIndicator color={colors.white} size="small" />
       ) : icon ? (
         <View style={[styles.iconCircle, disabled ? styles.iconCircleDisabled : null]}>
-          <Text style={[styles.iconText, disabled ? styles.iconTextDisabled : null]}>
-            {icon === 'save' ? '✓' : '→'}
-          </Text>
+          <Feather
+            name={icon === 'plus' ? 'plus' : 'arrow-right'}
+            size={16}
+            color={disabled ? colors.placeholder : colors.textPrimary}
+          />
         </View>
       ) : null}
     </Pressable>
@@ -48,9 +52,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.textPrimary,
     borderRadius: 28,
     flexDirection: 'row',
+    height: 56,
     justifyContent: 'space-between',
     paddingHorizontal: 24,
-    paddingVertical: 16,
+  },
+  buttonCenter: {
+    justifyContent: 'center',
   },
   buttonDisabled: {
     backgroundColor: colors.track,
@@ -68,14 +75,6 @@ const styles = StyleSheet.create({
   },
   iconCircleDisabled: {
     backgroundColor: colors.disabledIcon,
-  },
-  iconText: {
-    color: colors.textPrimary,
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  iconTextDisabled: {
-    color: colors.placeholder,
   },
   label: {
     color: colors.white,

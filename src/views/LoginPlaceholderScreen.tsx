@@ -1,65 +1,119 @@
 import { useRouter } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { CadastroHeader } from '@/components/common/CadastroHeader';
+import { styles as stepStyles } from '@/components/common/cadastroStepStyles';
+import { PasswordField } from '@/components/ui/PasswordField';
+import { PrimaryButton } from '@/components/ui/PrimaryButton';
+import { TextField } from '@/components/ui/TextField';
+import { colors } from '@/theme/colors';
+import { useLoginViewModel } from '@/viewmodels/useLoginViewModel';
 
+/**
+ * VIEW - login de quem ja e cliente, com e-mail e senha.
+ *
+ * Segue o layout das telas do cadastro (cabecalho, titulo + subtitulo, campos e
+ * botao principal no rodape). So observa o useLoginViewModel.
+ */
 export default function LoginPlaceholderScreen() {
-  const insets = useSafeAreaInsets();
   const router = useRouter();
+  const {
+    email,
+    password,
+    emailError,
+    error,
+    canSubmit,
+    submitting,
+    setEmail,
+    setPassword,
+    touchEmail,
+    submit,
+  } = useLoginViewModel();
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 16 }]}>
-      <StatusBar style="dark" />
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Text style={styles.backText}>← Voltar</Text>
-        </Pressable>
-      </View>
+    <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={styles.flex}
+      >
+        <CadastroHeader title="Entrar" onClose={() => router.back()} />
 
-      <View style={styles.content}>
-        <Text style={styles.title}>Já sou cliente</Text>
-        <Text style={styles.subtitle}>
-          Fluxo de login de cliente existente do FinUp. Esta tela será implementada no próximo passo.
-        </Text>
-      </View>
-    </View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.content}>
+            <Text style={stepStyles.title}>Já sou cliente</Text>
+            <Text style={stepStyles.subtitle}>Entre com seu e-mail e senha</Text>
+
+            <View style={stepStyles.fields}>
+              <TextField
+                placeholder="E-mail"
+                value={email}
+                onChangeText={setEmail}
+                onBlur={touchEmail}
+                error={emailError}
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="email-address"
+                textContentType="username"
+                autoComplete="email"
+              />
+              <PasswordField
+                placeholder="Senha"
+                value={password}
+                onChangeText={setPassword}
+                onSubmitEditing={submit}
+                returnKeyType="go"
+                textContentType="password"
+                autoComplete="current-password"
+                importantForAutofill="yes"
+              />
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+
+        {error ? (
+          <Text style={styles.error} accessibilityLiveRegion="polite">
+            {error}
+          </Text>
+        ) : null}
+
+        <PrimaryButton
+          label="Entrar"
+          icon="next"
+          disabled={!canSubmit && !submitting}
+          loading={submitting}
+          onPress={submit}
+        />
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  backButton: {
-    paddingVertical: 8,
-  },
-  backText: {
-    color: '#0284C7',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  container: {
-    backgroundColor: '#F8FAFC',
-    flex: 1,
-    paddingHorizontal: 24,
-  },
   content: {
-    alignItems: 'center',
     flex: 1,
-    justifyContent: 'center',
   },
-  header: {
-    flexDirection: 'row',
-  },
-  subtitle: {
-    color: '#64748B',
-    fontSize: 16,
-    lineHeight: 24,
-    marginTop: 12,
+  error: {
+    color: colors.error,
+    fontSize: 14,
+    marginBottom: 12,
     textAlign: 'center',
   },
-  title: {
-    color: '#0F172A',
-    fontSize: 28,
-    fontWeight: '700',
-    textAlign: 'center',
+  flex: {
+    flex: 1,
+    paddingBottom: 16,
+    paddingHorizontal: 20,
+    paddingTop: 8,
+  },
+  screen: {
+    backgroundColor: colors.background,
+    flex: 1,
   },
 });
