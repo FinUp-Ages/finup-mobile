@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useRouter } from 'expo-router';
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BalanceCard } from '@/components/home/BalanceCard';
 import { ExpenseList } from '@/components/home/ExpenseList';
 import { HomeHeader } from '@/components/home/HomeHeader';
-import { HomeTabBar, type TabKey } from '@/components/home/HomeTabBar';
 import { ScoreBannerCard } from '@/components/home/ScoreBannerCard';
 import { darkColors } from '@/theme/colors';
 import { useHomeViewModel } from '@/viewmodels/useHomeViewModel';
@@ -12,20 +11,23 @@ import { useHomeViewModel } from '@/viewmodels/useHomeViewModel';
 /**
  * VIEW - Home do FinUp (ver Figma).
  *
- * Nome, saldo total e gastos do mes corrente vem do back (useHomeViewModel).
+ * Nome, saldo total e saldo e gastos do periodo escolhido vem do back (useHomeViewModel).
  * Ainda mockados: score, os CTAs (Adicionar agora, Adicionar informacoes,
  * Integrar cartoes) e a barra inferior - todo `onPress` deles e ponto de
  * integracao para tarefas futuras.
  */
 export default function HomeScreen() {
-  const [activeTab, setActiveTab] = useState<TabKey>('carteira');
+  const router = useRouter();
   const {
     status,
     userName,
     balance,
-    hasTransactions,
+    income,
+    expense,
     expenses,
+    periodKey,
     periodLabel,
+    setPeriodKey,
     refreshing,
     retry,
     refresh,
@@ -50,10 +52,13 @@ export default function HomeScreen() {
 
         <BalanceCard
           balance={balance}
-          onPressAdd={() => {}}
+          expense={expense}
+          income={income}
+          onPressAdd={() => router.navigate('/analise')}
           onRetry={retry}
+          onSelectPeriod={setPeriodKey}
           period={periodLabel}
-          showAddHint={!hasTransactions}
+          periodKey={periodKey}
           status={status}
         />
 
@@ -62,10 +67,6 @@ export default function HomeScreen() {
           <ExpenseList expenses={expenses} onPressIntegrate={() => {}} status={status} />
         </View>
       </ScrollView>
-
-      <View style={styles.tabBarWrapper}>
-        <HomeTabBar activeTab={activeTab} onSelectTab={setActiveTab} />
-      </View>
     </SafeAreaView>
   );
 }
@@ -88,9 +89,5 @@ const styles = StyleSheet.create({
     color: darkColors.textPrimary,
     fontSize: 18,
     fontWeight: '700',
-  },
-  tabBarWrapper: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
   },
 });

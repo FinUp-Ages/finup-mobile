@@ -6,8 +6,7 @@ import { styles } from './cadastroStepStyles';
 /**
  * COMPONENT - campos da Etapa 1 (Dados cadastrais).
  *
- * `celular` nao tem correspondencia na modelagem atual do backend - aparece aqui
- * so para bater com o Figma, mas nao e enviado em nenhum envio (ver cadastroModel).
+ * `celular` segue no PATCH additional-info, em E.164 (ver cadastroModel).
  *
  * `onTouch` marca o campo como "tocado" ao perder o foco - so a partir dai o
  * erro daquele campo aparece (ver useCadastroViewModel).

@@ -1,6 +1,6 @@
 {
   "stage": "REVIEWING",
-  "task": "[APP] Integrar a Home com o back: nome do usuario autenticado, saldo total e gastos reais (GET /api/v1/transactions)",
+  "task": "[APP] Cadastro: renda em faixas, lista de profissoes, celular/profissao enviados ao back, fonte Inter e ajuste do botao da tela inicial ao Figma + registro de transacao (POST /transactions) e card de saldo da Home conforme Figma 185-21121",
   "branch": "feature/home-connected (Home mockada em 40d74db, 1 commit a frente da develop, 0 atras)",
   "objective": "Manter o design da Home e trocar os mocks de nome, saldo total e Gastos por dados do back, com loading, erro (tentar de novo) e vazio/zero; cadastro, login e abertura do app com sessao passam a abrir a Home",
   "decisions": [
@@ -15,46 +15,64 @@
     "Home recarrega ao ganhar foco (gastos novos do POST /transactions aparecem) e por pull-to-refresh",
     "Barra de abas nativa continua visivel na Home (Perfil/Sair segue acessivel); so o header nativo sai",
     "Gastos de uma transacao sem descricao usam o nome da categoria como titulo; sem categoria conhecida, 'Gasto'",
-    "Convite 'Adicionar informacoes' do card de saldo so aparece quando nao ha transacoes no periodo"
+    "Convite 'Adicionar informacoes' do card de saldo so aparece quando nao ha transacoes no periodo",
+    "2026-10-02, usuario: renda vira dropdown em faixas (ate 2.500, ..., 20.000-50.000, mais de 50.000); envia o limite superior da faixa (assumido, confirmar)",
+    "Profissao: lista fixa + Outra (campo livre); celular (E.164 +55) e profissao vao no PATCH additional-info, que o back ja aceita",
+    "Fonte Inter (@expo-google-fonts/inter) aplicada globalmente via src/theme/fonts.ts, em vez do DM Sans/Onest do Figma, a pedido do usuario",
+    "2026-10-02, usuario: a tela de transacao e a da origin/feature/transaction-modal (Analise + modal + abas nativas), copiada arquivo a arquivo (sem merge); Carteira = Home, abre /analise pelo botao Adicionar transacao e recarrega saldo/entradas/saidas ao ganhar foco",
+    "Home passa a mostrar o historico todo (1970-01-01 ate hoje), igual ao saldo da Analise; 10 gastos mais recentes; HomeTabBar removida (abas nativas); PillButton da Home renomeado para HomePillButton; rotas de login/cadastro/abertura levam a /carteira",
+    "2026-10-02, usuario: banner do score refeito conforme Figma (371x152, degrade radial #B3DCF2->#005586, medalha 3D de assets/home/score-medal.png girada 13,44 graus, botao translucido com seta); RN Image (sem expo-image)",
+    "2026-10-02, usuario: card de saldo com seletor de periodo (7/15/30 dias, 3/6/12 meses; padrao 7 dias; from = hoje menos N-1 dias ou N meses) via GET /transactions?from&to, gastos seguem o periodo; olho oculta so o saldo (estado local); degrade #2343BD->#3B82F6"
   ],
   "files_in_scope": [
-    "src/types/transaction.ts (novo)",
-    "src/types/home.ts (novo)",
-    "src/models/transactionModel.ts (novo)",
-    "src/models/categoriesModel.ts (novo)",
-    "src/utils/format.ts (novo)",
-    "src/utils/dates.ts (novo)",
-    "src/viewmodels/useHomeViewModel.ts (novo)",
-    "src/components/home/ExpenseList.tsx (novo)",
-    "src/views/HomeScreen.tsx",
-    "src/components/home/HomeHeader.tsx",
-    "src/components/home/BalanceCard.tsx",
-    "src/components/ui/PillButton.tsx",
-    "app/(tabs)/_layout.tsx",
-    "src/viewmodels/useLoginViewModel.ts",
+    "app/_layout.tsx",
+    "src/theme/fonts.ts (novo)",
+    "src/utils/cadastroOptions.ts (novo)",
+    "src/components/common/CadastroStepAdicionais.tsx",
+    "src/components/common/CadastroStepDados.tsx",
+    "src/components/ui/SelectField.tsx",
+    "src/components/ui/AuthButton.tsx",
+    "src/models/cadastroModel.ts",
+    "src/models/userModel.ts",
+    "src/types/cadastro.ts",
     "src/viewmodels/useCadastroViewModel.ts",
-    "src/viewmodels/useLoadingScreenViewModel.ts"
+    "package.json",
+    "src/models/paymentMethodsModel.ts (novo)",
+    "src/models/transactionModel.ts",
+    "src/types/transaction.ts",
+    "src/utils/dates.ts",
+    "src/components/home/BalanceCard.tsx",
+    "src/viewmodels/useHomeViewModel.ts",
+    "src/views/HomeScreen.tsx",
+    "src/config/httpClient.ts (timeout 15s)",
+    "arquivos trazidos da origin/feature/transaction-modal: TransactionModal, AnaliseScreen, ComingSoonScreen, BrandGradient, CurrencyField, PillButton, PillSelect, useAnaliseViewModel, useTransactionModalViewModel, models/types de transacao, app/(tabs)/*, app/profile.tsx, app/transcricao.tsx",
+    "src/components/home/ScoreBannerCard.tsx",
+    "assets/home/score-medal.png (novo)",
+    "src/utils/homePeriods.ts (novo)",
+    "src/components/home/PeriodPickerModal.tsx (novo)",
+    "src/utils/dates.ts (addDays, subtractMonths)"
   ],
   "flow_and_states": "Fluxos: abertura do app com sessao, login e fim do cadastro levam a Home. Estados: carregando, erro com tentar de novo, saldo zerado / sem gastos, sucesso, sessao expirada (httpClient volta ao login)",
   "non_goals": [
     "Score, CTAs (Adicionar agora, Adicionar informacoes, Integrar cartoes) e barra inferior propria da Home",
     "Mudancas no back"
   ],
-  "updated_at": "2026-10-01",
+  "updated_at": "2026-10-02",
   "validation": {
-    "typecheck": "ok",
-    "lint": "0 erros, 0 warnings",
-    "prettier": "arquivos novos ok; avisos restantes ja existiam (CRLF/BOM e falta de newline final nos componentes do commit 40d74db)",
-    "metro_android_bundle": "ok (expo export --platform android)",
-    "cenarios_node": "22 verificacoes ok com httpClient simulado: formatBRL (zero, milhar, negativo, ponto flutuante, -0,001), datas locais (fim de mes 23h, fevereiro bissexto), primeiro nome, chamada GET /transactions sem userId no mes corrente, so despesas com categoria e fallbacks de titulo, usuario novo com R$ 0,00 e lista vazia, falha so nas categorias, erro em transactions e em users/me propagam",
-    "back_sem_token": "ok, back local (porta 8080): GET /transactions, /users/me e /categories sem token -> 401",
-    "expo_go_pendente": "nao validado no aparelho: criar usuario -> Home com nome e saldo corretos; dois usuarios com saldos diferentes; estados de loading, erro (back parado) e saldo zerado; pull-to-refresh; volta para a Home apos cadastrar transacao. Back na develop (ja com a fix/get-transactions-sem-userid)"
+    "typecheck": "ok (app)",
+    "lint": "0 erros",
+    "metro_android_bundle": "ok (android e ios)",
+    "expo_go_pendente": "nao validado no aparelho: Home -> Adicionar transacao -> salvar entrada/saida -> Home atualizada; erro de rede",
+    "banner": "tsc e eslint sem erros; bundle android ok; visual nao conferido no aparelho",
+    "periodo": "tsc/eslint ok, bundle android ok; nao conferido no aparelho"
   },
   "review": "Diff revisado em 2026-10-01 (16 arquivos): sem nome ou saldo fixo, sem console.log novo, sem any, sem segredo. package-lock.json modificado antes da tarefa (so flags peer) fica fora dos commits. Riscos: conflito add/add com a origin/feature/transaction-modal em src/types/transaction.ts e src/models/(transactionModel|categoriesModel).ts (la Category tem isDefault, que o GET /categories nao devolve); pull-to-refresh que falha com dados na tela nao avisa; barra de abas nativa aparece junto da barra propria da Home",
   "follow_ups": [
     "Score: expor finUpScore no GET /users/me",
     "CTAs da Home (Adicionar agora, Adicionar informacoes, Integrar cartoes) e barra inferior propria sem destino",
     "Decidir barra de abas nativa vs. HomeTabBar e onde fica o Sair",
-    "Runner de testes no mobile (jest-expo + Testing Library)"
+    "Runner de testes no mobile (jest-expo + Testing Library)",
+    "Conflitos esperados ao mergear com a feature/transaction-modal (add/add em PillButton, transactionModel, categoriesModel, types, dates, colors); resolver mantendo a versao dela e HomePillButton",
+    "Acesso ao Perfil/Sair pela interface (saiu da barra)"
   ]
 }

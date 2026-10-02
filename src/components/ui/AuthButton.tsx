@@ -105,10 +105,10 @@ export function AuthButton({
 const styles = StyleSheet.create({
   buttonBase: {
     alignItems: 'center',
-    borderRadius: 28,
+    borderRadius: 10000,
     elevation: 2,
     flexDirection: 'row',
-    height: 56,
+    height: 55,
     justifyContent: 'center',
     paddingHorizontal: 24,
     position: 'relative',
@@ -145,12 +145,12 @@ const styles = StyleSheet.create({
   linkText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '800',
     letterSpacing: 0.2,
     textAlign: 'center',
   },
   primaryButton: {
-    backgroundColor: '#061A35',
+    backgroundColor: '#021736',
   },
   primaryPressed: {
     backgroundColor: '#041226',
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     opacity: 0.92,
   },
   socialText: {
-    color: '#1E293B',
-    fontWeight: '600',
+    color: '#000000',
+    fontWeight: '500',
   },
 });

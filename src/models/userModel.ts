@@ -19,9 +19,10 @@ export type UserResponse = {
   updatedAt: string;
 };
 
-// Todos opcionais: o back so atualiza o que vier preenchido. Celular e
-// profissao nao existem no back e nao entram aqui.
+// Todos opcionais: o back so atualiza o que vier preenchido. `phone` em E.164.
 export type AdditionalInfoPayload = {
+  phone?: string;
+  profession?: string;
   birthDate?: string;
   monthlyIncome?: number;
 };

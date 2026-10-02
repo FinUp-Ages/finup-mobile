@@ -1,8 +1,10 @@
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
+import { useFonts } from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { setSessionExpiredHandler } from '@/config/httpClient';
+import { applyInterFont, interFonts } from '@/theme/fonts';
 
 /**
  * Rota raiz do Expo Router.
@@ -19,11 +21,19 @@ import { setSessionExpiredHandler } from '@/config/httpClient';
  */
 export default function RootLayout() {
   const router = useRouter();
+  const [fontsLoaded, fontError] = useFonts(interFonts);
 
   useEffect(() => {
     setSessionExpiredHandler(() => router.replace('/(auth)'));
     return () => setSessionExpiredHandler(null);
   }, [router]);
+
+  useEffect(() => {
+    if (fontsLoaded) applyInterFont();
+  }, [fontsLoaded]);
+
+  // Segura a primeira tela ate a Inter carregar (ou falhar: ai segue com a fonte do sistema).
+  if (!fontsLoaded && !fontError) return null;
 
   return (
     <SafeAreaProvider>
@@ -32,6 +42,9 @@ export default function RootLayout() {
         <Stack.Screen name="index" />
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
+        {/* Fora da barra de abas: abrem por cima, com cabecalho e voltar. */}
+        <Stack.Screen name="profile" options={{ headerShown: true, title: 'Perfil' }} />
+        <Stack.Screen name="transcricao" options={{ headerShown: true, title: 'Transcrição' }} />
       </Stack>
     </SafeAreaProvider>
   );

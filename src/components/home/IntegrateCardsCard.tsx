@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
-import { PillButton } from '@/components/ui/PillButton';
+import { HomePillButton } from '@/components/ui/HomePillButton';
 import { darkColors } from '@/theme/colors';
 
 /**
@@ -26,7 +26,7 @@ export function IntegrateCardsCard({ onPressIntegrate }: IntegrateCardsCardProps
         </View>
       </View>
 
-      <PillButton icon="plus" label="Integrar cartões" onPress={onPressIntegrate} />
+      <HomePillButton icon="plus" label="Integrar cartões" onPress={onPressIntegrate} />
     </View>
   );
 }

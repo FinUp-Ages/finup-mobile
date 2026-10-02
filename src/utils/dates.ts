@@ -1,46 +1,23 @@
 /**
- * UTILS - periodos de consulta para a API.
+ * UTILS - datas no formato do back (yyyy-MM-dd, LocalDate), no fuso do aparelho.
  *
  * Sempre pela data local do aparelho: toISOString() usa UTC e, a noite no
  * Brasil, ja devolveria o dia seguinte.
  */
-
-const MONTH_NAMES = [
-  'Janeiro',
-  'Fevereiro',
-  'Março',
-  'Abril',
-  'Maio',
-  'Junho',
-  'Julho',
-  'Agosto',
-  'Setembro',
-  'Outubro',
-  'Novembro',
-  'Dezembro',
-] as const;
-
-export type DatePeriod = {
-  /** yyyy-MM-dd, inclusivo */
-  from: string;
-  /** yyyy-MM-dd, inclusivo */
-  to: string;
-  /** Nome do mes para exibicao, ex.: "Outubro" */
-  label: string;
-};
-
-function toApiDate(date: Date): string {
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${date.getFullYear()}-${month}-${day}`;
+export function todayIsoDate(today: Date = new Date()): string {
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${today.getFullYear()}-${month}-${day}`;
 }
 
-/** Mes corrente ate hoje: do dia 1 ao dia de `today`. */
-export function currentMonthPeriod(today: Date = new Date()): DatePeriod {
-  const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-  return {
-    from: toApiDate(firstDay),
-    to: toApiDate(today),
-    label: MONTH_NAMES[today.getMonth()],
-  };
+/** Data local `days` dias antes de `from` (negativo avanca). */
+export function addDays(from: Date, days: number): Date {
+  return new Date(from.getFullYear(), from.getMonth(), from.getDate() + days);
+}
+
+/** Data local `months` meses antes de `from`, limitando ao ultimo dia do mes destino. */
+export function subtractMonths(from: Date, months: number): Date {
+  const target = new Date(from.getFullYear(), from.getMonth() - months, 1);
+  const lastDay = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+  return new Date(target.getFullYear(), target.getMonth(), Math.min(from.getDate(), lastDay));
 }

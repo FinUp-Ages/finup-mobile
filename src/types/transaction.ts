@@ -1,18 +1,34 @@
 export type TransactionType = 'INCOME' | 'EXPENSE';
 
-/** Espelha CategoryListResponse.java (GET /api/v1/categories). */
 export type Category = {
   id: string;
   name: string;
   type: TransactionType;
+  isDefault: boolean;
+};
+
+export type PaymentMethod = {
+  id: string;
+  name: string;
 };
 
 /**
- * Espelha TransactionListItemResponse.java. `amount` vem em reais, sempre
- * positivo (o sinal e dado pelo `type`); `transactionDate` em yyyy-MM-dd.
+ * Espelha CreateTransactionRequest.java. Sem userId: o back tira o usuario do
+ * access token que o httpClient injeta.
  */
-export type TransactionListItem = {
+export type CreateTransactionPayload = {
+  categoryId: string;
+  paymentMethodId: string | null;
+  type: TransactionType;
+  description?: string;
+  amount: number;
+  transactionDate: string;
+  isRecurring: boolean;
+};
+
+export type TransactionResponse = {
   id: string;
+  userId: string;
   categoryId: string;
   paymentMethodId: string | null;
   type: TransactionType;
@@ -21,13 +37,21 @@ export type TransactionListItem = {
   transactionDate: string;
   isRecurring: boolean;
   createdAt: string;
+  updatedAt: string;
 };
 
-/**
- * Espelha TransactionListResponse.java. `balance` = entradas - saidas do
- * periodo consultado, em reais (pode ser negativo).
- */
+/** Espelha TransactionListResponse.java (GET /api/v1/transactions?from&to). */
 export type TransactionListResponse = {
   balance: number;
-  transactions: TransactionListItem[];
+  transactions: {
+    id: string;
+    categoryId: string;
+    paymentMethodId: string | null;
+    type: TransactionType;
+    description: string | null;
+    amount: number;
+    transactionDate: string;
+    isRecurring: boolean;
+    createdAt: string;
+  }[];
 };

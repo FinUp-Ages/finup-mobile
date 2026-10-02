@@ -1,32 +1,52 @@
 import { Feather } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { darkColors } from '@/theme/colors';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { colors } from '@/theme/colors';
 
 /**
- * COMPONENT - botao pilula claro com icone circular a direita.
+ * COMPONENT - botao em pilula da tela Analise e do modal de transacao
+ * (mockup: "Entrada"/"Saida" e "Salvar entrada"/"Salvar saida").
  *
- * Mesma estrutura visual do PrimaryButton (rotulo + circulo de icone), so que
- * com as cores invertidas (fundo claro, circulo escuro) - e o padrao usado nos
- * cards da Home ("Adicionar agora", "Adicionar informacoes", "Integrar
- * cartoes", "Tentar novamente"). Passivo: quem chama decide o que o onPress
- * faz.
+ * Passivo: rotulo, icone e estado chegam por props. `light` e o botao claro
+ * (entrada), `dark` o escuro (saida).
  */
 type PillButtonProps = {
   label: string;
   onPress: () => void;
-  icon?: 'plus' | 'arrow-right' | 'refresh-cw';
+  variant: 'light' | 'dark';
+  icon: 'plus' | 'minus';
+  disabled?: boolean;
+  loading?: boolean;
 };
 
-export function PillButton({ label, onPress, icon = 'plus' }: PillButtonProps) {
+export function PillButton({ label, onPress, variant, icon, disabled, loading }: PillButtonProps) {
+  const isLight = variant === 'light';
+  const isNonInteractive = disabled || loading;
+
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ disabled: Boolean(isNonInteractive), busy: Boolean(loading) }}
+      disabled={isNonInteractive}
       onPress={onPress}
-      style={({ pressed }) => [styles.button, pressed ? styles.buttonPressed : null]}
+      style={({ pressed }) => [
+        styles.button,
+        isLight ? styles.buttonLight : styles.buttonDark,
+        disabled ? styles.buttonDisabled : null,
+        pressed && !isNonInteractive ? styles.buttonPressed : null,
+      ]}
     >
-      <Text style={styles.label}>{label}</Text>
-      <View style={styles.iconCircle}>
-        <Feather color="#ffffff" name={icon} size={14} />
-      </View>
+      <Text style={[styles.label, isLight ? styles.labelLight : styles.labelDark]}>{label}</Text>
+      {loading ? (
+        <ActivityIndicator color={isLight ? colors.textPrimary : colors.white} size="small" />
+      ) : (
+        <View style={[styles.iconCircle, isLight ? styles.iconCircleLight : styles.iconCircleDark]}>
+          <Feather
+            color={isLight ? colors.white : colors.textPrimary}
+            name={icon}
+            size={14}
+          />
+        </View>
+      )}
     </Pressable>
   );
 }
@@ -34,28 +54,49 @@ export function PillButton({ label, onPress, icon = 'plus' }: PillButtonProps) {
 const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: 28,
+    borderRadius: 26,
     flexDirection: 'row',
-    gap: 16,
+    height: 52,
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 14,
+    paddingHorizontal: 24,
   },
+  buttonDark: {
+    backgroundColor: colors.pillDark,
+    borderColor: colors.pillDarkBorder,
+    borderWidth: 1,
+  },
+  buttonDisabled: {
+    opacity: 0.45,
+  },
+  buttonLight: {
+    backgroundColor: colors.pillLight,
+  },
+  // Feedback no toque (press-in), como pede o guia da Expo: escala leve no lugar
+  // de ripple, igual nas duas plataformas.
   buttonPressed: {
-    opacity: 0.85,
+    transform: [{ scale: 0.97 }],
   },
   iconCircle: {
     alignItems: 'center',
-    backgroundColor: darkColors.background,
-    borderRadius: 12,
-    height: 24,
+    borderRadius: 11,
+    height: 22,
     justifyContent: 'center',
-    width: 24,
+    width: 22,
+  },
+  iconCircleDark: {
+    backgroundColor: colors.white,
+  },
+  iconCircleLight: {
+    backgroundColor: colors.textPrimary,
   },
   label: {
-    color: darkColors.background,
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  labelDark: {
+    color: colors.white,
+  },
+  labelLight: {
+    color: colors.textPrimary,
   },
 });
