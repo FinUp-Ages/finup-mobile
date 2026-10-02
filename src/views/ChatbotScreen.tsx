@@ -2,6 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -32,13 +33,18 @@ const GRADIENT_COLORS = [
   colors.chatGradientBottom,
 ] as const;
 
-/** VIEW - experiencia visual do chatbot e seus estados de teclado. */
+/**
+ * VIEW - experiencia visual do chatbot e seus estados de teclado.
+ *
+ * Area central: carregando a conversa aberta pelo menu, erro ao abrir, mensagens
+ * ou, sem conversa, as boas-vindas.
+ */
 export default function ChatbotScreen() {
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<ScrollView>(null);
   const vm = useChatbotViewModel();
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
-  const hasConversation = vm.messages.length > 0;
+  const hasConversation = vm.hasConversation;
 
   useEffect(() => {
     scrollRef.current?.scrollToEnd({ animated: true });
@@ -66,7 +72,20 @@ export default function ChatbotScreen() {
           <View style={[styles.content, { paddingTop: insets.top + 13, paddingBottom: isKeyboardOpen ? 8 : 16 }]}>
             <ChatbotHeader onOpenMenu={() => vm.setIsMenuOpen(true)} showAssistantStatus={hasConversation} />
 
-            {hasConversation ? (
+            {vm.isLoadingMessages ? (
+              <View style={styles.centered}>
+                <ActivityIndicator accessibilityLabel="Carregando conversa" color={colors.chatAccent} />
+              </View>
+            ) : vm.messagesError ? (
+              <View style={styles.centered}>
+                <Text accessibilityLiveRegion="polite" style={[styles.errorText, styles.centeredText]}>
+                  {vm.messagesError}
+                </Text>
+                <Pressable accessibilityRole="button" onPress={vm.retryOpenConversation} style={styles.centeredRetry}>
+                  <Text style={styles.retryText}>Tentar novamente</Text>
+                </Pressable>
+              </View>
+            ) : hasConversation ? (
               <ScrollView
                 contentContainerStyle={styles.messagesContent}
                 keyboardShouldPersistTaps="handled"
@@ -102,11 +121,15 @@ export default function ChatbotScreen() {
         </KeyboardAvoidingView>
       </SafeAreaView>
       <ChatbotSideMenu
+        activeConversationId={vm.conversationId}
         conversations={vm.conversations}
+        disabled={vm.isSending}
         error={vm.conversationsError}
         isLoading={vm.isLoadingConversations}
         onClose={() => vm.setIsMenuOpen(false)}
+        onNewConversation={vm.newConversation}
         onRetry={vm.loadConversations}
+        onSelectConversation={(id) => void vm.openConversation(id)}
         visible={vm.isMenuOpen}
       />
     </LinearGradient>
@@ -114,6 +137,9 @@ export default function ChatbotScreen() {
 }
 
 const styles = StyleSheet.create({
+  centered: { alignItems: 'center', flex: 1, justifyContent: 'center', paddingHorizontal: 24 },
+  centeredRetry: { marginTop: 8 },
+  centeredText: { textAlign: 'center' },
   content: { flex: 1, paddingHorizontal: 16 },
   errorContainer: { marginTop: 16 },
   errorText: { color: colors.errorOnDark, fontSize: 13, lineHeight: 19 },

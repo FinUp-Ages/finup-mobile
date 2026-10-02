@@ -1,21 +1,25 @@
 {
   "stage": "REVIEWING",
-  "task": "PR #16 - [APP] Implementar tela de Chat com IA (ClickUp 86e3bcy5f): ajustes do review de 2026-10-01, assumidos por quem revisou",
-  "objective": "Integrar a aba Chatbot (ja criada na barra nativa pelo #11) ao assistente do back e fechar os pontos do review antes do merge",
+  "task": "PR #16 - [APP] Implementar tela de Chat com IA (ClickUp 86e3bcy5f): ajustes do review e contrato de conversas do finup-backend PR #39, assumidos por quem revisou",
+  "objective": "Integrar a aba Chatbot (ja criada na barra nativa pelo #11) ao assistente do back com conversas gravadas: continuar, abrir e comecar conversas",
   "scope_changes": [
-    "2026-10-01: merge da develop (#11): a barra de abas fica a NativeTabs da develop e sai o guarda de sessao que o PR punha no layout de (tabs); a rota /chatbot passa a abrir a ChatbotScreen no lugar do 'Em breve'"
+    "2026-10-01: merge da develop (#11): a barra de abas fica a NativeTabs da develop e sai o guarda de sessao que o PR punha no layout de (tabs); a rota /chatbot passa a abrir a ChatbotScreen no lugar do 'Em breve'",
+    "2026-10-02: o finup-backend PR #39 passou a gravar as conversas (conversationId no POST, GET .../{id}/messages, messageCount, acao FINANCIAL_FEEDBACK, 422 com detail); a pedido do usuario o mobile segue esse contrato neste mesmo PR"
   ],
   "requirements": [
-    "Enviar mensagens ao POST /api/v1/ai/assistant e mostrar a resposta, com estados de enviando, erro e nova tentativa no mesmo balao",
-    "Listar o historico de conversas (GET /api/v1/assistant/conversations) no menu lateral, com carregando, vazio, erro e nova tentativa",
-    "Boas-vindas com o primeiro nome do GET /users/me, utilizavel com o teclado aberto",
-    "Composer acima da barra de abas nativa e do teclado",
+    "Enviar mensagens ao POST /api/v1/ai/assistant com o conversationId da conversa aberta; a primeira mensagem de uma conversa nova vai sem ele e o id da resposta passa a valer",
+    "Depois de cada envio com sucesso, recarregar a lista de conversas (titulo, ordem e contagem mudam)",
+    "Menu lateral: 'Nova conversa', lista com rolagem, conversa aberta destacada, tocar abre a conversa (GET /api/v1/assistant/conversations/{id}/messages); carregando, vazio, erro e nova tentativa",
+    "Abrir conversa: carregando, erro com nova tentativa (404 = conversa indisponivel); troca de conversa bloqueada enquanto uma mensagem e enviada",
+    "422 (assistente nao entendeu) vira fala do assistente com o detail do back, sem 'Tentar novamente'; demais erros marcam o balao e oferecem nova tentativa no mesmo balao",
+    "Boas-vindas com o primeiro nome do GET /users/me, utilizavel com o teclado aberto; composer acima da barra de abas nativa e do teclado",
     "Cores so de src/theme/colors.ts; textos da interface com acentuacao"
   ],
-  "flow_and_states": "Fluxo: aba Chatbot -> boas-vindas -> digitar -> enviar -> resposta (ou 'Transacao registrada'). Estados: enviando ('FinUp esta pensando...'), erro com 'Tentar novamente' (reenvia o mesmo balao), menu lateral carregando/vazio/erro/lista, teclado aberto (marca compacta)",
+  "flow_and_states": "Fluxo: aba Chatbot -> boas-vindas -> enviar (abre conversa nova) -> resposta ('Transacao registrada' ou feedback) -> menu -> abrir outra conversa ou 'Nova conversa'. Estados: enviando ('FinUp esta pensando...'), erro com nova tentativa, 422 como resposta do assistente, conversa carregando/erro, menu carregando/vazio/erro/lista, teclado aberto (marca compacta)",
   "files_in_scope": [
     "app/(tabs)/chatbot.tsx",
     "assets/logo-white.png",
+    "src/config/httpClient.ts (HttpError.detail)",
     "src/components/chatbot/ (Composer, Header, Mark, Message, SideMenu, Welcome)",
     "src/models/chatbotModel.ts",
     "src/theme/colors.ts",
@@ -26,22 +30,25 @@
   "decisions": [
     "Sessao: a Loading e o setSessionExpiredHandler do app/_layout.tsx ja cobrem o acesso sem sessao; o guarda extra no layout de (tabs) deixava todas as abas em branco enquanto conferia",
     "Bump de expo/expo-router e o package-lock do PR revertidos para os da develop: fora do escopo e o lock novo duplicava expo-modules-core em expo/node_modules",
-    "Sem anexo e sem microfone no composer ate o back ter contrato; sem selecao de modelo (tipo AiModel removido)",
+    "Sem anexo e sem microfone no composer ate haver tarefa para isso; sem selecao de modelo (o back usa o padrao sem o campo model)",
     "A transacao da resposta usa o TransactionResponse de src/types/transaction.ts (o back devolve o mesmo DTO)",
-    "O POST nao grava conversa, entao o historico nao e recarregado depois de cada envio",
-    "Tokens chat* novos em colors.ts para o degrade e os tons do chatbot; os gradientes do SVG da ChatbotMark ficam no componente (desenho, nao tema)"
+    "HttpError ganhou `detail` (lido do problem+json do back) sem mudar `message`: quem ja usava HttpError continua igual",
+    "conversationId nulo na resposta (back nao gravou o historico) mantem a conversa atual; o turno com 422 nao e gravado no back, entao some ao reabrir a conversa",
+    "Resposta de uma conversa aberta antes e descartada se a pessoa trocou de conversa enquanto carregava (ref da conversa mostrada)",
+    "Tokens chat* em colors.ts para o degrade e os tons do chatbot; os gradientes do SVG da ChatbotMark ficam no componente (desenho, nao tema)"
   ],
   "non_goals": [
-    "Abrir uma conversa do historico (depende do finup-backend PR #37, GET /assistant/conversations/{id}/messages)",
-    "Anexos, audio, selecao de modelo e confirmacao da transacao antes de registrar"
+    "Apagar ou renomear conversas (o back nao tem rota)",
+    "Microfone com a transcricao da POC (#6) no composer: tarefa separada, exige build de desenvolvimento",
+    "Anexos, selecao de modelo e confirmacao da transacao antes de registrar"
   ],
   "validation": {
     "typecheck": "ok, 2026-10-02",
     "lint": "ok, 2026-10-02",
-    "prettier": "ok nos arquivos do chatbot",
-    "contrato_back": "GET /api/v1/assistant/conversations na develop do back; POST /api/v1/ai/assistant so na branch feature/integrate-ai-bedrock (sem PR): contra a develop do back o envio da 404",
-    "expo_go": "iOS testado pelo autor antes do merge da develop; com a barra nativa e os ajustes ainda nao visto no aparelho; Android nao testado"
+    "prettier": "ok nos arquivos do chatbot e no httpClient",
+    "contrato_back": "conferido contra o finup-backend PR #39 (feature/integrate-ai-bedrock, 7b77121): AiAssistantRequest/Response com conversationId, ConversationResponse com messageCount, ConversationMessageResponse (role USER/ASSISTANT, text, action, createdAt), BusinessException -> 422 com detail. PR #39 ainda nao esta na develop do back; o PR #37 do back cria o mesmo GET de mensagens",
+    "expo_go": "nao verificado: com a barra nativa, as conversas e os ajustes ainda nao visto no aparelho; exige o back do PR #39 com Bedrock e S3 configurados"
   },
-  "review": "Review de 2026-10-01 aplicado: conflitos com a develop, dependencias revertidas, cores no tema, acentos, nova tentativa sem duplicar o balao, botoes sem acao removidos, recarga inutil do historico removida, tipos duplicados removidos, ChatBotWelcome -> ChatbotWelcome, rotacao da marca no driver nativo, envio pelo teclado com multiline (submitBehavior). Pendente: Expo Go com a barra nativa e o POST do assistente na develop do back",
+  "review": "Review de 2026-10-01 aplicado (conflitos, dependencias, cores, acentos, nova tentativa, botoes sem acao, tipos, nome do Welcome, driver nativo, submitBehavior) e contrato de conversas do back PR #39 em 2026-10-02. Pendente: Expo Go contra o back do PR #39 e merge do PR #39 antes deste",
   "updated_at": "2026-10-02"
 }
