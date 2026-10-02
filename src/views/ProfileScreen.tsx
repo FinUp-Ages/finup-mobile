@@ -4,7 +4,7 @@ import { useProfileViewModel } from '@/viewmodels/useProfileViewModel';
 /**
  * VIEW - tela de perfil do usuario final.
  *
- * A rota que aponta para esta tela e src/app/(tabs)/profile.tsx.
+ * A rota que aponta para esta tela e app/profile.tsx (fora da barra de abas).
  *
  * TODO: implementar em tarefa futura - dados reais do perfil.
  */
