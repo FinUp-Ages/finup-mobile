@@ -1,44 +1,56 @@
 {
-  "stage": "VALIDATING",
-  "task": "Aba Chatbot integrada ao backend",
-  "objective": "Registrar a aba autenticada e integrar o chatbot aos contratos de conversa disponiveis no backend.",
-  "requirements": [
-    "Registrar Chatbot como terceira aba ao lado de Perfil e Transcricao",
-    "Carregar o historico autenticado em GET /api/v1/assistant/conversations",
-    "Enviar mensagens ao POST /api/v1/ai/assistant e exibir respostas, com carregamento, erro e reenvio",
-    "Separar visualmente mensagens consecutivas e preservar a tela de boas-vindas utilizavel com o teclado aberto",
-    "Acessar a aba apenas com sessao autenticada",
-    "Manter o componente ChatbotMark em conformidade com o lint react-hooks/refs"
+  "stage": "IMPLEMENTING",
+  "task": "PR #11 - [APP] Ajustar Registro de Transacao para modal: ajustes do review de 2026-10-01, assumidos por quem revisou",
+  "objective": "Fechar os pontos do review, aplicar o mockup 'Adicionar transacao' (Analise + modal) e a barra de abas do mockup",
+  "scope_changes": [
+    "2026-10-01: depois do teste no Expo Go, o usuario pediu o mockup na tela Analise e no modal, alem de corrigir o teclado que cobria o formulario no Android e a lista vazia do seletor",
+    "2026-10-01: por pedido do usuario o modal deixou de seguir o mockup em dois pontos: o botao de salvar fica dentro do cartao e cada botao da tela (Entrada/Saida) abre o modal com um unico botao de salvar do seu tipo",
+    "2026-10-01: o usuario pediu a barra de abas do mockup (Carteira, Analise, Transacao, Educacional, Chatbot) com NativeTabs; Perfil e Transcricao sairam da barra e viraram rotas da pilha raiz"
   ],
+  "requirements": [
+    "Payload do POST /api/v1/transactions sem userId (o back tira o usuario do token) e sem depender do GET /users/me para salvar",
+    "Entrada/Saida abrem o modal com o tipo; so as categorias desse tipo e um unico botao 'Salvar entrada' ou 'Salvar saida' (evita o 422)",
+    "Pagamento e categoria em pilulas que abrem as opcoes em chips dentro do cartao (nada por cima do formulario); pagamento opcional e desmarcavel; mensagem quando nao ha opcoes",
+    "Com o teclado aberto, o valor digitado e o botao de salvar continuam visiveis",
+    "Analise com degrade, saldo total (GET /api/v1/transactions de 1970-01-01 ate hoje) com estados carregando, erro com nova tentativa e valor; recarrega depois de salvar",
+    "Barra de abas nativa com as 5 abas do mockup; abas sem tela mostram 'Em breve'; login, cadastro e abertura do app levam para /analise",
+    "Cores so de src/theme/colors.ts"
+  ],
+  "flow_and_states": "Fluxo: abas -> Analise -> Entrada ou Saida -> modal -> salvar. Estados: saldo carregando/erro/valor, carregando categorias/meios, falha no carregamento, sem metodos de pagamento, formulario invalido (botao desabilitado), salvando, erro ao salvar (modal continua aberto com os dados), sucesso (fecha e recarrega o saldo). Voltar do Android fecha o modal",
   "files_in_scope": [
     "app/_layout.tsx",
     "app/(tabs)/_layout.tsx",
-    "app/(tabs)/chatbot.tsx",
-    "app/(tabs)/chatbot.tsx",
-    "src/types/chatbot.ts",
-    "src/models/chatbotModel.ts",
-    "src/viewmodels/useChatbotViewModel.ts",
-    "src/views/ChatbotScreen.tsx",
-    "src/components/chatbot/"
+    "app/(tabs)/analise.tsx, carteira.tsx, transacao.tsx, educacional.tsx, chatbot.tsx",
+    "app/profile.tsx, app/transcricao.tsx (movidos de app/(tabs))",
+    "src/components/common/TransactionModal.tsx",
+    "src/components/ui/BrandGradient.tsx, CurrencyField.tsx, PillButton.tsx, PillSelect.tsx",
+    "src/models/transactionModel.ts",
+    "src/theme/colors.ts",
+    "src/types/transaction.ts",
+    "src/utils/dates.ts, src/utils/masks.ts",
+    "src/viewmodels/useAnaliseViewModel.ts, useTransactionModalViewModel.ts, useCadastroViewModel.ts, useLoginViewModel.ts, useLoadingScreenViewModel.ts",
+    "src/views/AnaliseScreen.tsx, ComingSoonScreen.tsx, ProfileScreen.tsx (comentario)"
   ],
   "decisions": [
-    "O httpClient ja injeta o access token e trata 401 com retorno ao fluxo de autenticacao.",
-    "O backend possui POST /api/v1/ai/assistant para comandos de IA e GET /api/v1/assistant/conversations para metadados de conversas; o POST pode registrar transacoes e nao persiste mensagens.",
-    "A tela usa o POST atual por meio de chatbotModel, para permitir futura troca por um contrato de chat persistente sem acoplamento da View.",
-    "Os valores Animated.Value do ChatbotMark sao inicializados com useState para permanecerem estaveis sem leitura de ref durante a renderizacao."
+    "Modal e uma camada opaca dentro da tela (nao um <Modal> do RN) para a barra de abas continuar visivel; KeyboardAvoidingView com padding so no iOS, como Login/Cadastro/chatbot",
+    "SelectField e PrimaryButton voltaram ao da develop; o modal usa PillSelect/ChipOptions proprios",
+    "Icones da barra: sf no iOS e @expo/vector-icons (MaterialIcons) no Android via src",
+    "Sem dependencias novas: Reanimated/keyboard-controller (recomendados pela skill da Expo) ficaram de fora porque o node_modules do worktree e uma junction do repo principal",
+    "Saldo total depende do GET /transactions sem userId (finup-backend fix/get-transactions-sem-userid); na develop do back ele ainda exige userId e o saldo cai no estado de erro"
   ],
   "non_goals": [
-    "Implementar criacao, leitura ou persistencia de mensagens/conversas que ainda nao existem no backend",
-    "Implementar anexos, audio, selecao de modelo ou confirmacao de transacao sem contrato de backend"
+    "Telas de Carteira, Transacao, Educacional e Chatbot (a feat/chatbot traz a aba Chatbot: conflito esperado em app/(tabs))",
+    "Acesso ao Perfil (e ao Sair) pela interface, que saiu da barra",
+    "Cadastro de metodos de pagamento (back so tem GET); graficos e edicao do saldo total; recorrencia e descricao no modal"
   ],
   "validation": {
-    "backend_contract": "POST /api/v1/ai/assistant e GET /api/v1/assistant/conversations confirmados; nao ha endpoint de mensagens persistidas.",
-    "lint": "Nao executado: node/npm nao esta disponivel no PATH deste ambiente; o shim local do eslint tambem falha por ausencia de node.",
-    "typecheck": "Falha de inferencia em ChatMessage corrigida; requer nova execucao local de npm run typecheck.",
-    "diff": "git diff --check passou sem erros de espacos. Revisao estatica concluida.",
-    "expo_go": "Nao verificado: Expo nao pode ser iniciado sem Node neste ambiente."
+    "lint": "ok, 2026-10-01",
+    "typecheck": "ok, 2026-10-01",
+    "prettier": "ok em src e app",
+    "bundle_metro": "android e ios ok, 2026-10-01",
+    "contrato_back": "conferido: CreateTransactionRequest sem userId, CategoryResponse com type, PaymentMethodResponse(id, name), GET /transactions?from&to (fix/get-transactions-sem-userid)",
+    "expo_go": "rodadas anteriores testadas pelo usuario em Android (teclado, lista vazia, contraste); barra de abas nativa ainda nao vista no aparelho; iOS nao testado"
   },
-  "review": "Integracao e ajustes de interface concluidos: mensagens do usuario possuem espacamento superior, inclusive apos resposta de transacao; a boas-vindas compacta e eleva a marca com teclado aberto e permite fecha-lo por toque fora do composer. O composer usa 8px de padding inferior enquanto o teclado esta aberto. O carregamento inicial de conversas foi isolado no efeito para atender react-hooks/set-state-in-effect e a resposta do assistente possui tipo ChatMessage explicito.",
+  "review": "Iteracoes com o usuario no Expo Go em 2026-10-01. Pendente: validar a barra de abas no aparelho, descricao do PR, checklist e print/video",
   "updated_at": "2026-10-01"
 }
-
