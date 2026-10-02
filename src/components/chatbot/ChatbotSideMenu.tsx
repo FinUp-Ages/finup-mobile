@@ -1,13 +1,22 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '@/theme/colors';
 import type { ConversationSummary } from '@/types/chatbot';
 
-interface ChatbotSideMenuProps {
+export interface ChatbotSideMenuProps {
   activeConversationId: string | null;
   conversations: ConversationSummary[];
-  /** Enquanto uma mensagem e enviada nao da para trocar de conversa. */
+  /** Enquanto uma mensagem é enviada não dá para trocar de conversa. */
   disabled: boolean;
   error: string | null;
   isLoading: boolean;
@@ -18,7 +27,7 @@ interface ChatbotSideMenuProps {
   onSelectConversation: (id: string) => void;
 }
 
-/** Historico de conversas do assistente: abre uma conversa ou comeca outra. */
+/** COMPONENT - drawer lateral com histórico de conversas conforme o Figma (#121212). */
 export function ChatbotSideMenu({
   activeConversationId,
   conversations,
@@ -31,59 +40,121 @@ export function ChatbotSideMenu({
   onRetry,
   onSelectConversation,
 }: ChatbotSideMenuProps) {
+  const insets = useSafeAreaInsets();
+
   return (
-    <Modal animationType="fade" onRequestClose={onClose} statusBarTranslucent transparent visible={visible}>
+    <Modal
+      animationType="fade"
+      onRequestClose={onClose}
+      statusBarTranslucent
+      transparent
+      visible={visible}
+    >
       <View style={styles.overlay}>
-        <Pressable accessibilityLabel="Fechar menu" onPress={onClose} style={styles.backdrop} />
-        <View style={styles.drawer}>
-          <View style={styles.titleRow}>
-            <Text style={styles.title}>FinUp</Text>
-            <Pressable accessibilityLabel="Fechar menu" accessibilityRole="button" hitSlop={10} onPress={onClose}>
-              <Ionicons color={colors.chatTextBright} name="close" size={25} />
+        <Pressable
+          accessibilityLabel="Fechar menu lateral"
+          onPress={onClose}
+          style={styles.backdrop}
+        />
+        <View
+          style={[
+            styles.drawer,
+            {
+              paddingTop: Math.max(insets.top + 16, 48),
+              paddingBottom: Math.max(insets.bottom + 16, 24),
+            },
+          ]}
+        >
+          {/* Barra superior com fechar e nova conversa */}
+          <View style={styles.headerRow}>
+            <Pressable
+              accessibilityLabel="Fechar menu"
+              accessibilityRole="button"
+              hitSlop={12}
+              onPress={onClose}
+              style={styles.iconBtn}
+            >
+              <Ionicons color={colors.white} name="close" size={26} />
+            </Pressable>
+
+            <Pressable
+              accessibilityLabel="Nova conversa"
+              accessibilityRole="button"
+              accessibilityState={{ disabled }}
+              disabled={disabled}
+              hitSlop={12}
+              onPress={onNewConversation}
+              style={[styles.iconBtn, disabled ? styles.itemDisabled : null]}
+            >
+              <Ionicons color={colors.white} name="create-outline" size={22} />
             </Pressable>
           </View>
 
-          <Pressable
-            accessibilityRole="button"
-            accessibilityState={{ disabled }}
-            disabled={disabled}
-            onPress={onNewConversation}
-            style={[styles.newConversation, disabled ? styles.disabled : undefined]}
-          >
-            <Ionicons color={colors.white} name="create-outline" size={20} />
-            <Text style={styles.newConversationText}>Nova conversa</Text>
-          </Pressable>
+          {/* Subtítulo da seção */}
+          <Text style={styles.sectionTitle}>Histórico de conversas</Text>
+          <View style={styles.divider} />
 
-          <Text style={styles.section}>CONVERSAS</Text>
-          {isLoading && conversations.length === 0 ? <ActivityIndicator color={colors.chatAccent} style={styles.loading} /> : null}
+          {/* Feedback de erro */}
           {error ? (
-            <View style={styles.feedback}>
-              <Text style={styles.feedbackText}>{error}</Text>
-              <Pressable accessibilityRole="button" onPress={onRetry} style={styles.retryButton}>
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{error}</Text>
+              <Pressable
+                accessibilityLabel="Tentar novamente carregar conversas"
+                accessibilityRole="button"
+                onPress={onRetry}
+                style={styles.retryBtn}
+              >
                 <Text style={styles.retryText}>Tentar novamente</Text>
               </Pressable>
             </View>
           ) : null}
-          {!isLoading && !error && conversations.length === 0 ? <Text style={styles.hint}>Nenhuma conversa ainda.</Text> : null}
 
-          <ScrollView contentContainerStyle={styles.listContent} showsVerticalScrollIndicator={false} style={styles.list}>
-            {conversations.map((conversation) => {
-              const active = conversation.id === activeConversationId;
-              return (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityState={{ disabled, selected: active }}
-                  disabled={disabled}
-                  key={conversation.id}
-                  onPress={() => onSelectConversation(conversation.id)}
-                  style={[styles.item, active ? styles.itemActive : undefined, disabled ? styles.disabled : undefined]}
-                >
-                  <Ionicons color={colors.chatAccent} name="chatbubble-ellipses-outline" size={20} />
-                  <Text numberOfLines={1} style={styles.itemText}>{conversation.title || 'Conversa sem título'}</Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
+          {/* Conteúdo da Lista */}
+          {isLoading && conversations.length === 0 ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator color={colors.textMuted} size="small" />
+            </View>
+          ) : !error && conversations.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>Nenhuma conversa anterior</Text>
+            </View>
+          ) : (
+            <ScrollView
+              contentContainerStyle={styles.listContent}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              style={styles.list}
+            >
+              {conversations.map((item) => {
+                const isSelected = item.id === activeConversationId;
+                const displayTitle = item.title?.trim() || 'Nova conversa';
+
+                return (
+                  <Pressable
+                    accessibilityLabel={`Abrir conversa: ${displayTitle}`}
+                    accessibilityRole="button"
+                    accessibilityState={{ disabled, selected: isSelected }}
+                    disabled={disabled}
+                    key={item.id}
+                    onPress={() => onSelectConversation(item.id)}
+                    style={({ pressed }) => [
+                      styles.itemRow,
+                      isSelected ? styles.itemRowActive : null,
+                      disabled ? styles.itemDisabled : null,
+                      pressed ? styles.itemRowPressed : null,
+                    ]}
+                  >
+                    <Text
+                      numberOfLines={1}
+                      style={[styles.itemText, isSelected ? styles.itemTextActive : null]}
+                    >
+                      {displayTitle}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          )}
         </View>
       </View>
     </Modal>
@@ -91,32 +162,99 @@ export function ChatbotSideMenu({
 }
 
 const styles = StyleSheet.create({
-  backdrop: { flex: 1 },
-  disabled: { opacity: 0.5 },
-  drawer: { backgroundColor: colors.chatDrawer, bottom: 0, left: 0, padding: 28, paddingTop: 62, position: 'absolute', top: 0, width: '78%' },
-  feedback: { marginTop: 13 },
-  feedbackText: { color: colors.chatTextBright, fontSize: 13, lineHeight: 19 },
-  hint: { color: colors.chatTextMuted, fontSize: 13, marginTop: 13 },
-  item: { alignItems: 'center', backgroundColor: colors.chatDrawerItem, borderRadius: 11, flexDirection: 'row', gap: 12, marginTop: 13, padding: 14 },
-  itemActive: { borderColor: colors.chatAccent, borderWidth: 1 },
-  itemText: { color: colors.chatTextBright, flex: 1, fontSize: 14 },
-  list: { flex: 1 },
-  listContent: { paddingBottom: 28 },
-  loading: { marginTop: 20 },
-  newConversation: {
-    alignItems: 'center',
-    backgroundColor: colors.chatSendButton,
-    borderRadius: 11,
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: 28,
-    padding: 14,
+  backdrop: {
+    flex: 1,
   },
-  newConversationText: { color: colors.white, fontSize: 14, fontWeight: '700' },
-  overlay: { backgroundColor: colors.chatOverlay, flex: 1 },
-  section: { color: colors.chatTextMuted, fontSize: 11, fontWeight: '700', letterSpacing: 1.1, marginTop: 28 },
-  retryButton: { alignSelf: 'flex-start', marginTop: 9 },
-  retryText: { color: colors.chatAccent, fontSize: 13, fontWeight: '700' },
-  title: { color: colors.white, fontSize: 23, fontWeight: '700' },
-  titleRow: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
+  divider: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    height: 1,
+    width: '100%',
+  },
+  drawer: {
+    backgroundColor: colors.drawerBackground,
+    bottom: 0,
+    left: 0,
+    paddingHorizontal: 20,
+    position: 'absolute',
+    top: 0,
+    width: '78%',
+  },
+  emptyContainer: {
+    paddingVertical: 24,
+  },
+  emptyText: {
+    color: colors.textMuted,
+    fontSize: 14,
+  },
+  errorContainer: {
+    paddingVertical: 16,
+  },
+  errorText: {
+    color: colors.errorOnDark,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  headerRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+  },
+  iconBtn: {
+    padding: 4,
+  },
+  itemDisabled: {
+    opacity: 0.5,
+  },
+  itemRow: {
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomWidth: 1,
+    justifyContent: 'center',
+    paddingVertical: 18,
+  },
+  itemRowActive: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  itemRowPressed: {
+    opacity: 0.6,
+  },
+  itemText: {
+    color: colors.white,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  itemTextActive: {
+    color: colors.white,
+    fontWeight: '700',
+  },
+  list: {
+    flex: 1,
+  },
+  listContent: {
+    paddingBottom: 24,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 32,
+  },
+  overlay: {
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    flex: 1,
+  },
+  retryBtn: {
+    alignSelf: 'flex-start',
+    marginTop: 8,
+  },
+  retryText: {
+    color: colors.chatAccent,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  sectionTitle: {
+    color: colors.textMuted,
+    fontSize: 14,
+    fontWeight: '400',
+    marginBottom: 16,
+  },
 });

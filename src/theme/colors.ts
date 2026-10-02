@@ -20,6 +20,8 @@ export const colors = {
   link: '#2563eb',
   white: '#ffffff',
   screenBackground: '#051329',
+  drawerBackground: '#121212',
+  textMuted: '#a1a1aa',
   // Aba Transacao e modal de transacao (mockup): degrade azul para o marinho da
   // tela inicial, cartao e pilulas translucidos sobre ele.
   brandBlue: '#1a6fb0',
