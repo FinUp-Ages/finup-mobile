@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { colors } from '@/theme/colors';
 
 interface ChatbotComposerProps {
   draft: string;
@@ -9,6 +10,11 @@ interface ChatbotComposerProps {
   onSend: () => void;
 }
 
+/**
+ * Campo de mensagem do chatbot. Anexo e audio ficam de fora ate o back ter
+ * contrato para eles. `submitBehavior="submit"` faz o "Enviar" do teclado
+ * enviar mesmo com `multiline` (sem ele o iOS so quebra a linha).
+ */
 export function ChatbotComposer({ draft, isSending, onChangeDraft, onSend }: ChatbotComposerProps) {
   return (
     <View style={styles.composer}>
@@ -19,30 +25,27 @@ export function ChatbotComposer({ draft, isSending, onChangeDraft, onSend }: Cha
         onChangeText={onChangeDraft}
         onSubmitEditing={onSend}
         placeholder="Digite sua mensagem"
-        placeholderTextColor="#C9D9E9"
+        placeholderTextColor={colors.chatText}
         returnKeyType="send"
         style={styles.input}
+        submitBehavior="submit"
         value={draft}
       />
       <View style={styles.actions}>
-        <Pressable accessibilityLabel="Adicionar anexo" accessibilityRole="button" hitSlop={10} style={styles.leftAction}>
-          <Ionicons color="#FFFFFF" name="add" size={25} />
+        <Pressable
+          accessibilityLabel="Enviar mensagem"
+          accessibilityRole="button"
+          disabled={!draft.trim() || isSending}
+          hitSlop={10}
+          onPress={onSend}
+          style={styles.sendAction}
+        >
+          {isSending ? (
+            <ActivityIndicator color={colors.white} size="small" />
+          ) : (
+            <Ionicons color={colors.white} name="arrow-up" size={19} />
+          )}
         </Pressable>
-        <View style={styles.rightActions}>
-          <Pressable accessibilityLabel="Gravar mensagem de voz" accessibilityRole="button" hitSlop={10}>
-            <Ionicons color="#FFFFFF" name="mic-outline" size={21} />
-          </Pressable>
-          <Pressable
-            accessibilityLabel="Enviar mensagem"
-            accessibilityRole="button"
-            disabled={!draft.trim() || isSending}
-            hitSlop={10}
-            onPress={onSend}
-            style={styles.sendAction}
-          >
-            {isSending ? <ActivityIndicator color="#FFFFFF" size="small" /> : <Ionicons color="#FFFFFF" name="arrow-up" size={19} />}
-          </Pressable>
-        </View>
       </View>
     </View>
   );
@@ -52,13 +55,13 @@ const styles = StyleSheet.create({
   actions: {
     alignItems: 'center',
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     paddingHorizontal: 16,
     paddingTop: 22,
     paddingBottom: 12,
   },
   composer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.11)',
+    backgroundColor: colors.glass,
     borderRadius: 13,
     elevation: 5,
     minHeight: 92,
@@ -68,7 +71,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
   },
   input: {
-    color: '#FFFFFF',
+    color: colors.white,
     fontSize: 14,
     lineHeight: 20,
     maxHeight: 70,
@@ -76,11 +79,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 14,
   },
-  leftAction: { alignItems: 'center', height: 28, justifyContent: 'center', width: 20 },
-  rightActions: { alignItems: 'center', flexDirection: 'row', gap: 21 },
   sendAction: {
     alignItems: 'center',
-    backgroundColor: 'rgba(135, 190, 226, 0.45)',
+    backgroundColor: colors.chatSendButton,
     borderRadius: 13,
     height: 26,
     justifyContent: 'center',

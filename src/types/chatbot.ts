@@ -1,26 +1,21 @@
+import type { TransactionResponse } from '@/types/transaction';
+
 export type ChatMessageRole = 'assistant' | 'user';
 export type ChatMessageStatus = 'error' | 'sending' | 'sent';
 
-export type AiModel = 'AMAZON_LITE' | 'ANTHROPIC' | 'GPT' | 'MAGISTRAL';
-
+/** Espelha AiAssistantRequest.java (POST /api/v1/ai/assistant). */
 export interface AiAssistantRequest {
   message: string;
-  model?: AiModel;
 }
 
-export interface TransactionSummary {
-  id: string;
-  amount: number;
-  description: string;
-  type: string;
-}
-
+/** Espelha AiAssistantResponse.java: `transaction` vem quando a acao cria uma. */
 export interface AiAssistantResponse {
   action: string;
   message: string;
-  transaction: TransactionSummary | null;
+  transaction: TransactionResponse | null;
 }
 
+/** Espelha ConversationResponse.java (GET /api/v1/assistant/conversations). */
 export interface ConversationSummary {
   id: string;
   title: string | null;
@@ -33,5 +28,5 @@ export interface ChatMessage {
   status: ChatMessageStatus;
   text: string;
   action?: string;
-  transaction?: TransactionSummary | null;
+  transaction?: TransactionResponse | null;
 }

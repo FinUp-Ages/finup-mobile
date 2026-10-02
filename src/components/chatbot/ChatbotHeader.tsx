@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { colors } from '@/theme/colors';
 
 interface ChatbotHeaderProps {
   showAssistantStatus: boolean;
@@ -17,7 +18,7 @@ export function ChatbotHeader({ showAssistantStatus, onOpenMenu }: ChatbotHeader
         onPress={onOpenMenu}
         style={styles.menuButton}
       >
-        <Ionicons color="#FFFFFF" name="menu" size={27} />
+        <Ionicons color={colors.white} name="menu" size={27} />
       </Pressable>
 
       {showAssistantStatus ? (
@@ -32,10 +33,10 @@ export function ChatbotHeader({ showAssistantStatus, onOpenMenu }: ChatbotHeader
 const styles = StyleSheet.create({
   header: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', minHeight: 38 },
   menuButton: { alignItems: 'center', height: 40, justifyContent: 'center', width: 40 },
-  modelLabel: { color: '#F5F9FC', fontSize: 14 },
+  modelLabel: { color: colors.chatTextBright, fontSize: 14 },
   modelPill: {
     alignItems: 'center',
-    backgroundColor: 'rgba(26, 61, 101, 0.7)',
+    backgroundColor: colors.chatPill,
     borderRadius: 22,
     flexDirection: 'row',
     gap: 7,

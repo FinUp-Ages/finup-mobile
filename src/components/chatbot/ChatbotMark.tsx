@@ -55,7 +55,8 @@ export function ChatbotMark({
         duration: flameRotationDuration,
         easing: Easing.linear,
         toValue: 1,
-        useNativeDriver: false,
+        // So `transform: rotate`: roda na thread nativa, sem ocupar a de JS no loop infinito.
+        useNativeDriver: true,
       }),
     );
 

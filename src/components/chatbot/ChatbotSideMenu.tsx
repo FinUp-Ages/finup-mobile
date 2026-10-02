@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { colors } from '@/theme/colors';
 import type { ConversationSummary } from '@/types/chatbot';
 
 interface ChatbotSideMenuProps {
@@ -22,11 +23,11 @@ export function ChatbotSideMenu({ conversations, error, isLoading, visible, onCl
           <View style={styles.titleRow}>
             <Text style={styles.title}>FinUp</Text>
             <Pressable accessibilityLabel="Fechar menu" onPress={onClose}>
-              <Ionicons color="#DDEAF5" name="close" size={25} />
+              <Ionicons color={colors.chatTextBright} name="close" size={25} />
             </Pressable>
           </View>
           <Text style={styles.section}>CONVERSAS</Text>
-          {isLoading ? <ActivityIndicator color="#8FC9F0" style={styles.loading} /> : null}
+          {isLoading ? <ActivityIndicator color={colors.chatAccent} style={styles.loading} /> : null}
           {error ? (
             <View style={styles.feedback}>
               <Text style={styles.feedbackText}>{error}</Text>
@@ -35,14 +36,14 @@ export function ChatbotSideMenu({ conversations, error, isLoading, visible, onCl
               </Pressable>
             </View>
           ) : null}
-          {!isLoading && !error && conversations.length === 0 ? <Text style={styles.hint}>Nenhuma conversa disponivel.</Text> : null}
+          {!isLoading && !error && conversations.length === 0 ? <Text style={styles.hint}>Nenhuma conversa disponível.</Text> : null}
           {conversations.map((conversation) => (
             <View key={conversation.id} style={styles.item}>
-              <Ionicons color="#8FC9F0" name="chatbubble-ellipses-outline" size={20} />
-              <Text numberOfLines={1} style={styles.itemText}>{conversation.title || 'Conversa sem titulo'}</Text>
+              <Ionicons color={colors.chatAccent} name="chatbubble-ellipses-outline" size={20} />
+              <Text numberOfLines={1} style={styles.itemText}>{conversation.title || 'Conversa sem título'}</Text>
             </View>
           ))}
-          <Text style={styles.footerHint}>O historico de mensagens ainda nao esta disponivel.</Text>
+          <Text style={styles.footerHint}>O histórico de mensagens ainda não está disponível.</Text>
         </View>
       </View>
     </Modal>
@@ -51,18 +52,18 @@ export function ChatbotSideMenu({ conversations, error, isLoading, visible, onCl
 
 const styles = StyleSheet.create({
   backdrop: { flex: 1 },
-  drawer: { backgroundColor: '#082544', bottom: 0, left: 0, padding: 28, paddingTop: 62, position: 'absolute', top: 0, width: '78%' },
+  drawer: { backgroundColor: colors.chatDrawer, bottom: 0, left: 0, padding: 28, paddingTop: 62, position: 'absolute', top: 0, width: '78%' },
   feedback: { marginTop: 13 },
-  feedbackText: { color: '#D7E6F3', fontSize: 13, lineHeight: 19 },
-  footerHint: { bottom: 42, color: '#7794AF', fontSize: 12, left: 28, position: 'absolute', right: 28 },
-  hint: { color: '#7794AF', fontSize: 13, marginTop: 13 },
-  item: { alignItems: 'center', backgroundColor: '#103456', borderRadius: 11, flexDirection: 'row', gap: 12, marginTop: 13, padding: 14 },
-  itemText: { color: '#E8F3FB', flex: 1, fontSize: 14 },
+  feedbackText: { color: colors.chatTextBright, fontSize: 13, lineHeight: 19 },
+  footerHint: { bottom: 42, color: colors.chatTextMuted, fontSize: 12, left: 28, position: 'absolute', right: 28 },
+  hint: { color: colors.chatTextMuted, fontSize: 13, marginTop: 13 },
+  item: { alignItems: 'center', backgroundColor: colors.chatDrawerItem, borderRadius: 11, flexDirection: 'row', gap: 12, marginTop: 13, padding: 14 },
+  itemText: { color: colors.chatTextBright, flex: 1, fontSize: 14 },
   loading: { marginTop: 20 },
-  overlay: { backgroundColor: 'rgba(0, 12, 28, 0.65)', flex: 1 },
-  section: { color: '#7FA7C7', fontSize: 11, fontWeight: '700', letterSpacing: 1.1, marginTop: 34 },
+  overlay: { backgroundColor: colors.chatOverlay, flex: 1 },
+  section: { color: colors.chatTextMuted, fontSize: 11, fontWeight: '700', letterSpacing: 1.1, marginTop: 34 },
   retryButton: { alignSelf: 'flex-start', marginTop: 9 },
-  retryText: { color: '#8FC9F0', fontSize: 13, fontWeight: '700' },
-  title: { color: '#FFFFFF', fontSize: 23, fontWeight: '700' },
+  retryText: { color: colors.chatAccent, fontSize: 13, fontWeight: '700' },
+  title: { color: colors.white, fontSize: 23, fontWeight: '700' },
   titleRow: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
 });
