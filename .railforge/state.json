@@ -22,7 +22,8 @@
     "2026-10-02, usuario: a tela de transacao e a da origin/feature/transaction-modal (Analise + modal + abas nativas), copiada arquivo a arquivo (sem merge); Carteira = Home, abre /analise pelo botao Adicionar transacao e recarrega saldo/entradas/saidas ao ganhar foco",
     "Home passa a mostrar o historico todo (1970-01-01 ate hoje), igual ao saldo da Analise; 10 gastos mais recentes; HomeTabBar removida (abas nativas); PillButton da Home renomeado para HomePillButton; rotas de login/cadastro/abertura levam a /carteira",
     "2026-10-02, usuario: banner do score refeito conforme Figma (371x152, degrade radial #B3DCF2->#005586, medalha 3D de assets/home/score-medal.png girada 13,44 graus, botao translucido com seta); RN Image (sem expo-image)",
-    "2026-10-02, usuario: card de saldo com seletor de periodo (7/15/30 dias, 3/6/12 meses; padrao 7 dias; from = hoje menos N-1 dias ou N meses) via GET /transactions?from&to, gastos seguem o periodo; olho oculta so o saldo (estado local); degrade #2343BD->#3B82F6"
+    "2026-10-02, usuario: card de saldo com seletor de periodo (7/15/30 dias, 3/6/12 meses; padrao 7 dias; from = hoje menos N-1 dias ou N meses) via GET /transactions?from&to, gastos seguem o periodo; olho oculta so o saldo (estado local); degrade #2343BD->#3B82F6",
+    "2026-10-02, usuario autorizou commit + merge da origin/develop (chatbot #16, modal #11): mantida a UI da Home/cadastro/login; da develop ficaram chatbot, aba Transacao (TransacaoScreen), Analise 'Em breve', PillButton e BrandGradient; Carteira = HomeScreen (app abre em /carteira), botao Adicionar transacao abre /transacao; Home recarrega via transactionEvents; AnaliseScreen/useAnaliseViewModel removidos"
   ],
   "files_in_scope": [
     "app/_layout.tsx",
@@ -64,7 +65,8 @@
     "metro_android_bundle": "ok (android e ios)",
     "expo_go_pendente": "nao validado no aparelho: Home -> Adicionar transacao -> salvar entrada/saida -> Home atualizada; erro de rede",
     "banner": "tsc e eslint sem erros; bundle android ok; visual nao conferido no aparelho",
-    "periodo": "tsc/eslint ok, bundle android ok; nao conferido no aparelho"
+    "periodo": "tsc/eslint ok, bundle android ok; nao conferido no aparelho",
+    "merge_develop": "tsc/eslint ok, bundle android ok; chatbot e abas nao conferidos no aparelho"
   },
   "review": "Diff revisado em 2026-10-01 (16 arquivos): sem nome ou saldo fixo, sem console.log novo, sem any, sem segredo. package-lock.json modificado antes da tarefa (so flags peer) fica fora dos commits. Riscos: conflito add/add com a origin/feature/transaction-modal em src/types/transaction.ts e src/models/(transactionModel|categoriesModel).ts (la Category tem isDefault, que o GET /categories nao devolve); pull-to-refresh que falha com dados na tela nao avisa; barra de abas nativa aparece junto da barra propria da Home",
   "follow_ups": [

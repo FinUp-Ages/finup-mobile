@@ -54,7 +54,7 @@ export default function HomeScreen() {
           balance={balance}
           expense={expense}
           income={income}
-          onPressAdd={() => router.navigate('/analise')}
+          onPressAdd={() => router.navigate('/transacao')}
           onRetry={retry}
           onSelectPeriod={setPeriodKey}
           period={periodLabel}

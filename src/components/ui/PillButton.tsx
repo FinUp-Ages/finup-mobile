@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { colors } from '@/theme/colors';
 
 /**
- * COMPONENT - botao em pilula da tela Analise e do modal de transacao
+ * COMPONENT - botao em pilula da aba Transacao e do modal de transacao
  * (mockup: "Entrada"/"Saida" e "Salvar entrada"/"Salvar saida").
  *
  * Passivo: rotulo, icone e estado chegam por props. `light` e o botao claro

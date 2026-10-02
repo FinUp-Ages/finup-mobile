@@ -1,6 +1,7 @@
 import { useFocusEffect } from 'expo-router';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { categoriesModel } from '@/models/categoriesModel';
+import { transactionEvents } from '@/models/transactionEvents';
 import { transactionModel } from '@/models/transactionModel';
 import { userModel } from '@/models/userModel';
 import type { HomeExpense, HomeStatus } from '@/types/home';
@@ -123,6 +124,9 @@ export function useHomeViewModel() {
       load(loadedPeriodRef.current === periodKey ? 'silent' : 'initial', periodKey);
     }, [load, periodKey]),
   );
+
+  // O chatbot (outra aba, ja montada) pode registrar transacoes: recarrega o saldo.
+  useEffect(() => transactionEvents.subscribe(() => load('silent', periodKey)), [load, periodKey]);
 
   const retry = useCallback(() => load('initial', periodKey), [load, periodKey]);
   const refresh = useCallback(() => load('pull', periodKey), [load, periodKey]);
