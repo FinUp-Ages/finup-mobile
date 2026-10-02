@@ -8,13 +8,13 @@ import { darkColors } from '@/theme/colors';
  * Mesma estrutura visual do PrimaryButton (rotulo + circulo de icone), so que
  * com as cores invertidas (fundo claro, circulo escuro) - e o padrao usado nos
  * cards da Home ("Adicionar agora", "Adicionar informacoes", "Integrar
- * cartoes"). Passivo: quem chama decide o que o onPress faz - hoje e sempre
- * mockado, ponto de integracao futura.
+ * cartoes", "Tentar novamente"). Passivo: quem chama decide o que o onPress
+ * faz.
  */
 type PillButtonProps = {
   label: string;
   onPress: () => void;
-  icon?: 'plus' | 'arrow-right';
+  icon?: 'plus' | 'arrow-right' | 'refresh-cw';
 };
 
 export function PillButton({ label, onPress, icon = 'plus' }: PillButtonProps) {

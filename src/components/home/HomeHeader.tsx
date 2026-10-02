@@ -5,12 +5,13 @@ import { darkColors } from '@/theme/colors';
 /**
  * COMPONENT - cabecalho da Home: avatar + saudacao + badge de score.
  *
- * `userName` e `score` sao mockados por enquanto - nao ha sessao nem endpoint
- * de score consumido ainda. `onPressScore` e ponto de integracao futuro (ex.:
- * abrir o detalhe do FinUp Score).
+ * `userName` vem do GET /users/me (null enquanto carrega ou se falhar: a
+ * saudacao fica so "Ola!"). `score` ainda e mockado - o GET /users/me nao
+ * expoe o FinUp Score. `onPressScore` e ponto de integracao futuro (ex.: abrir
+ * o detalhe do FinUp Score).
  */
 type HomeHeaderProps = {
-  userName: string;
+  userName: string | null;
   score: string;
   onPressScore: () => void;
 };
@@ -24,7 +25,7 @@ export function HomeHeader({ userName, score, onPressScore }: HomeHeaderProps) {
         </View>
         <View>
           <Text style={styles.eyebrow}>Sua conta</Text>
-          <Text style={styles.greeting}>Olá, {userName}!</Text>
+          <Text style={styles.greeting}>{userName ? `Olá, ${userName}!` : 'Olá!'}</Text>
         </View>
       </View>
 

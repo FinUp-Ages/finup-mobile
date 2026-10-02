@@ -1,21 +1,34 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { PillButton } from '@/components/ui/PillButton';
 import { darkColors } from '@/theme/colors';
+import type { HomeStatus } from '@/types/home';
 
 /**
- * COMPONENT - card de saldo total, em estado vazio/mascarado.
+ * COMPONENT - card de saldo total do periodo (GET /api/v1/transactions).
  *
- * Nao ha endpoint de saldo consumido ainda - o valor fica sempre mascarado
- * ("R$ .........") ate a Etapa 2 do cadastro (informacoes complementares)
- * existir de verdade. `onPressAdd` e o ponto de integracao futuro.
+ * Estados: carregando (indicador no lugar do valor), erro (mensagem + tentar
+ * novamente) e sucesso (valor ja formatado em BRL). Sem transacoes no periodo
+ * o valor e R$ 0,00 e o card mantem o convite do design para adicionar
+ * informacoes; `onPressAdd` segue como ponto de integracao futuro.
  */
 type BalanceCardProps = {
   period: string;
+  status: HomeStatus;
+  balance: string | null;
+  showAddHint: boolean;
   onPressAdd: () => void;
+  onRetry: () => void;
 };
 
-export function BalanceCard({ period, onPressAdd }: BalanceCardProps) {
+export function BalanceCard({
+  period,
+  status,
+  balance,
+  showAddHint,
+  onPressAdd,
+  onRetry,
+}: BalanceCardProps) {
   return (
     <LinearGradient
       colors={darkColors.balanceCardGradient}
@@ -30,13 +43,32 @@ export function BalanceCard({ period, onPressAdd }: BalanceCardProps) {
         </View>
       </View>
 
-      <Text style={styles.balance}>R$ ..........</Text>
+      {status === 'loading' ? (
+        <View style={styles.balanceSlot}>
+          <ActivityIndicator accessibilityLabel="Carregando saldo" color={darkColors.textPrimary} />
+        </View>
+      ) : null}
 
-      <Text style={styles.helperText}>
-        Adicione suas informações para usar esta funcionalidade e aumentar seu score!
-      </Text>
+      {status === 'error' ? (
+        <>
+          <Text style={styles.helperText}>Não foi possível carregar seu saldo.</Text>
+          <PillButton icon="refresh-cw" label="Tentar novamente" onPress={onRetry} />
+        </>
+      ) : null}
 
-      <PillButton icon="plus" label="Adicionar informações" onPress={onPressAdd} />
+      {status === 'success' ? (
+        <>
+          <Text style={styles.balance}>{balance}</Text>
+          {showAddHint ? (
+            <>
+              <Text style={styles.helperText}>
+                Adicione suas informações para usar esta funcionalidade e aumentar seu score!
+              </Text>
+              <PillButton icon="plus" label="Adicionar informações" onPress={onPressAdd} />
+            </>
+          ) : null}
+        </>
+      ) : null}
     </LinearGradient>
   );
 }
@@ -46,6 +78,13 @@ const styles = StyleSheet.create({
     color: darkColors.textPrimary,
     fontSize: 28,
     fontWeight: '700',
+    marginTop: 8,
+  },
+  // Mesma altura da linha do valor, para o card nao pular ao terminar de carregar.
+  balanceSlot: {
+    alignItems: 'flex-start',
+    height: 34,
+    justifyContent: 'center',
     marginTop: 8,
   },
   card: {
