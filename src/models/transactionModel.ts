@@ -1,5 +1,9 @@
 import { HttpError, httpClient } from '@/config/httpClient';
-import type { CreateTransactionPayload, TransactionResponse } from '@/types/transaction';
+import type {
+  CreateTransactionPayload,
+  TransactionListResponse,
+  TransactionResponse,
+} from '@/types/transaction';
 
 const GENERIC_MESSAGE = 'Não foi possível concluir a operação. Tente novamente.';
 
@@ -22,8 +26,12 @@ export function transactionErrorMessage(error: unknown): string {
     : GENERIC_MESSAGE;
 }
 
-/** MODEL - cadastro de transacoes financeiras. Payload identico ao contrato do backend. */
+/** MODEL - transacoes financeiras. Payload e parametros identicos ao contrato do backend. */
 export const transactionModel = {
   create: (payload: CreateTransactionPayload) =>
     httpClient.post<TransactionResponse>('/api/v1/transactions', payload),
+
+  /** Transacoes e saldo do usuario do token no periodo (datas yyyy-MM-dd, inclusive). */
+  list: (from: string, to: string) =>
+    httpClient.get<TransactionListResponse>(`/api/v1/transactions?from=${from}&to=${to}`),
 };

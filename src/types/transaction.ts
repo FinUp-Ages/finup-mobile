@@ -12,9 +12,11 @@ export type PaymentMethod = {
   name: string;
 };
 
-/** Espelha CreateTransactionRequest.java - payload nao muda nesta tarefa. */
+/**
+ * Espelha CreateTransactionRequest.java. Sem userId: o back tira o usuario do
+ * access token que o httpClient injeta.
+ */
 export type CreateTransactionPayload = {
-  userId: string;
   categoryId: string;
   paymentMethodId: string | null;
   type: TransactionType;
@@ -36,4 +38,20 @@ export type TransactionResponse = {
   isRecurring: boolean;
   createdAt: string;
   updatedAt: string;
+};
+
+/** Espelha TransactionListResponse.java (GET /api/v1/transactions?from&to). */
+export type TransactionListResponse = {
+  balance: number;
+  transactions: {
+    id: string;
+    categoryId: string;
+    paymentMethodId: string | null;
+    type: TransactionType;
+    description: string | null;
+    amount: number;
+    transactionDate: string;
+    isRecurring: boolean;
+    createdAt: string;
+  }[];
 };

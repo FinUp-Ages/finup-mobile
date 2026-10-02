@@ -13,7 +13,7 @@ type PrimaryButtonProps = {
   onPress: () => void;
   disabled?: boolean;
   loading?: boolean;
-  icon?: 'next' | 'plus' | 'save';
+  icon?: 'next' | 'plus';
 };
 
 export function PrimaryButton({ label, onPress, disabled, loading, icon }: PrimaryButtonProps) {
@@ -36,7 +36,7 @@ export function PrimaryButton({ label, onPress, disabled, loading, icon }: Prima
       ) : icon ? (
         <View style={[styles.iconCircle, disabled ? styles.iconCircleDisabled : null]}>
           <Feather
-            name={icon === 'plus' ? 'plus' : icon === 'save' ? 'check' : 'arrow-right'}
+            name={icon === 'plus' ? 'plus' : 'arrow-right'}
             size={16}
             color={disabled ? colors.placeholder : colors.textPrimary}
           />

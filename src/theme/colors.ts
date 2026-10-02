@@ -20,4 +20,19 @@ export const colors = {
   link: '#2563eb',
   white: '#ffffff',
   screenBackground: '#051329',
+  // Tela Analise e modal de transacao (mockup): degrade azul para o marinho da
+  // tela inicial, cartao e pilulas translucidos sobre ele.
+  brandBlue: '#1a6fb0',
+  brandDeep: '#031836',
+  glass: 'rgba(255, 255, 255, 0.12)',
+  glassBorder: 'rgba(255, 255, 255, 0.18)',
+  glassStrong: 'rgba(255, 255, 255, 0.2)',
+  pillLight: '#f4f4f5',
+  pillDark: '#22385f',
+  // Contorno do botao escuro: sem ele o botao some no fundo marinho.
+  pillDarkBorder: 'rgba(255, 255, 255, 0.35)',
+  errorOnDark: '#fecaca',
+  // Barra de abas (Figma): aba ativa em azul, indicador do Android translucido.
+  tabActive: '#0088ff',
+  tabIndicator: 'rgba(0, 136, 255, 0.16)',
 } as const;
