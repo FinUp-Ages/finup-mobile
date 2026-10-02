@@ -1,6 +1,2 @@
-// ROTA "/transacao" - aba ainda sem tela propria; mostra o "Em breve" da barra.
-import ComingSoonScreen from '@/views/ComingSoonScreen';
-
-export default function TransacaoRoute() {
-  return <ComingSoonScreen title="Transação" />;
-}
+// ROTA "/transacao" - so aponta para a tela. Toda a logica visual mora em views/.
+export { default } from '@/views/TransacaoScreen';

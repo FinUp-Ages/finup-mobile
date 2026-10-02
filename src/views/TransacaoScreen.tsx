@@ -7,18 +7,19 @@ import { BrandGradient } from '@/components/ui/BrandGradient';
 import { PillButton } from '@/components/ui/PillButton';
 import { colors } from '@/theme/colors';
 import { formatAmount } from '@/utils/masks';
-import { useAnaliseViewModel } from '@/viewmodels/useAnaliseViewModel';
+import { useTransacaoViewModel } from '@/viewmodels/useTransacaoViewModel';
 
 /**
- * VIEW - tela de Analise (mockup "Adicionar transacao", primeira tela).
+ * VIEW - aba Transacao (mockup "Adicionar transacao", primeira tela).
  *
  * Saldo total no centro e os botoes Entrada/Saida embaixo, que abrem o
  * TransactionModal por cima desta tela. Cada botao abre o modal ja com o seu
  * tipo: Entrada mostra so "Salvar entrada" e as categorias de entrada, Saida o
- * mesmo para saida. Graficos, o seletor do saldo e a edicao do saldo total sao
- * escopo futuro.
+ * mesmo para saida. O saldo tambem recarrega quando o chatbot registra uma
+ * transacao. Graficos, o seletor do saldo e a edicao do saldo total sao escopo
+ * futuro.
  */
-export default function AnaliseScreen() {
+export default function TransacaoScreen() {
   const insets = useSafeAreaInsets();
   const {
     balance,
@@ -29,7 +30,7 @@ export default function AnaliseScreen() {
     openModal,
     closeModal,
     onTransactionSaved,
-  } = useAnaliseViewModel();
+  } = useTransacaoViewModel();
 
   return (
     <View style={styles.screen}>

@@ -1,56 +1,65 @@
 {
-  "stage": "IMPLEMENTING",
-  "task": "PR #11 - [APP] Ajustar Registro de Transacao para modal: ajustes do review de 2026-10-01, assumidos por quem revisou",
-  "objective": "Fechar os pontos do review, aplicar o mockup 'Adicionar transacao' (Analise + modal) e a barra de abas do mockup",
+  "stage": "REVIEWING",
+  "task": "PR #16 - [APP] Implementar tela de Chat com IA (ClickUp 86e3bcy5f): ajustes do review e contrato de conversas do finup-backend PR #39, assumidos por quem revisou",
+  "objective": "Integrar a aba Chatbot (ja criada na barra nativa pelo #11) ao assistente do back com conversas gravadas: continuar, abrir e comecar conversas",
   "scope_changes": [
-    "2026-10-01: depois do teste no Expo Go, o usuario pediu o mockup na tela Analise e no modal, alem de corrigir o teclado que cobria o formulario no Android e a lista vazia do seletor",
-    "2026-10-01: por pedido do usuario o modal deixou de seguir o mockup em dois pontos: o botao de salvar fica dentro do cartao e cada botao da tela (Entrada/Saida) abre o modal com um unico botao de salvar do seu tipo",
-    "2026-10-01: o usuario pediu a barra de abas do mockup (Carteira, Analise, Transacao, Educacional, Chatbot) com NativeTabs; Perfil e Transcricao sairam da barra e viraram rotas da pilha raiz"
+    "2026-10-01: merge da develop (#11): a barra de abas fica a NativeTabs da develop e sai o guarda de sessao que o PR punha no layout de (tabs); a rota /chatbot passa a abrir a ChatbotScreen no lugar do 'Em breve'",
+    "2026-10-02: o finup-backend PR #39 passou a gravar as conversas (conversationId no POST, GET .../{id}/messages, messageCount, acao FINANCIAL_FEEDBACK, 422 com detail); a pedido do usuario o mobile segue esse contrato neste mesmo PR",
+    "2026-10-02: depois do teste no aparelho o usuario pediu: (1) o saldo recarregar quando o chatbot registra transacao ou responde sobre saldo; (2) a tela de saldo + Entrada/Saida sair da aba Analise e ir para a aba Transacao (Analise vira 'Em breve'; login, cadastro e abertura do app abrem em /transacao); (3) o composer do chat subir com o teclado"
   ],
   "requirements": [
-    "Payload do POST /api/v1/transactions sem userId (o back tira o usuario do token) e sem depender do GET /users/me para salvar",
-    "Entrada/Saida abrem o modal com o tipo; so as categorias desse tipo e um unico botao 'Salvar entrada' ou 'Salvar saida' (evita o 422)",
-    "Pagamento e categoria em pilulas que abrem as opcoes em chips dentro do cartao (nada por cima do formulario); pagamento opcional e desmarcavel; mensagem quando nao ha opcoes",
-    "Com o teclado aberto, o valor digitado e o botao de salvar continuam visiveis",
-    "Analise com degrade, saldo total (GET /api/v1/transactions de 1970-01-01 ate hoje) com estados carregando, erro com nova tentativa e valor; recarrega depois de salvar",
-    "Barra de abas nativa com as 5 abas do mockup; abas sem tela mostram 'Em breve'; login, cadastro e abertura do app levam para /analise",
-    "Cores so de src/theme/colors.ts"
+    "Enviar mensagens ao POST /api/v1/ai/assistant com o conversationId da conversa aberta; a primeira mensagem de uma conversa nova vai sem ele e o id da resposta passa a valer",
+    "Depois de cada envio com sucesso, recarregar a lista de conversas (titulo, ordem e contagem mudam)",
+    "Menu lateral: 'Nova conversa', lista com rolagem, conversa aberta destacada, tocar abre a conversa (GET /api/v1/assistant/conversations/{id}/messages); carregando, vazio, erro e nova tentativa",
+    "Abrir conversa: carregando, erro com nova tentativa (404 = conversa indisponivel); troca de conversa bloqueada enquanto uma mensagem e enviada",
+    "422 (assistente nao entendeu) vira fala do assistente com o detail do back, sem 'Tentar novamente'; demais erros marcam o balao e oferecem nova tentativa no mesmo balao",
+    "Boas-vindas com o primeiro nome do GET /users/me, utilizavel com o teclado aberto; composer acima da barra de abas nativa e do teclado",
+    "Cores so de src/theme/colors.ts; textos da interface com acentuacao",
+    "Resposta do chatbot com transacao criada ou FINANCIAL_FEEDBACK recarrega o saldo da aba Transacao",
+    "Aba Transacao com o saldo e Entrada/Saida; aba Analise com 'Em breve'; destino depois de login/cadastro/abertura = /transacao",
+    "Composer do chat visivel acima do teclado no Android e no iOS"
   ],
-  "flow_and_states": "Fluxo: abas -> Analise -> Entrada ou Saida -> modal -> salvar. Estados: saldo carregando/erro/valor, carregando categorias/meios, falha no carregamento, sem metodos de pagamento, formulario invalido (botao desabilitado), salvando, erro ao salvar (modal continua aberto com os dados), sucesso (fecha e recarrega o saldo). Voltar do Android fecha o modal",
+  "flow_and_states": "Fluxo: aba Chatbot -> boas-vindas -> enviar (abre conversa nova) -> resposta ('Transacao registrada' ou feedback) -> menu -> abrir outra conversa ou 'Nova conversa'. Estados: enviando ('FinUp esta pensando...'), erro com nova tentativa, 422 como resposta do assistente, conversa carregando/erro, menu carregando/vazio/erro/lista, teclado aberto (marca compacta)",
   "files_in_scope": [
-    "app/_layout.tsx",
-    "app/(tabs)/_layout.tsx",
-    "app/(tabs)/analise.tsx, carteira.tsx, transacao.tsx, educacional.tsx, chatbot.tsx",
-    "app/profile.tsx, app/transcricao.tsx (movidos de app/(tabs))",
-    "src/components/common/TransactionModal.tsx",
-    "src/components/ui/BrandGradient.tsx, CurrencyField.tsx, PillButton.tsx, PillSelect.tsx",
-    "src/models/transactionModel.ts",
+    "app/(tabs)/chatbot.tsx",
+    "assets/logo-white.png",
+    "src/config/httpClient.ts (HttpError.detail)",
+    "src/components/chatbot/ (Composer, Header, Mark, Message, SideMenu, Welcome)",
+    "src/models/chatbotModel.ts",
     "src/theme/colors.ts",
-    "src/types/transaction.ts",
-    "src/utils/dates.ts, src/utils/masks.ts",
-    "src/viewmodels/useAnaliseViewModel.ts, useTransactionModalViewModel.ts, useCadastroViewModel.ts, useLoginViewModel.ts, useLoadingScreenViewModel.ts",
-    "src/views/AnaliseScreen.tsx, ComingSoonScreen.tsx, ProfileScreen.tsx (comentario)"
+    "src/types/chatbot.ts",
+    "src/viewmodels/useChatbotViewModel.ts",
+    "src/views/ChatbotScreen.tsx",
+    "app/(tabs)/analise.tsx, app/(tabs)/transacao.tsx",
+    "src/views/AnaliseScreen.tsx -> TransacaoScreen.tsx, src/viewmodels/useAnaliseViewModel.ts -> useTransacaoViewModel.ts",
+    "src/models/transactionEvents.ts",
+    "src/viewmodels/useLoginViewModel.ts, useCadastroViewModel.ts, useLoadingScreenViewModel.ts (destino /transacao)",
+    "comentarios: app/(tabs)/_layout.tsx, ComingSoonScreen, BrandGradient, PillButton, colors.ts"
   ],
   "decisions": [
-    "Modal e uma camada opaca dentro da tela (nao um <Modal> do RN) para a barra de abas continuar visivel; KeyboardAvoidingView com padding so no iOS, como Login/Cadastro/chatbot",
-    "SelectField e PrimaryButton voltaram ao da develop; o modal usa PillSelect/ChipOptions proprios",
-    "Icones da barra: sf no iOS e @expo/vector-icons (MaterialIcons) no Android via src",
-    "Sem dependencias novas: Reanimated/keyboard-controller (recomendados pela skill da Expo) ficaram de fora porque o node_modules do worktree e uma junction do repo principal",
-    "Saldo total depende do GET /transactions sem userId (finup-backend fix/get-transactions-sem-userid); na develop do back ele ainda exige userId e o saldo cai no estado de erro"
+    "Sessao: a Loading e o setSessionExpiredHandler do app/_layout.tsx ja cobrem o acesso sem sessao; o guarda extra no layout de (tabs) deixava todas as abas em branco enquanto conferia",
+    "Bump de expo/expo-router e o package-lock do PR revertidos para os da develop: fora do escopo e o lock novo duplicava expo-modules-core em expo/node_modules",
+    "Sem anexo e sem microfone no composer ate haver tarefa para isso; sem selecao de modelo (o back usa o padrao sem o campo model)",
+    "A transacao da resposta usa o TransactionResponse de src/types/transaction.ts (o back devolve o mesmo DTO)",
+    "HttpError ganhou `detail` (lido do problem+json do back) sem mudar `message`: quem ja usava HttpError continua igual",
+    "conversationId nulo na resposta (back nao gravou o historico) mantem a conversa atual; o turno com 422 nao e gravado no back, entao some ao reabrir a conversa",
+    "Resposta de uma conversa aberta antes e descartada se a pessoa trocou de conversa enquanto carregava (ref da conversa mostrada)",
+    "Saldo entre abas por um aviso simples (transactionEvents: subscribe/notifyChanged) em vez de recarregar no foco: as NativeTabs ficam montadas e o aviso nao depende de evento de foco da navegacao",
+    "Teclado do chat: KeyboardAvoidingView com padding tambem no Android (edge-to-edge nao encolhe a janela); o KAV recalcula pelo layout se a janela encolher, entao nao soma duas vezes",
+    "Tokens chat* em colors.ts para o degrade e os tons do chatbot; os gradientes do SVG da ChatbotMark ficam no componente (desenho, nao tema)"
   ],
   "non_goals": [
-    "Telas de Carteira, Transacao, Educacional e Chatbot (a feat/chatbot traz a aba Chatbot: conflito esperado em app/(tabs))",
-    "Acesso ao Perfil (e ao Sair) pela interface, que saiu da barra",
-    "Cadastro de metodos de pagamento (back so tem GET); graficos e edicao do saldo total; recorrencia e descricao no modal"
+    "Apagar ou renomear conversas (o back nao tem rota)",
+    "Microfone com a transcricao da POC (#6) no composer: tarefa separada, exige build de desenvolvimento",
+    "Anexos, selecao de modelo e confirmacao da transacao antes de registrar"
   ],
   "validation": {
-    "lint": "ok, 2026-10-01",
-    "typecheck": "ok, 2026-10-01",
-    "prettier": "ok em src e app",
-    "bundle_metro": "android e ios ok, 2026-10-01",
-    "contrato_back": "conferido: CreateTransactionRequest sem userId, CategoryResponse com type, PaymentMethodResponse(id, name), GET /transactions?from&to (fix/get-transactions-sem-userid)",
-    "expo_go": "rodadas anteriores testadas pelo usuario em Android (teclado, lista vazia, contraste); barra de abas nativa ainda nao vista no aparelho; iOS nao testado"
+    "typecheck": "ok, 2026-10-02",
+    "lint": "ok, 2026-10-02",
+    "prettier": "ok nos arquivos do chatbot e no httpClient",
+    "contrato_back": "conferido contra o finup-backend PR #39 (feature/integrate-ai-bedrock, 7b77121): AiAssistantRequest/Response com conversationId, ConversationResponse com messageCount, ConversationMessageResponse (role USER/ASSISTANT, text, action, createdAt), BusinessException -> 422 com detail. PR #39 ainda nao esta na develop do back; o PR #37 do back cria o mesmo GET de mensagens",
+    "expo_go": "nao verificado: com a barra nativa, as conversas e os ajustes ainda nao visto no aparelho; exige o back do PR #39 com Bedrock e S3 configurados"
   },
-  "review": "Iteracoes com o usuario no Expo Go em 2026-10-01. Pendente: validar a barra de abas no aparelho, descricao do PR, checklist e print/video",
-  "updated_at": "2026-10-01"
+  "review": "Review de 2026-10-01 aplicado (conflitos, dependencias, cores, acentos, nova tentativa, botoes sem acao, tipos, nome do Welcome, driver nativo, submitBehavior) e contrato de conversas do back PR #39 em 2026-10-02. Pendente: Expo Go contra o back do PR #39 e merge do PR #39 antes deste",
+  "updated_at": "2026-10-02"
 }

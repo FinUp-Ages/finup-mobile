@@ -5,8 +5,8 @@ import { BrandGradient } from '@/components/ui/BrandGradient';
 import { colors } from '@/theme/colors';
 
 /**
- * VIEW - aba da barra que ainda nao tem tela (Carteira, Transacao,
- * Educacional, Chatbot). Mantem o fundo da Analise para a navegacao entre abas
+ * VIEW - aba da barra que ainda nao tem tela (Carteira, Analise,
+ * Educacional). Mantem o fundo da aba Transacao para a navegacao entre abas
  * nao piscar; cada aba ganha a tela de verdade na tarefa dela.
  */
 type ComingSoonScreenProps = {

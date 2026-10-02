@@ -1,6 +1,2 @@
-// ROTA "/chatbot" - aba ainda sem tela propria; mostra o "Em breve" da barra.
-import ComingSoonScreen from '@/views/ComingSoonScreen';
-
-export default function ChatbotRoute() {
-  return <ComingSoonScreen title="Chatbot" />;
-}
+// Rota "/chatbot" - so aponta para a View; navegacao por abas fica no layout do grupo.
+export { default } from '@/views/ChatbotScreen';

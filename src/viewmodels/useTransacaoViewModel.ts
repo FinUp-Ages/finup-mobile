@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { transactionEvents } from '@/models/transactionEvents';
 import { transactionModel } from '@/models/transactionModel';
 import type { TransactionType } from '@/types/transaction';
 import { todayIsoDate } from '@/utils/dates';
@@ -16,19 +17,20 @@ function fetchBalance(): Promise<BalanceState> {
     .list(BALANCE_FROM, todayIsoDate())
     .then(({ balance }): BalanceState => ({ status: 'ready', value: balance }))
     .catch((error: unknown): BalanceState => {
-      if (__DEV__) console.warn('[Analise] falha ao carregar o saldo', error);
+      if (__DEV__) console.warn('[Transacao] falha ao carregar o saldo', error);
       return { status: 'error' };
     });
 }
 
 /**
- * VIEWMODEL - tela Analise: saldo total exibido no topo e no modal de transacao.
+ * VIEWMODEL - aba Transacao: saldo total exibido no topo e no modal de transacao.
  *
  * O saldo tem tres estados (carregando, erro com nova tentativa, valor): uma
  * falha nao vira "R$ 0,00" e nao impede o registro de transacao. Depois de
- * salvar, o valor atual continua na tela enquanto o novo carrega.
+ * salvar aqui ou pelo chatbot (transactionEvents), o valor atual continua na
+ * tela enquanto o novo carrega.
  */
-export function useAnaliseViewModel() {
+export function useTransacaoViewModel() {
   const [balance, setBalance] = useState<BalanceState>({ status: 'loading' });
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -45,6 +47,9 @@ export function useAnaliseViewModel() {
   const reloadBalance = useCallback(() => {
     void fetchBalance().then(setBalance);
   }, []);
+
+  // Transacao registrada em outra aba (chatbot): a aba fica montada, entao recarrega aqui.
+  useEffect(() => transactionEvents.subscribe(reloadBalance), [reloadBalance]);
 
   const retryBalance = useCallback(() => {
     setBalance({ status: 'loading' });
