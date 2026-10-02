@@ -1,21 +1,18 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, View } from 'react-native';
-import { PillButton } from '@/components/ui/PillButton';
 import { darkColors } from '@/theme/colors';
+import { formatCurrency } from '@/utils/transactions';
 
 /**
- * COMPONENT - card de saldo total, em estado vazio/mascarado.
- *
- * Nao ha endpoint de saldo consumido ainda - o valor fica sempre mascarado
- * ("R$ .........") ate a Etapa 2 do cadastro (informacoes complementares)
- * existir de verdade. `onPressAdd` e o ponto de integracao futuro.
+ * COMPONENT - saldo do periodo retornado pelo backend.
+ * null significa que o saldo ainda nao esta disponivel, nunca saldo zero.
  */
 type BalanceCardProps = {
   period: string;
-  onPressAdd: () => void;
+  balance: number | null;
 };
 
-export function BalanceCard({ period, onPressAdd }: BalanceCardProps) {
+export function BalanceCard({ period, balance }: BalanceCardProps) {
   return (
     <LinearGradient
       colors={darkColors.balanceCardGradient}
@@ -24,19 +21,15 @@ export function BalanceCard({ period, onPressAdd }: BalanceCardProps) {
       style={styles.card}
     >
       <View style={styles.headerRow}>
-        <Text style={styles.eyebrow}>SALDO TOTAL</Text>
+        <Text style={styles.eyebrow}>SALDO DO PERÍODO</Text>
         <View style={styles.periodBadge}>
           <Text style={styles.periodLabel}>{period}</Text>
         </View>
       </View>
 
-      <Text style={styles.balance}>R$ ..........</Text>
+      <Text style={styles.balance}>{balance === null ? '—' : formatCurrency(balance)}</Text>
 
-      <Text style={styles.helperText}>
-        Adicione suas informações para usar esta funcionalidade e aumentar seu score!
-      </Text>
-
-      <PillButton icon="plus" label="Adicionar informações" onPress={onPressAdd} />
+      <Text style={styles.helperText}>Entradas menos saídas no período selecionado.</Text>
     </LinearGradient>
   );
 }
@@ -67,7 +60,6 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.85)',
     fontSize: 13,
     lineHeight: 18,
-    marginBottom: 16,
     marginTop: 8,
   },
   periodBadge: {
