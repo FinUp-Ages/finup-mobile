@@ -4,7 +4,8 @@
   "objective": "Integrar a aba Chatbot (ja criada na barra nativa pelo #11) ao assistente do back com conversas gravadas: continuar, abrir e comecar conversas",
   "scope_changes": [
     "2026-10-01: merge da develop (#11): a barra de abas fica a NativeTabs da develop e sai o guarda de sessao que o PR punha no layout de (tabs); a rota /chatbot passa a abrir a ChatbotScreen no lugar do 'Em breve'",
-    "2026-10-02: o finup-backend PR #39 passou a gravar as conversas (conversationId no POST, GET .../{id}/messages, messageCount, acao FINANCIAL_FEEDBACK, 422 com detail); a pedido do usuario o mobile segue esse contrato neste mesmo PR"
+    "2026-10-02: o finup-backend PR #39 passou a gravar as conversas (conversationId no POST, GET .../{id}/messages, messageCount, acao FINANCIAL_FEEDBACK, 422 com detail); a pedido do usuario o mobile segue esse contrato neste mesmo PR",
+    "2026-10-02: depois do teste no aparelho o usuario pediu: (1) o saldo recarregar quando o chatbot registra transacao ou responde sobre saldo; (2) a tela de saldo + Entrada/Saida sair da aba Analise e ir para a aba Transacao (Analise vira 'Em breve'; login, cadastro e abertura do app abrem em /transacao); (3) o composer do chat subir com o teclado"
   ],
   "requirements": [
     "Enviar mensagens ao POST /api/v1/ai/assistant com o conversationId da conversa aberta; a primeira mensagem de uma conversa nova vai sem ele e o id da resposta passa a valer",
@@ -13,7 +14,10 @@
     "Abrir conversa: carregando, erro com nova tentativa (404 = conversa indisponivel); troca de conversa bloqueada enquanto uma mensagem e enviada",
     "422 (assistente nao entendeu) vira fala do assistente com o detail do back, sem 'Tentar novamente'; demais erros marcam o balao e oferecem nova tentativa no mesmo balao",
     "Boas-vindas com o primeiro nome do GET /users/me, utilizavel com o teclado aberto; composer acima da barra de abas nativa e do teclado",
-    "Cores so de src/theme/colors.ts; textos da interface com acentuacao"
+    "Cores so de src/theme/colors.ts; textos da interface com acentuacao",
+    "Resposta do chatbot com transacao criada ou FINANCIAL_FEEDBACK recarrega o saldo da aba Transacao",
+    "Aba Transacao com o saldo e Entrada/Saida; aba Analise com 'Em breve'; destino depois de login/cadastro/abertura = /transacao",
+    "Composer do chat visivel acima do teclado no Android e no iOS"
   ],
   "flow_and_states": "Fluxo: aba Chatbot -> boas-vindas -> enviar (abre conversa nova) -> resposta ('Transacao registrada' ou feedback) -> menu -> abrir outra conversa ou 'Nova conversa'. Estados: enviando ('FinUp esta pensando...'), erro com nova tentativa, 422 como resposta do assistente, conversa carregando/erro, menu carregando/vazio/erro/lista, teclado aberto (marca compacta)",
   "files_in_scope": [
@@ -25,7 +29,12 @@
     "src/theme/colors.ts",
     "src/types/chatbot.ts",
     "src/viewmodels/useChatbotViewModel.ts",
-    "src/views/ChatbotScreen.tsx"
+    "src/views/ChatbotScreen.tsx",
+    "app/(tabs)/analise.tsx, app/(tabs)/transacao.tsx",
+    "src/views/AnaliseScreen.tsx -> TransacaoScreen.tsx, src/viewmodels/useAnaliseViewModel.ts -> useTransacaoViewModel.ts",
+    "src/models/transactionEvents.ts",
+    "src/viewmodels/useLoginViewModel.ts, useCadastroViewModel.ts, useLoadingScreenViewModel.ts (destino /transacao)",
+    "comentarios: app/(tabs)/_layout.tsx, ComingSoonScreen, BrandGradient, PillButton, colors.ts"
   ],
   "decisions": [
     "Sessao: a Loading e o setSessionExpiredHandler do app/_layout.tsx ja cobrem o acesso sem sessao; o guarda extra no layout de (tabs) deixava todas as abas em branco enquanto conferia",
@@ -35,6 +44,8 @@
     "HttpError ganhou `detail` (lido do problem+json do back) sem mudar `message`: quem ja usava HttpError continua igual",
     "conversationId nulo na resposta (back nao gravou o historico) mantem a conversa atual; o turno com 422 nao e gravado no back, entao some ao reabrir a conversa",
     "Resposta de uma conversa aberta antes e descartada se a pessoa trocou de conversa enquanto carregava (ref da conversa mostrada)",
+    "Saldo entre abas por um aviso simples (transactionEvents: subscribe/notifyChanged) em vez de recarregar no foco: as NativeTabs ficam montadas e o aviso nao depende de evento de foco da navegacao",
+    "Teclado do chat: KeyboardAvoidingView com padding tambem no Android (edge-to-edge nao encolhe a janela); o KAV recalcula pelo layout se a janela encolher, entao nao soma duas vezes",
     "Tokens chat* em colors.ts para o degrade e os tons do chatbot; os gradientes do SVG da ChatbotMark ficam no componente (desenho, nao tema)"
   ],
   "non_goals": [

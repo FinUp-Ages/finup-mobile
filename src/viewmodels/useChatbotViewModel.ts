@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { HttpError } from '@/config/httpClient';
 import { chatbotModel } from '@/models/chatbotModel';
+import { transactionEvents } from '@/models/transactionEvents';
 import type { ChatMessage, ConversationMessage, ConversationSummary } from '@/types/chatbot';
 import { userModel } from '@/models/userModel';
 
@@ -189,6 +190,9 @@ export function useChatbotViewModel() {
         }
         // O turno foi gravado: titulo, ordem e contagem do menu mudaram.
         void loadConversations();
+        // Transacao criada ou pergunta de saldo: a aba Transacao recarrega o
+        // saldo para mostrar o mesmo valor que o assistente usou.
+        if (response.transaction || response.action === 'FINANCIAL_FEEDBACK') transactionEvents.notifyChanged();
       } catch (error) {
         if (error instanceof HttpError && error.status === 422) {
           // Chegou, mas o assistente nao entendeu: a resposta vira fala dele e

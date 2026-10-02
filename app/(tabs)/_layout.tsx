@@ -15,7 +15,8 @@ import { colors } from '@/theme/colors';
  * Abas nativas nao desenham cabecalho; as telas cuidam do proprio topo.
  *
  * Os parenteses fazem de "(tabs)" um grupo: as rotas respondem em "/carteira",
- * "/analise", "/transacao", "/educacional" e "/chatbot". Perfil e Transcricao
+ * "/analise", "/transacao", "/educacional" e "/chatbot"; o app abre em "/transacao"
+ * (saldo e registro de transacao). Perfil e Transcricao
  * ficam fora da barra, como rotas da pilha raiz (app/_layout.tsx).
  */
 export default function TabsLayout() {

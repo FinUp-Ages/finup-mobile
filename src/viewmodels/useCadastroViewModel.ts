@@ -299,7 +299,7 @@ export function useCadastroViewModel({ resume = false }: { resume?: boolean } = 
 
     await userModel.ensureCreated();
     await userModel.updateAdditionalInfo(toAdditionalInfo(data));
-    router.replace('/analise');
+    router.replace('/transacao');
   }, [data, resume, router]);
 
   const submit = useCallback(async () => {

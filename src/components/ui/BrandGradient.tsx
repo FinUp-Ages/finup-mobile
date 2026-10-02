@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import { colors } from '@/theme/colors';
 
 /**
- * COMPONENT - fundo em degrade azul da tela Analise e do modal de transacao
+ * COMPONENT - fundo em degrade azul da aba Transacao e do modal de transacao
  * (mockup). Ocupa todo o pai; quem usa coloca o conteudo por cima.
  */
 export function BrandGradient() {
