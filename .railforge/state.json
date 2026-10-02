@@ -6,7 +6,7 @@
   "decisions": [
     "2026-10-01, usuario: saldo e gastos do mes corrente (from = dia 1, to = hoje, datas locais); etiqueta do card mostra o mes",
     "2026-10-01, usuario: Gastos lista as transacoes EXPENSE do periodo com o nome da categoria (GET /api/v1/categories); sem gastos, o card Integrar cartoes e o estado vazio",
-    "2026-10-01, usuario: GET /transactions sem userId (contrato da fix/get-transactions-sem-userid do back, ainda sem merge na develop do back)",
+    "2026-10-01, usuario: GET /transactions sem userId (contrato da fix/get-transactions-sem-userid, ja mergeada na develop do back segundo o usuario em 2026-10-01; nao conferido aqui: o fetch do back falha por acesso SSH)",
     "2026-10-01, usuario: sem runner de testes; validar com typecheck, lint, cenarios em Node e Expo Go",
     "Nome: GET /api/v1/users/me (ja existe); saudacao usa o primeiro nome",
     "Sem mudanca no back: os endpoints necessarios ja existem",
@@ -48,11 +48,10 @@
     "metro_android_bundle": "ok (expo export --platform android)",
     "cenarios_node": "22 verificacoes ok com httpClient simulado: formatBRL (zero, milhar, negativo, ponto flutuante, -0,001), datas locais (fim de mes 23h, fevereiro bissexto), primeiro nome, chamada GET /transactions sem userId no mes corrente, so despesas com categoria e fallbacks de titulo, usuario novo com R$ 0,00 e lista vazia, falha so nas categorias, erro em transactions e em users/me propagam",
     "back_sem_token": "ok, back local (porta 8080): GET /transactions, /users/me e /categories sem token -> 401",
-    "expo_go_pendente": "nao validado no aparelho: criar usuario -> Home com nome e saldo corretos; dois usuarios com saldos diferentes; estados de loading, erro (back parado) e saldo zerado; pull-to-refresh; volta para a Home apos cadastrar transacao. Requer o back com a fix/get-transactions-sem-userid (a develop do back ainda exige userId e responde 400)"
+    "expo_go_pendente": "nao validado no aparelho: criar usuario -> Home com nome e saldo corretos; dois usuarios com saldos diferentes; estados de loading, erro (back parado) e saldo zerado; pull-to-refresh; volta para a Home apos cadastrar transacao. Back na develop (ja com a fix/get-transactions-sem-userid)"
   },
   "review": "Diff revisado em 2026-10-01 (16 arquivos): sem nome ou saldo fixo, sem console.log novo, sem any, sem segredo. package-lock.json modificado antes da tarefa (so flags peer) fica fora dos commits. Riscos: conflito add/add com a origin/feature/transaction-modal em src/types/transaction.ts e src/models/(transactionModel|categoriesModel).ts (la Category tem isDefault, que o GET /categories nao devolve); pull-to-refresh que falha com dados na tela nao avisa; barra de abas nativa aparece junto da barra propria da Home",
   "follow_ups": [
-    "Merge da fix/get-transactions-sem-userid na develop do back (bloqueia o saldo e os gastos contra a develop)",
     "Score: expor finUpScore no GET /users/me",
     "CTAs da Home (Adicionar agora, Adicionar informacoes, Integrar cartoes) e barra inferior propria sem destino",
     "Decidir barra de abas nativa vs. HomeTabBar e onde fica o Sair",
