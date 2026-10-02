@@ -59,7 +59,7 @@ export function useLoginViewModel() {
     try {
       await userModel.getMe();
       setPasswordValue('');
-      router.replace('/profile');
+      router.replace('/home');
     } catch (meError) {
       if (meError instanceof HttpError && meError.status === 404) {
         setPasswordValue('');
