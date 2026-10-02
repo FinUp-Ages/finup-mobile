@@ -1,13 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { colors } from '@/theme/colors';
 
 interface ChatbotHeaderProps {
-  showModel: boolean;
+  showAssistantStatus: boolean;
   onOpenMenu: () => void;
 }
 
-export function ChatbotHeader({ showModel, onOpenMenu }: ChatbotHeaderProps) {
+export function ChatbotHeader({ showAssistantStatus, onOpenMenu }: ChatbotHeaderProps) {
   return (
     <View style={styles.header}>
       <Pressable
@@ -17,13 +18,12 @@ export function ChatbotHeader({ showModel, onOpenMenu }: ChatbotHeaderProps) {
         onPress={onOpenMenu}
         style={styles.menuButton}
       >
-        <Ionicons color="#FFFFFF" name="menu" size={27} />
+        <Ionicons color={colors.white} name="menu" size={27} />
       </Pressable>
 
-      {showModel ? (
-        <View accessibilityLabel="Modelo atual: Sonnet 2.0" style={styles.modelPill}>
-          <Text style={styles.modelLabel}>Sonnet 2.0</Text>
-          <Ionicons color="#D7E6F3" name="chevron-down" size={17} />
+      {showAssistantStatus ? (
+        <View accessibilityLabel="Assistente financeiro" style={styles.modelPill}>
+          <Text style={styles.modelLabel}>Assistente</Text>
         </View>
       ) : null}
     </View>
@@ -33,10 +33,10 @@ export function ChatbotHeader({ showModel, onOpenMenu }: ChatbotHeaderProps) {
 const styles = StyleSheet.create({
   header: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', minHeight: 38 },
   menuButton: { alignItems: 'center', height: 40, justifyContent: 'center', width: 40 },
-  modelLabel: { color: '#F5F9FC', fontSize: 14 },
+  modelLabel: { color: colors.chatTextBright, fontSize: 14 },
   modelPill: {
     alignItems: 'center',
-    backgroundColor: 'rgba(26, 61, 101, 0.7)',
+    backgroundColor: colors.chatPill,
     borderRadius: 22,
     flexDirection: 'row',
     gap: 7,

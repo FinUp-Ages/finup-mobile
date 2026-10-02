@@ -36,6 +36,14 @@ export function formatCurrency(value: string): string {
 }
 
 /**
+ * Formata um valor em reais ja numerico, com sinal (ex.: -12.5 -> "-R$ 12,50").
+ */
+export function formatAmount(value: number): string {
+  const cents = Math.round(Math.abs(value) * 100);
+  return `${value < 0 ? '-' : ''}${formatCurrency(String(cents))}`;
+}
+
+/**
  * Converte valor digitado (com ou sem mascara) para number sem ambiguidade.
  * Exemplos:
  * "R$ 1.500,00" -> 1500

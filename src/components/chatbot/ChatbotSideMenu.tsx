@@ -11,25 +11,33 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '@/theme/colors';
-import type { Conversation } from '@/types/chatbot';
+import type { ConversationSummary } from '@/types/chatbot';
 
-interface ChatbotSideMenuProps {
+export interface ChatbotSideMenuProps {
+  activeConversationId: string | null;
+  conversations: ConversationSummary[];
+  /** Enquanto uma mensagem é enviada não dá para trocar de conversa. */
+  disabled: boolean;
+  error: string | null;
+  isLoading: boolean;
   visible: boolean;
   onClose: () => void;
-  conversations: Conversation[];
-  currentConversationId: string | null;
-  isLoading: boolean;
+  onNewConversation: () => void;
+  onRetry: () => void;
   onSelectConversation: (id: string) => void;
-  onNewConversation?: () => void;
 }
 
-/** COMPONENT - drawer lateral com historico de conversas conforme o Figma (#121212). */
+/** COMPONENT - drawer lateral com histórico de conversas conforme o Figma (#121212). */
 export function ChatbotSideMenu({
+  activeConversationId,
+  conversations,
+  disabled,
+  error,
+  isLoading,
   visible,
   onClose,
-  conversations,
-  currentConversationId,
-  isLoading,
+  onNewConversation,
+  onRetry,
   onSelectConversation,
 }: ChatbotSideMenuProps) {
   const insets = useSafeAreaInsets();
@@ -57,27 +65,56 @@ export function ChatbotSideMenu({
             },
           ]}
         >
-          {/* Botao de fechar no topo esquerdo */}
-          <Pressable
-            accessibilityLabel="Fechar menu"
-            accessibilityRole="button"
-            hitSlop={12}
-            onPress={onClose}
-            style={styles.closeBtn}
-          >
-            <Ionicons color={colors.white} name="close" size={26} />
-          </Pressable>
+          {/* Barra superior com fechar e nova conversa */}
+          <View style={styles.headerRow}>
+            <Pressable
+              accessibilityLabel="Fechar menu"
+              accessibilityRole="button"
+              hitSlop={12}
+              onPress={onClose}
+              style={styles.iconBtn}
+            >
+              <Ionicons color={colors.white} name="close" size={26} />
+            </Pressable>
 
-          {/* Subtitulo da secao */}
+            <Pressable
+              accessibilityLabel="Nova conversa"
+              accessibilityRole="button"
+              accessibilityState={{ disabled }}
+              disabled={disabled}
+              hitSlop={12}
+              onPress={onNewConversation}
+              style={[styles.iconBtn, disabled ? styles.itemDisabled : null]}
+            >
+              <Ionicons color={colors.white} name="create-outline" size={22} />
+            </Pressable>
+          </View>
+
+          {/* Subtítulo da seção */}
           <Text style={styles.sectionTitle}>Histórico de conversas</Text>
           <View style={styles.divider} />
 
-          {/* Conteudo da Lista */}
+          {/* Feedback de erro */}
+          {error ? (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{error}</Text>
+              <Pressable
+                accessibilityLabel="Tentar novamente carregar conversas"
+                accessibilityRole="button"
+                onPress={onRetry}
+                style={styles.retryBtn}
+              >
+                <Text style={styles.retryText}>Tentar novamente</Text>
+              </Pressable>
+            </View>
+          ) : null}
+
+          {/* Conteúdo da Lista */}
           {isLoading && conversations.length === 0 ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator color={colors.textMuted} size="small" />
             </View>
-          ) : conversations.length === 0 ? (
+          ) : !error && conversations.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>Nenhuma conversa anterior</Text>
             </View>
@@ -89,18 +126,21 @@ export function ChatbotSideMenu({
               style={styles.list}
             >
               {conversations.map((item) => {
-                const isSelected = item.id === currentConversationId;
+                const isSelected = item.id === activeConversationId;
                 const displayTitle = item.title?.trim() || 'Nova conversa';
 
                 return (
                   <Pressable
                     accessibilityLabel={`Abrir conversa: ${displayTitle}`}
                     accessibilityRole="button"
+                    accessibilityState={{ disabled, selected: isSelected }}
+                    disabled={disabled}
                     key={item.id}
                     onPress={() => onSelectConversation(item.id)}
                     style={({ pressed }) => [
                       styles.itemRow,
                       isSelected ? styles.itemRowActive : null,
+                      disabled ? styles.itemDisabled : null,
                       pressed ? styles.itemRowPressed : null,
                     ]}
                   >
@@ -125,11 +165,6 @@ const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
   },
-  closeBtn: {
-    alignSelf: 'flex-start',
-    marginBottom: 24,
-    padding: 4,
-  },
   divider: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     height: 1,
@@ -142,7 +177,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     position: 'absolute',
     top: 0,
-    width: '75%',
+    width: '78%',
   },
   emptyContainer: {
     paddingVertical: 24,
@@ -150,6 +185,26 @@ const styles = StyleSheet.create({
   emptyText: {
     color: colors.textMuted,
     fontSize: 14,
+  },
+  errorContainer: {
+    paddingVertical: 16,
+  },
+  errorText: {
+    color: colors.errorOnDark,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  headerRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+  },
+  iconBtn: {
+    padding: 4,
+  },
+  itemDisabled: {
+    opacity: 0.5,
   },
   itemRow: {
     borderBottomColor: 'rgba(255, 255, 255, 0.1)',
@@ -186,6 +241,15 @@ const styles = StyleSheet.create({
   overlay: {
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     flex: 1,
+  },
+  retryBtn: {
+    alignSelf: 'flex-start',
+    marginTop: 8,
+  },
+  retryText: {
+    color: colors.chatAccent,
+    fontSize: 13,
+    fontWeight: '700',
   },
   sectionTitle: {
     color: colors.textMuted,

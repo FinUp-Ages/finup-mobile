@@ -7,6 +7,8 @@ const DEFAULT_PULSE_DURATION_MS = 12000;
 const DEFAULT_FLAME_ROTATION_DURATION_MS = 28000;
 
 interface ChatbotMarkProps {
+  /** Reduz a marca e a posiciona mais acima em espacos verticais menores. */
+  compact?: boolean;
   /** Intensidade do glow, de 0 (invisivel) a 1 (original). */
   glowOpacity?: number;
   /** Escala do glow em relacao ao container; preparada para o pulso futuro. */
@@ -20,6 +22,7 @@ interface ChatbotMarkProps {
 
 /** Marca usada na tela de boas-vindas, com aura azul orgânica inspirada em Hotflames. */
 export function ChatbotMark({
+  compact = false,
   flameRotationDuration = DEFAULT_FLAME_ROTATION_DURATION_MS,
   glowExpansion = 1,
   glowOpacity = 1,
@@ -52,7 +55,8 @@ export function ChatbotMark({
         duration: flameRotationDuration,
         easing: Easing.linear,
         toValue: 1,
-        useNativeDriver: false,
+        // So `transform: rotate`: roda na thread nativa, sem ocupar a de JS no loop infinito.
+        useNativeDriver: true,
       }),
     );
 
@@ -70,6 +74,7 @@ export function ChatbotMark({
             height: glowCanvasSize,
             marginLeft: -glowCanvasOffset,
             marginTop: -glowCanvasOffset,
+            top: compact ? '24%' : '40%',
             width: glowCanvasSize,
           },
           {
@@ -196,7 +201,10 @@ export function ChatbotMark({
         accessibilityLabel="FinUp"
         resizeMode="contain"
         source={require('../../../assets/logo-white.png')}
-        style={[styles.logo, { height: size, marginLeft: -size / 2, marginTop: -size / 2, width: size }]}
+        style={[
+          styles.logo,
+          { height: size, marginLeft: -size / 2, marginTop: -size / 2, top: compact ? '24%' : '40%', width: size },
+        ]}
       />
     </View>
   );
@@ -205,7 +213,7 @@ export function ChatbotMark({
 const styles = StyleSheet.create({
   container: { flex: 1, overflow: 'visible', width: '100%' },
   flameLayer: { ...StyleSheet.absoluteFill },
-  logo: { flexShrink: 0, left: '50%', position: 'absolute', top: '40%' },
-  sphere: { left: '50%', position: 'absolute', top: '40%' },
+  logo: { flexShrink: 0, left: '50%', position: 'absolute' },
+  sphere: { left: '50%', position: 'absolute' },
   svg: { overflow: 'visible' },
 });

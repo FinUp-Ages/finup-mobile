@@ -15,11 +15,25 @@ const baseURL = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
 
 export class HttpError extends Error {
   readonly status: number;
+  /** `detail` do problem+json do back, quando vier: texto ja escrito para o usuario. */
+  readonly detail: string | null;
 
-  constructor(status: number, message: string) {
+  constructor(status: number, message: string, detail: string | null = null) {
     super(message);
     this.name = 'HttpError';
     this.status = status;
+    this.detail = detail;
+  }
+}
+
+// O back responde erro em problem+json ({ title, status, detail }). Corpo vazio
+// ou fora desse formato vira null: quem chama cai na propria mensagem.
+async function readProblemDetail(response: Response): Promise<string | null> {
+  try {
+    const body = (await response.json()) as { detail?: unknown };
+    return typeof body.detail === 'string' && body.detail.trim() ? body.detail.trim() : null;
+  } catch {
+    return null;
   }
 }
 
@@ -74,7 +88,7 @@ async function request<T>(path: string, { auth = true, ...init }: RequestOptions
   }
 
   if (!response.ok) {
-    throw new HttpError(response.status, `Falha na requisicao: ${response.status}`);
+    throw new HttpError(response.status, `Falha na requisicao: ${response.status}`, await readProblemDetail(response));
   }
 
   if (response.status === 204) {
