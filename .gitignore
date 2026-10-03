@@ -91,3 +91,6 @@ bun.lockb
 
 # sobra de "mv node_modules node_modules_old"
 node_modules_old/
+
+finup-backend/
+finup-web/
