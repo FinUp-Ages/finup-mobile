@@ -65,9 +65,11 @@ export default function ChatbotScreen() {
   return (
     <LinearGradient colors={GRADIENT_COLORS} locations={[0, 0.48, 0.77, 1]} style={styles.screen}>
       <StatusBar style="light" />
-      {/* Como na aba Transacao: o SafeAreaView do react-native-screens deixa o
+      {/* No Android a barra de abas nativa ja fica fora da area da tela, entao o
+          inset de baixo somaria a altura dela de novo (vao entre composer e barra).
+          Como na aba Transacao: o SafeAreaView do react-native-screens deixa o
           composer acima da barra de abas nativa (que flutua no iOS 26). */}
-      <SafeAreaView edges={{ bottom: true }} style={styles.safeArea}>
+      <SafeAreaView edges={{ bottom: Platform.OS === 'ios' }} style={styles.safeArea}>
         {/* `padding` tambem no Android: com o edge-to-edge a janela nao encolhe
             quando o teclado abre e o composer ficava atras dele. Se a janela
             encolher mesmo assim, o KAV recalcula pelo layout e a sobra vira 0. */}

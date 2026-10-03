@@ -13,6 +13,8 @@ import { authModel } from '@/models/authModel';
 
 const baseURL = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
 
+const REQUEST_TIMEOUT_MS = 15000;
+
 export class HttpError extends Error {
   readonly status: number;
   /** `detail` do problem+json do back, quando vier: texto ja escrito para o usuario. */
@@ -73,15 +75,24 @@ type RequestOptions = RequestInit & { auth?: boolean };
 async function request<T>(path: string, { auth = true, ...init }: RequestOptions = {}): Promise<T> {
   const accessToken = auth ? await resolveAccessToken() : null;
 
-  const response = await fetch(`${baseURL}${path}`, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      // Sempre o access token: o IdToken (token_use=id) o back recusa com 401.
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-      ...init.headers,
-    },
-  });
+  // Sem timeout, back fora do ar deixava a tela em "carregando" para sempre.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  let response: Response;
+  try {
+    response = await fetch(`${baseURL}${path}`, {
+      ...init,
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        // Sempre o access token: o IdToken (token_use=id) o back recusa com 401.
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        ...init.headers,
+      },
+    });
+  } finally {
+    clearTimeout(timer);
+  }
 
   if (auth && response.status === 401 && (await authModel.hasSession())) {
     return expireSession();

@@ -70,6 +70,7 @@ export function useChatbotViewModel() {
   // Conversa que a tela quer mostrar agora: descarta a resposta de uma conversa
   // aberta antes se a pessoa trocou de novo enquanto ela carregava.
   const shownConversation = useRef<string | null>(null);
+  const sendLockRef = useRef(false);
 
   useEffect(() => {
     let active = true;
@@ -206,6 +207,7 @@ export function useChatbotViewModel() {
           setErrorMessage(createErrorMessage(error));
         }
       } finally {
+        sendLockRef.current = false;
         setIsSending(false);
       }
     },
@@ -214,7 +216,11 @@ export function useChatbotViewModel() {
 
   const sendMessage = useCallback(() => {
     const text = draft.trim();
-    if (!text || isSending || isLoadingMessages) return;
+    // O ref fecha a janela entre o envio e o re-render: `onSubmitEditing` e o
+    // botao (ou o "Enviar" do teclado, que pode disparar duas vezes) chegam com
+    // o mesmo `draft`/`isSending` do render anterior e enviavam a mensagem em dobro.
+    if (!text || isSending || isLoadingMessages || sendLockRef.current) return;
+    sendLockRef.current = true;
 
     const messageId = `user-${Date.now()}`;
     setDraft('');
@@ -225,7 +231,8 @@ export function useChatbotViewModel() {
   // Reenvia a ultima mensagem que falhou no proprio balao, sem duplicar o texto.
   const retryLastMessage = useCallback(() => {
     const failed = [...messages].reverse().find((message) => message.status === 'error');
-    if (!failed || isSending) return;
+    if (!failed || isSending || sendLockRef.current) return;
+    sendLockRef.current = true;
 
     setMessages((current) => current.map((message) => (message.id === failed.id ? { ...message, status: 'sending' } : message)));
     void deliver(failed.id, failed.text);

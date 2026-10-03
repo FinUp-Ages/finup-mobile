@@ -154,15 +154,15 @@ const styles = StyleSheet.create({
   },
   pill: {
     alignItems: 'center',
-    backgroundColor: colors.glassStrong,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderColor: 'transparent',
-    borderRadius: 22,
+    borderRadius: 10000,
     borderWidth: 1,
     flex: 1,
     flexDirection: 'row',
     gap: 6,
-    minHeight: 44,
-    paddingHorizontal: 12,
+    minHeight: 45,
+    paddingHorizontal: 16,
   },
   pillError: {
     borderColor: colors.errorOnDark,
@@ -170,8 +170,7 @@ const styles = StyleSheet.create({
   pillLabel: {
     color: colors.white,
     flex: 1,
-    fontSize: 13,
-    fontWeight: '500',
+    fontSize: 16,
   },
   pillOpen: {
     borderColor: colors.white,

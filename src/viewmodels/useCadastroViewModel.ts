@@ -11,9 +11,7 @@ import type {
   CadastroStep,
 } from '@/types/cadastro';
 import {
-  formatCurrency,
   formatPhone,
-  parseCurrencyToNumber,
   sanitizeEmail,
   sanitizeName,
 } from '@/utils/masks';
@@ -78,12 +76,6 @@ function computeStep2Errors(data: CadastroFormData): CadastroFormErrors {
   // (DateField) so permite selecionar datas ate hoje, entao um valor presente
   // ja e garantidamente valido.
   if (!data.birthDate) errors.birthDate = true;
-  if (data.monthlyIncome.trim()) {
-    const value = parseCurrencyToNumber(data.monthlyIncome);
-    if (value === undefined || value < 0) {
-      errors.monthlyIncome = 'Deve ser um valor numérico e não negativo.';
-    }
-  }
   return errors;
 }
 
@@ -192,8 +184,6 @@ export function useCadastroViewModel({ resume = false }: { resume?: boolean } = 
           formattedValue = sanitizeEmail(value) as CadastroFormData[K];
         } else if (field === 'celular') {
           formattedValue = formatPhone(value) as CadastroFormData[K];
-        } else if (field === 'monthlyIncome') {
-          formattedValue = formatCurrency(value) as CadastroFormData[K];
         }
       }
 
@@ -299,7 +289,7 @@ export function useCadastroViewModel({ resume = false }: { resume?: boolean } = 
 
     await userModel.ensureCreated();
     await userModel.updateAdditionalInfo(toAdditionalInfo(data));
-    router.replace('/transacao');
+    router.replace('/carteira');
   }, [data, resume, router]);
 
   const submit = useCallback(async () => {

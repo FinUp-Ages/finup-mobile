@@ -31,6 +31,10 @@ export const colors = {
   pillDark: '#22385f',
   // Contorno do botao escuro: sem ele o botao some no fundo marinho.
   pillDarkBorder: 'rgba(255, 255, 255, 0.35)',
+  // Figma (tela Transacao): botao Saida em azul-gelo translucido; texto marinho.
+  pillSoftFill: 'rgba(205, 233, 246, 0.1)',
+  pillSoftText: '#cde9f6',
+  pillLightText: '#021736',
   errorOnDark: '#fecaca',
   // Barra de abas (Figma): aba ativa em azul, indicador do Android translucido.
   tabActive: '#0088ff',
@@ -54,4 +58,23 @@ export const colors = {
   chatDrawer: '#082544',
   chatDrawerItem: '#103456',
   chatOverlay: 'rgba(0, 12, 28, 0.65)',
+} as const;
+
+/**
+ * Paleta escura - telas autenticadas (Home e afins). Reaproveita o azul-marinho
+ * ja usado na AuthInitialScreen (mesmo `#031836` base) em vez de inventar um tom
+ * novo, para as duas telas lerem como o mesmo produto.
+ */
+export const darkColors = {
+  background: '#04102A',
+  surface: '#0B1E3D',
+  surfaceBorder: 'rgba(255, 255, 255, 0.08)',
+  textPrimary: '#ffffff',
+  textMuted: 'rgba(255, 255, 255, 0.65)',
+  textFaint: 'rgba(255, 255, 255, 0.45)',
+  accent: '#2F80FF',
+  // Gradiente do cartao de CTA do score (teal -> azul-marinho escuro).
+  scoreCardGradient: ['#123B47', '#0A1F3D'] as const,
+  // Gradiente do cartao de saldo (azul vibrante -> azul-marinho escuro).
+  balanceCardGradient: ['#3D7BEB', '#12306E'] as const,
 } as const;
