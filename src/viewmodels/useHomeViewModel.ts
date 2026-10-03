@@ -19,8 +19,9 @@ type TransactionListItem = TransactionListResponse['transactions'][number];
  *                                        historico ate hoje (mesmo saldo da Analise)
  *   GET /api/v1/categories            -> nome da categoria de cada gasto
  *
- * O periodo (7/15/30 dias, 3/6/12 meses) e escolhido no card; trocar de periodo
- * volta ao loading do card e busca de novo.
+ * O periodo (7/15/30 dias, 3/6/12 meses) e escolhido no card e vale para entradas,
+ * saidas e gastos; o saldo total e sempre o acumulado ate hoje, igual ao da aba
+ * Transacao. Trocar de periodo volta ao loading do card e busca de novo.
  *
  * Tudo vem do usuario do access token (o httpClient injeta); nenhum id e
  * enviado. Sessao expirada (401) ja e tratada no httpClient, que volta ao
@@ -32,6 +33,9 @@ type TransactionListItem = TransactionListResponse['transactions'][number];
  */
 
 const MAX_EXPENSES = 10;
+// O saldo total nao depende do periodo escolhido: o GET /transactions so devolve
+// saldo de um intervalo, entao ele vem de uma consulta propria desde o inicio.
+const BALANCE_FROM = '1970-01-01';
 
 type HomeData = {
   userName: string;
@@ -68,9 +72,10 @@ function toExpenses(transactions: TransactionListItem[], categories: Category[])
 async function fetchHomeData(periodKey: HomePeriodKey): Promise<HomeData> {
   const period = homePeriodRange(periodKey);
 
-  const [user, list, categories] = await Promise.all([
+  const [user, list, total, categories] = await Promise.all([
     userModel.getMe(),
     transactionModel.list(period.from, period.to),
+    transactionModel.list(BALANCE_FROM, period.to),
     categoriesModel.listAvailable().catch((): Category[] => []),
   ]);
 
@@ -81,10 +86,10 @@ async function fetchHomeData(periodKey: HomePeriodKey): Promise<HomeData> {
 
   return {
     userName: firstName(user.name),
-    balance: formatBRL(list.balance),
+    balance: formatBRL(total.balance),
     income: `+ ${formatBRL(sum('INCOME'))}`,
     expense: `- ${formatBRL(sum('EXPENSE'))}`,
-    hasTransactions: list.transactions.length > 0,
+    hasTransactions: total.transactions.length > 0,
     expenses: toExpenses(list.transactions, categories),
   };
 }

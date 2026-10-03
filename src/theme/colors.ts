@@ -31,6 +31,10 @@ export const colors = {
   pillDark: '#22385f',
   // Contorno do botao escuro: sem ele o botao some no fundo marinho.
   pillDarkBorder: 'rgba(255, 255, 255, 0.35)',
+  // Figma (tela Transacao): botao Saida em azul-gelo translucido; texto marinho.
+  pillSoftFill: 'rgba(205, 233, 246, 0.1)',
+  pillSoftText: '#cde9f6',
+  pillLightText: '#021736',
   errorOnDark: '#fecaca',
   // Barra de abas (Figma): aba ativa em azul, indicador do Android translucido.
   tabActive: '#0088ff',

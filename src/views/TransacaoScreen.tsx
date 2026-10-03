@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,6 +21,7 @@ import { useTransacaoViewModel } from '@/viewmodels/useTransacaoViewModel';
  * futuro.
  */
 export default function TransacaoScreen() {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const {
     balance,
@@ -47,6 +49,17 @@ export default function TransacaoScreen() {
           importantForAccessibility={modalVisible ? 'no-hide-descendants' : 'auto'}
           style={[styles.content, { paddingTop: insets.top + 24 }]}
         >
+          <View style={styles.header}>
+            <Pressable
+              accessibilityLabel="Abrir o assistente"
+              accessibilityRole="button"
+              onPress={() => router.navigate('/chatbot')}
+              style={({ pressed }) => [styles.assistantPill, pressed ? styles.pressed : null]}
+            >
+              <Text style={styles.headerLabel}>Assistant</Text>
+            </Pressable>
+          </View>
+
           <View style={styles.balanceArea}>
             <View style={styles.balanceChip}>
               <Text style={styles.balanceChipText}>Saldo total</Text>
@@ -63,9 +76,11 @@ export default function TransacaoScreen() {
                 </Pressable>
               </View>
             ) : (
-              <Text selectable style={styles.balanceValue}>
-                {formatAmount(balance.value)}
-              </Text>
+              <View style={styles.balanceRow}>
+                <Text selectable style={styles.balanceValue}>
+                  {formatAmount(balance.value)}
+                </Text>
+              </View>
             )}
           </View>
 
@@ -105,26 +120,33 @@ const styles = StyleSheet.create({
   },
   actionsTitle: {
     color: colors.white,
-    fontSize: 13,
-    marginBottom: 4,
+    fontSize: 16,
+    marginBottom: 12,
     textAlign: 'center',
   },
   balanceArea: {
     alignItems: 'center',
     flex: 1,
-    gap: 12,
+    gap: 16,
     justifyContent: 'center',
   },
   balanceChip: {
-    backgroundColor: colors.glassStrong,
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 10000,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   balanceChipText: {
     color: colors.white,
-    fontSize: 12,
-    fontWeight: '500',
+    fontSize: 16,
+  },
+  balanceRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
   },
   balanceError: {
     alignItems: 'center',
@@ -136,13 +158,33 @@ const styles = StyleSheet.create({
   },
   // Mesma altura do valor, para o layout nao pular quando o saldo chega.
   balanceLoading: {
-    height: 34,
+    height: 47,
   },
   balanceValue: {
     color: colors.white,
-    fontSize: 28,
+    fontSize: 36,
     fontVariant: ['tabular-nums'],
     fontWeight: '700',
+  },
+  header: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  assistantPill: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 10000,
+    height: 45,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  pressed: {
+    opacity: 0.7,
+  },
+  headerLabel: {
+    color: colors.white,
+    fontSize: 16,
   },
   content: {
     flex: 1,
@@ -158,7 +200,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   screen: {
-    backgroundColor: colors.brandDeep,
+    backgroundColor: '#021736',
     flex: 1,
   },
 });
