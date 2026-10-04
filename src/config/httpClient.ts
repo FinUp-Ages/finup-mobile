@@ -13,6 +13,8 @@ import { authModel } from '@/models/authModel';
 
 const baseURL = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
 
+// Padrao de cada requisicao; quem espera mais (ex.: o assistente de IA) passa
+// `timeoutMs` nas opcoes.
 const REQUEST_TIMEOUT_MS = 15000;
 
 export class HttpError extends Error {
@@ -70,14 +72,17 @@ async function resolveAccessToken(): Promise<string | null> {
 // `auth: false` para rota publica (ex.: consulta de e-mail no cadastro): nao manda
 // Authorization nem derruba a sessao num 401. O back recusa com 401 ate a rota
 // publica se vier um token invalido, entao quem nao precisa de token nao deve mandar.
-type RequestOptions = RequestInit & { auth?: boolean };
+type RequestOptions = RequestInit & { auth?: boolean; timeoutMs?: number };
 
-async function request<T>(path: string, { auth = true, ...init }: RequestOptions = {}): Promise<T> {
+async function request<T>(
+  path: string,
+  { auth = true, timeoutMs = REQUEST_TIMEOUT_MS, ...init }: RequestOptions = {},
+): Promise<T> {
   const accessToken = auth ? await resolveAccessToken() : null;
 
   // Sem timeout, back fora do ar deixava a tela em "carregando" para sempre.
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   let response: Response;
   try {
     response = await fetch(`${baseURL}${path}`, {
