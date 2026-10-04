@@ -2,12 +2,13 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { categoriesModel } from '@/models/categoriesModel';
 import { transactionEvents } from '@/models/transactionEvents';
-import { transactionModel } from '@/models/transactionModel';
+import { BALANCE_FROM, transactionModel } from '@/models/transactionModel';
 import { userModel } from '@/models/userModel';
 import type { HomeExpense, HomeStatus } from '@/types/home';
 import type { Category, TransactionListResponse } from '@/types/transaction';
-import { firstName, formatBRL, formatShortDate } from '@/utils/format';
+import { firstName, formatShortDate } from '@/utils/format';
 import { DEFAULT_HOME_PERIOD, homePeriodRange, type HomePeriodKey } from '@/utils/homePeriods';
+import { formatAmount } from '@/utils/masks';
 
 type TransactionListItem = TransactionListResponse['transactions'][number];
 
@@ -33,9 +34,8 @@ type TransactionListItem = TransactionListResponse['transactions'][number];
  */
 
 const MAX_EXPENSES = 10;
-// O saldo total nao depende do periodo escolhido: o GET /transactions so devolve
-// saldo de um intervalo, entao ele vem de uma consulta propria desde o inicio.
-const BALANCE_FROM = '1970-01-01';
+// O saldo total nao depende do periodo escolhido: vem de uma consulta propria
+// desde BALANCE_FROM (o GET /transactions so devolve saldo de um intervalo).
 
 type HomeData = {
   userName: string;
@@ -64,7 +64,7 @@ function toExpenses(transactions: TransactionListItem[], categories: Category[])
         title: transaction.description?.trim() || categoryName || 'Gasto',
         categoryName,
         date: formatShortDate(transaction.transactionDate),
-        amount: formatBRL(-transaction.amount),
+        amount: formatAmount(-transaction.amount),
       };
     });
 }
@@ -86,9 +86,9 @@ async function fetchHomeData(periodKey: HomePeriodKey): Promise<HomeData> {
 
   return {
     userName: firstName(user.name),
-    balance: formatBRL(total.balance),
-    income: `+ ${formatBRL(sum('INCOME'))}`,
-    expense: `- ${formatBRL(sum('EXPENSE'))}`,
+    balance: formatAmount(total.balance),
+    income: `+ ${formatAmount(sum('INCOME'))}`,
+    expense: `- ${formatAmount(sum('EXPENSE'))}`,
     hasTransactions: total.transactions.length > 0,
     expenses: toExpenses(list.transactions, categories),
   };
