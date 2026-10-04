@@ -7,9 +7,8 @@ import { colors, darkColors } from '@/theme/colors';
  *
  * Mesma estrutura visual do PrimaryButton (rotulo + circulo de icone), so que
  * com as cores invertidas (fundo claro, circulo escuro) - e o padrao usado nos
- * cards da Home ("Adicionar agora", "Adicionar informacoes", "Integrar
- * cartoes", "Tentar novamente"). Passivo: quem chama decide o que o onPress
- * faz.
+ * cards da Home ("Integrar cartoes", "Tentar novamente"). Passivo: quem chama
+ * decide o que o onPress faz.
  */
 type HomePillButtonProps = {
   label: string;

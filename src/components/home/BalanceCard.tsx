@@ -9,14 +9,14 @@ import type { HomeStatus } from '@/types/home';
 import type { HomePeriodKey } from '@/utils/homePeriods';
 
 /**
- * COMPONENT - card de saldo total do periodo (GET /api/v1/transactions), com
- * entradas, saidas e o botao "Adicionar transacao" (ver Figma).
+ * COMPONENT - card de saldo da Home (ver Figma): saldo total acumulado ate hoje,
+ * entradas e saidas do periodo escolhido no seletor e o botao "Adicionar
+ * transacao". Os valores chegam prontos do useHomeViewModel.
  *
  * Estados: carregando (indicador no lugar do valor), erro (mensagem + tentar
- * novamente) e sucesso (valores ja formatados em BRL). O botao de adicionar
- * aparece em todos os estados menos erro/carregando.
+ * novamente) e sucesso (valores ja formatados em BRL). O botao de adicionar so
+ * aparece no sucesso.
  */
-
 type BalanceCardProps = {
   period: string;
   periodKey: HomePeriodKey;

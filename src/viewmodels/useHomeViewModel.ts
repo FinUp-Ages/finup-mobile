@@ -16,8 +16,8 @@ type TransactionListItem = TransactionListResponse['transactions'][number];
  * VIEWMODEL - dados da Home.
  *
  *   GET /api/v1/users/me              -> nome da saudacao
- *   GET /api/v1/transactions?from&to  -> saldo, entradas, saidas e gastos de todo o
- *                                        historico ate hoje (mesmo saldo da Analise)
+ *   GET /api/v1/transactions?from&to  -> entradas, saidas e gastos do periodo; e
+ *                                        de novo desde BALANCE_FROM para o saldo total
  *   GET /api/v1/categories            -> nome da categoria de cada gasto
  *
  * O periodo (7/15/30 dias, 3/6/12 meses) e escolhido no card e vale para entradas,

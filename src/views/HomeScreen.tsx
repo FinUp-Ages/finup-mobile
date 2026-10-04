@@ -11,10 +11,10 @@ import { useHomeViewModel } from '@/viewmodels/useHomeViewModel';
 /**
  * VIEW - Home do FinUp (ver Figma).
  *
- * Nome, saldo total e saldo e gastos do periodo escolhido vem do back (useHomeViewModel).
- * Ainda mockados: score, os CTAs (Adicionar agora, Adicionar informacoes,
- * Integrar cartoes) e a barra inferior - todo `onPress` deles e ponto de
- * integracao para tarefas futuras.
+ * Nome, saldo total e entradas, saidas e gastos do periodo escolhido vem do back
+ * (useHomeViewModel). Ainda mockados: score e os CTAs "Adicionar agora" e
+ * "Integrar cartoes" - o `onPress` deles e ponto de integracao para tarefas
+ * futuras. A barra de baixo e a de abas nativa, de app/(tabs)/_layout.tsx.
  */
 export default function HomeScreen() {
   const router = useRouter();
