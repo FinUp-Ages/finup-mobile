@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { darkColors } from '@/theme/colors';
+import { colors, darkColors } from '@/theme/colors';
 
 /**
  * COMPONENT - botao pilula claro com icone circular a direita.
@@ -25,7 +25,7 @@ export function HomePillButton({ label, onPress, icon = 'plus' }: HomePillButton
     >
       <Text style={styles.label}>{label}</Text>
       <View style={styles.iconCircle}>
-        <Feather color="#ffffff" name={icon} size={14} />
+        <Feather color={colors.white} name={icon} size={14} />
       </View>
     </Pressable>
   );
@@ -34,7 +34,7 @@ export function HomePillButton({ label, onPress, icon = 'plus' }: HomePillButton
 const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.white,
     borderRadius: 28,
     flexDirection: 'row',
     gap: 16,

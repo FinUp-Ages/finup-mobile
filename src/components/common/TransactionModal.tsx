@@ -149,7 +149,7 @@ function TransactionModalContent({
                   pressed ? styles.closeButtonPressed : null,
                 ]}
               >
-                <Feather color={colors.pillLightText} name="x" size={20} />
+                <Feather color={colors.navy} name="x" size={20} />
               </Pressable>
             </View>
 
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   card: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: colors.glassSoft,
     borderCurve: 'continuous',
     borderRadius: 12,
     gap: 24,

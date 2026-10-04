@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     gap: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: colors.glassSoft,
     borderRadius: 10000,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
   },
   assistantPill: {
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: colors.glassSoft,
     borderRadius: 10000,
     height: 45,
     justifyContent: 'center',
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   screen: {
-    backgroundColor: '#021736',
+    backgroundColor: colors.navy,
     flex: 1,
   },
 });

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { PeriodPickerModal } from '@/components/home/PeriodPickerModal';
 import { HomePillButton } from '@/components/ui/HomePillButton';
-import { darkColors } from '@/theme/colors';
+import { colors, darkColors } from '@/theme/colors';
 import type { HomeStatus } from '@/types/home';
 import type { HomePeriodKey } from '@/utils/homePeriods';
 
@@ -16,8 +16,6 @@ import type { HomePeriodKey } from '@/utils/homePeriods';
  * novamente) e sucesso (valores ja formatados em BRL). O botao de adicionar
  * aparece em todos os estados menos erro/carregando.
  */
-// Figma: linear-gradient(128.92deg, #2343BD 0%, #3B82F6 100%) em 371x305 (~ canto a canto).
-const BALANCE_GRADIENT = ['#2343BD', '#3B82F6'] as const;
 
 type BalanceCardProps = {
   period: string;
@@ -47,7 +45,7 @@ export function BalanceCard({
 
   return (
     <LinearGradient
-      colors={BALANCE_GRADIENT}
+      colors={darkColors.balanceCardGradient}
       end={{ x: 1, y: 1 }}
       start={{ x: 0, y: 0 }}
       style={styles.card}
@@ -61,7 +59,7 @@ export function BalanceCard({
           style={styles.periodBadge}
         >
           <Text style={styles.periodLabel}>{period}</Text>
-          <Feather color="rgba(255, 255, 255, 0.7)" name="chevron-down" size={12} />
+          <Feather color={darkColors.textBadge} name="chevron-down" size={12} />
         </Pressable>
       </View>
 
@@ -89,7 +87,7 @@ export function BalanceCard({
               onPress={() => setHidden((value) => !value)}
             >
               <Feather
-                color="rgba(255, 255, 255, 0.8)"
+                color={darkColors.iconOnCard}
                 name={hidden ? 'eye-off' : 'eye'}
                 size={20}
               />
@@ -99,17 +97,17 @@ export function BalanceCard({
           <View style={styles.totalsRow}>
             <View style={styles.totalBox}>
               <View style={styles.totalHeader}>
-                <View style={[styles.dot, { backgroundColor: '#00d492' }]} />
+                <View style={[styles.dot, { backgroundColor: darkColors.incomeDot }]} />
                 <Text style={styles.totalLabel}>ENTRADA</Text>
               </View>
-              <Text style={[styles.totalValue, { color: '#5ee9b5' }]}>{income}</Text>
+              <Text style={[styles.totalValue, { color: darkColors.incomeText }]}>{income}</Text>
             </View>
             <View style={styles.totalBox}>
               <View style={styles.totalHeader}>
-                <View style={[styles.dot, { backgroundColor: '#ff637e' }]} />
+                <View style={[styles.dot, { backgroundColor: darkColors.expenseDot }]} />
                 <Text style={styles.totalLabel}>SAÍDA</Text>
               </View>
-              <Text style={[styles.totalValue, { color: '#ffa1ad' }]}>{expense}</Text>
+              <Text style={[styles.totalValue, { color: darkColors.expenseText }]}>{expense}</Text>
             </View>
           </View>
 
@@ -119,7 +117,7 @@ export function BalanceCard({
             style={({ pressed }) => [styles.addButton, pressed ? styles.addPressed : null]}
           >
             <Text style={styles.addLabel}>Adicionar transação</Text>
-            <Feather color="#021736" name="plus" size={18} />
+            <Feather color={colors.navy} name="plus" size={18} />
           </Pressable>
         </>
       ) : null}
@@ -136,7 +134,7 @@ export function BalanceCard({
 const styles = StyleSheet.create({
   addButton: {
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.white,
     borderRadius: 10000,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -145,7 +143,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   addLabel: {
-    color: '#021736',
+    color: colors.navy,
     fontSize: 16,
   },
   addPressed: {
@@ -180,7 +178,7 @@ const styles = StyleSheet.create({
     width: 6,
   },
   eyebrow: {
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: darkColors.textLabel,
     fontSize: 12,
     letterSpacing: 0.24,
   },
@@ -190,7 +188,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   helperText: {
-    color: 'rgba(255, 255, 255, 0.85)',
+    color: darkColors.textHelper,
     fontSize: 13,
     lineHeight: 18,
     marginBottom: 16,
@@ -200,21 +198,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     gap: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: colors.glass,
+    borderColor: colors.glassSoft,
     borderRadius: 100,
     borderWidth: 1,
     paddingHorizontal: 12,
     paddingVertical: 4,
   },
   periodLabel: {
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: darkColors.textBadge,
     fontSize: 11,
     letterSpacing: 0.22,
   },
   totalBox: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: colors.glassSoft,
+    borderColor: darkColors.surfaceBorder,
     borderRadius: 10,
     borderWidth: 1,
     flex: 1,
@@ -227,7 +225,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   totalLabel: {
-    color: 'rgba(255, 255, 255, 0.55)',
+    color: darkColors.textCaption,
     fontSize: 11,
     letterSpacing: 0.22,
   },

@@ -76,7 +76,7 @@ export function SelectField<T extends string>({
         {loading ? (
           <ActivityIndicator color={colors.icon} size="small" />
         ) : (
-          <Feather color={dark ? '#ffffff' : colors.icon} name="chevron-down" size={18} />
+          <Feather color={dark ? colors.white : colors.icon} name="chevron-down" size={18} />
         )}
       </Pressable>
       {message ? <Text style={styles.errorText}>{message}</Text> : null}
@@ -128,15 +128,15 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   inputRowDark: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: colors.glassSoft,
+    borderColor: colors.glassSoft,
     borderRadius: 10000,
   },
   labelDark: {
-    color: '#ffffff',
+    color: colors.white,
   },
   placeholderDark: {
-    color: 'rgba(255, 255, 255, 0.75)',
+    color: colors.placeholderOnDark,
   },
   label: {
     color: colors.textPrimary,

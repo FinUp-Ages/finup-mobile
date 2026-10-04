@@ -20,21 +20,24 @@ export const colors = {
   link: '#2563eb',
   white: '#ffffff',
   screenBackground: '#051329',
-  // Aba Transacao e modal de transacao (mockup): degrade azul para o marinho da
-  // tela inicial, cartao e pilulas translucidos sobre ele.
-  brandBlue: '#1a6fb0',
+  // Fundo do "Em breve" e superficies translucidas sobre o marinho.
   brandDeep: '#031836',
   glass: 'rgba(255, 255, 255, 0.12)',
-  glassBorder: 'rgba(255, 255, 255, 0.18)',
   glassStrong: 'rgba(255, 255, 255, 0.2)',
   pillLight: '#f4f4f5',
-  pillDark: '#22385f',
-  // Contorno do botao escuro: sem ele o botao some no fundo marinho.
-  pillDarkBorder: 'rgba(255, 255, 255, 0.35)',
   // Figma (tela Transacao): botao Saida em azul-gelo translucido; texto marinho.
   pillSoftFill: 'rgba(205, 233, 246, 0.1)',
   pillSoftText: '#cde9f6',
-  pillLightText: '#021736',
+  // Marinho do Figma: fundo da aba Transacao e texto/icone sobre superficie clara.
+  navy: '#021736',
+  // Brilho azul do topo da aba Transacao (BrandGradient).
+  brandGlow: '#1C93D7',
+  // Superficie clara do Figma: botao Entrada e campo de valor do modal.
+  surfaceLight: '#f5f5f5',
+  // Cartoes, pilulas e campos translucidos sobre fundo escuro (Figma: branco 10%).
+  glassSoft: 'rgba(255, 255, 255, 0.1)',
+  // Placeholder sobre fundo escuro (Figma: branco 75%).
+  placeholderOnDark: 'rgba(255, 255, 255, 0.75)',
   errorOnDark: '#fecaca',
   // Barra de abas (Figma): aba ativa em azul, indicador do Android translucido.
   tabActive: '#0088ff',
@@ -61,9 +64,8 @@ export const colors = {
 } as const;
 
 /**
- * Paleta escura - telas autenticadas (Home e afins). Reaproveita o azul-marinho
- * ja usado na AuthInitialScreen (mesmo `#031836` base) em vez de inventar um tom
- * novo, para as duas telas lerem como o mesmo produto.
+ * Paleta escura da Home (aba Carteira): fundo, cartoes e textos sobre o marinho,
+ * mais as cores proprias do card de saldo e do banner do score (Figma).
  */
 export const darkColors = {
   background: '#04102A',
@@ -71,10 +73,23 @@ export const darkColors = {
   surfaceBorder: 'rgba(255, 255, 255, 0.08)',
   textPrimary: '#ffffff',
   textMuted: 'rgba(255, 255, 255, 0.65)',
-  textFaint: 'rgba(255, 255, 255, 0.45)',
-  accent: '#2F80FF',
-  // Gradiente do cartao de CTA do score (teal -> azul-marinho escuro).
-  scoreCardGradient: ['#123B47', '#0A1F3D'] as const,
-  // Gradiente do cartao de saldo (azul vibrante -> azul-marinho escuro).
-  balanceCardGradient: ['#3D7BEB', '#12306E'] as const,
+  // Textos e icones sobre o card de saldo, do mais apagado ao mais forte.
+  textCaption: 'rgba(255, 255, 255, 0.55)',
+  textLabel: 'rgba(255, 255, 255, 0.6)',
+  textBadge: 'rgba(255, 255, 255, 0.7)',
+  iconOnCard: 'rgba(255, 255, 255, 0.8)',
+  textHelper: 'rgba(255, 255, 255, 0.85)',
+  // Figma: linear-gradient(128.92deg, #2343BD 0%, #3B82F6 100%) em 371x305.
+  balanceCardGradient: ['#2343BD', '#3B82F6'] as const,
+  incomeDot: '#00d492',
+  incomeText: '#5ee9b5',
+  expenseDot: '#ff637e',
+  expenseText: '#ffa1ad',
+  // Banner do score: degrade radial azul-claro -> azul profundo, botao translucido.
+  scoreBannerLight: '#B3DCF2',
+  scoreBannerDeep: '#005586',
+  scoreBannerButton: 'rgba(2, 23, 54, 0.1)',
+  // Seletor de periodo: fundo escurecido atras da lista e opcao pressionada.
+  overlay: 'rgba(0, 0, 0, 0.55)',
+  pressed: 'rgba(255, 255, 255, 0.08)',
 } as const;

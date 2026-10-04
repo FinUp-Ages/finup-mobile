@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
-import { darkColors } from '@/theme/colors';
+import { colors, darkColors } from '@/theme/colors';
 import { HOME_PERIODS, type HomePeriodKey } from '@/utils/homePeriods';
 
 /** COMPONENT - lista de periodos do card de saldo (7/15/30 dias, 3/6/12 meses). */
@@ -50,7 +50,7 @@ export function PeriodPickerModal({
 
 const styles = StyleSheet.create({
   backdrop: {
-    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+    backgroundColor: darkColors.overlay,
     flex: 1,
     justifyContent: 'center',
     padding: 24,
@@ -71,17 +71,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   pressed: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: darkColors.pressed,
   },
   sheet: {
     backgroundColor: darkColors.background,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
+    borderColor: colors.glass,
     borderRadius: 16,
     borderWidth: 1,
     padding: 12,
   },
   title: {
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: darkColors.textLabel,
     fontSize: 12,
     letterSpacing: 0.24,
     paddingHorizontal: 12,

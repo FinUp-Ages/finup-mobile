@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
   },
   pill: {
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: colors.glassSoft,
     borderColor: 'transparent',
     borderRadius: 10000,
     borderWidth: 1,

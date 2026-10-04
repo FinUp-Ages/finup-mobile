@@ -25,7 +25,7 @@ export function ChatbotComposer({ draft, isSending, onChangeDraft, onSend }: Cha
         onChangeText={onChangeDraft}
         onSubmitEditing={onSend}
         placeholder="Digite sua mensagem"
-        placeholderTextColor="rgba(255, 255, 255, 0.75)"
+        placeholderTextColor={colors.placeholderOnDark}
         returnKeyType="send"
         style={styles.input}
         submitBehavior="submit"
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     minHeight: 26,
   },
   composer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: colors.glassSoft,
     borderRadius: 12,
     gap: 24,
     padding: 16,

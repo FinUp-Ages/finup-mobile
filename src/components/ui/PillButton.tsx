@@ -38,12 +38,12 @@ export function PillButton({ label, onPress, variant, icon, disabled, loading }:
       <Text style={[styles.label, isLight ? styles.labelLight : styles.labelDark]}>{label}</Text>
       {loading ? (
         <ActivityIndicator
-          color={isLight ? colors.pillLightText : colors.pillSoftText}
+          color={isLight ? colors.navy : colors.pillSoftText}
           size="small"
         />
       ) : (
         <View style={[styles.iconCircle, isLight ? styles.iconCircleLight : styles.iconCircleDark]}>
-          <Feather color={isLight ? colors.white : colors.pillLightText} name={icon} size={14} />
+          <Feather color={isLight ? colors.white : colors.navy} name={icon} size={14} />
         </View>
       )}
     </Pressable>
@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     opacity: 0.45,
   },
   buttonLight: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.surfaceLight,
   },
   // Feedback no toque (press-in), como pede o guia da Expo: escala leve no lugar
   // de ripple, igual nas duas plataformas.
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.pillSoftText,
   },
   iconCircleLight: {
-    backgroundColor: colors.pillLightText,
+    backgroundColor: colors.navy,
   },
   label: {
     fontSize: 16,
@@ -93,6 +93,6 @@ const styles = StyleSheet.create({
     color: colors.pillSoftText,
   },
   labelLight: {
-    color: colors.pillLightText,
+    color: colors.navy,
   },
 });
