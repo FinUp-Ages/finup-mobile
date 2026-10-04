@@ -42,7 +42,6 @@ type HomeData = {
   balance: string;
   income: string;
   expense: string;
-  hasTransactions: boolean;
   expenses: HomeExpense[];
 };
 
@@ -89,7 +88,6 @@ async function fetchHomeData(periodKey: HomePeriodKey): Promise<HomeData> {
     balance: formatAmount(total.balance),
     income: `+ ${formatAmount(sum('INCOME'))}`,
     expense: `- ${formatAmount(sum('EXPENSE'))}`,
-    hasTransactions: total.transactions.length > 0,
     expenses: toExpenses(list.transactions, categories),
   };
 }
@@ -142,7 +140,6 @@ export function useHomeViewModel() {
     balance: data?.balance ?? null,
     income: data?.income ?? null,
     expense: data?.expense ?? null,
-    hasTransactions: data?.hasTransactions ?? false,
     expenses: data?.expenses ?? [],
     periodKey,
     periodLabel: homePeriodRange(periodKey).label,
