@@ -44,7 +44,8 @@
     "typecheck": "ok",
     "lint": "0 erros",
     "ci": "verde no head do PR antes dos ajustes do review",
-    "expo_go": "nao validado no aparelho: Home, seletor de periodo, banner, Adicionar transacao, cadastro (Etapa 2) e chatbot"
+    "expo_go": "nao validado no aparelho: Home, seletor de periodo, banner, Adicionar transacao, cadastro (Etapa 2) e chatbot",
+    "cadastro_retomado": "2026-10-04, Expo Go + back da develop local: Etapa 2 com celular, salvo com phone +55 (E.164), profissao, nascimento e renda; POST /users e PATCH additional-info ok"
   },
   "review": "2026-10-04, review do PR #18: ajustes aplicados na branch - .gitignore sem pastas locais; formatBRL trocado pelo formatAmount e BALANCE_FROM unico em transactionModel; hasTransactions sem uso removido; timeout por requisicao (60s no assistente); cores fixas movidas para tokens com os mesmos valores e tokens mortos (brandBlue, glassBorder, pillDark, pillDarkBorder, darkColors sem uso) removidos; comentarios atualizados. package-lock.json mantido: o npm 11 gera o mesmo arquivo a partir da develop. Itens de pending_decisions ficam para o time. 2026-10-04: fonte refeita com AppText (bundle conferido sem a troca global); celular no cadastro retomado validado como bug. Celular do cadastro retomado corrigido (showCelularInStep2); toAdditionalInfo conferido com o regex E.164 do back.",
   "follow_ups": [
