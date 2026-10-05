@@ -4,13 +4,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
-  Text,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CadastroHeader } from '@/components/common/CadastroHeader';
 import { styles as stepStyles } from '@/components/common/cadastroStepStyles';
+import { Text } from '@/components/ui/AppText';
 import { PasswordField } from '@/components/ui/PasswordField';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { TextField } from '@/components/ui/TextField';

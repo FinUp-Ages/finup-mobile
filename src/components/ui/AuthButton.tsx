@@ -4,11 +4,11 @@ import {
   Pressable,
   StyleProp,
   StyleSheet,
-  Text,
   TextStyle,
   View,
   ViewStyle,
 } from 'react-native';
+import { Text } from '@/components/ui/AppText';
 
 export type AuthButtonVariant = 'primary' | 'social' | 'link';
 

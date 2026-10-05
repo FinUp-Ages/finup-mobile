@@ -1,10 +1,11 @@
 import { useRouter } from 'expo-router';
-import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BalanceCard } from '@/components/home/BalanceCard';
 import { ExpenseList } from '@/components/home/ExpenseList';
 import { HomeHeader } from '@/components/home/HomeHeader';
 import { ScoreBannerCard } from '@/components/home/ScoreBannerCard';
+import { Text } from '@/components/ui/AppText';
 import { darkColors } from '@/theme/colors';
 import { useHomeViewModel } from '@/viewmodels/useHomeViewModel';
 

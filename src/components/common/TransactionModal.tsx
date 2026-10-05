@@ -7,11 +7,11 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppleIcon } from '@/components/ui/AppleIcon';
+import { Text } from '@/components/ui/AppText';
 import { BrandGradient } from '@/components/ui/BrandGradient';
 import { CurrencyField } from '@/components/ui/CurrencyField';
 import { PillButton } from '@/components/ui/PillButton';

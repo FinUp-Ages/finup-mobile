@@ -1,9 +1,10 @@
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeAreaView } from 'react-native-screens/experimental';
 import { TransactionModal } from '@/components/common/TransactionModal';
+import { Text } from '@/components/ui/AppText';
 import { BrandGradient } from '@/components/ui/BrandGradient';
 import { PillButton } from '@/components/ui/PillButton';
 import { colors } from '@/theme/colors';

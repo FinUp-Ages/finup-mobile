@@ -1,5 +1,6 @@
 import { Feather } from '@expo/vector-icons';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Text } from '@/components/ui/AppText';
 import { HomePillButton } from '@/components/ui/HomePillButton';
 import { darkColors } from '@/theme/colors';
 

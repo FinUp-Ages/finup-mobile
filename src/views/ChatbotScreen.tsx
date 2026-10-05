@@ -9,7 +9,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
@@ -21,6 +20,7 @@ import { ChatbotMark } from '@/components/chatbot/ChatbotMark';
 import { ChatbotMessage } from '@/components/chatbot/ChatbotMessage';
 import { ChatbotSideMenu } from '@/components/chatbot/ChatbotSideMenu';
 import { ChatbotWelcome } from '@/components/chatbot/ChatbotWelcome';
+import { Text } from '@/components/ui/AppText';
 import { colors } from '@/theme/colors';
 import { useChatbotViewModel } from '@/viewmodels/useChatbotViewModel';
 

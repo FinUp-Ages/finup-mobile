@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import { useFonts } from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { setSessionExpiredHandler } from '@/config/httpClient';
-import { applyInterFont, interFonts } from '@/theme/fonts';
+import { interFonts } from '@/theme/fonts';
 
 /**
  * Rota raiz do Expo Router.
@@ -28,11 +28,8 @@ export default function RootLayout() {
     return () => setSessionExpiredHandler(null);
   }, [router]);
 
-  useEffect(() => {
-    if (fontsLoaded) applyInterFont();
-  }, [fontsLoaded]);
-
-  // Segura a primeira tela ate a Inter carregar (ou falhar: ai segue com a fonte do sistema).
+  // Segura a primeira tela ate a Inter carregar (ou falhar: ai segue com a fonte do
+  // sistema). Quem aplica a Inter e o Text/TextInput de components/ui/AppText.
   if (!fontsLoaded && !fontError) return null;
 
   return (

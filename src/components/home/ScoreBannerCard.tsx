@@ -1,6 +1,7 @@
 import { Feather } from '@expo/vector-icons';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
+import { Text } from '@/components/ui/AppText';
 import { colors, darkColors } from '@/theme/colors';
 
 /**

@@ -1,8 +1,9 @@
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { PeriodPickerModal } from '@/components/home/PeriodPickerModal';
+import { Text } from '@/components/ui/AppText';
 import { HomePillButton } from '@/components/ui/HomePillButton';
 import { colors, darkColors } from '@/theme/colors';
 import type { HomeStatus } from '@/types/home';

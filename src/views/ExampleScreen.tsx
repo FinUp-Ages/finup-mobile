@@ -1,6 +1,7 @@
 import { Link } from 'expo-router';
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { ExampleCard } from '@/components/ExampleCard';
+import { Text } from '@/components/ui/AppText';
 import { useExampleViewModel } from '@/viewmodels/useExampleViewModel';
 
 /**

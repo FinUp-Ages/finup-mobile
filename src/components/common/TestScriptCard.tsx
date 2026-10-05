@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/ui/AppText';
 import { accuracyLabel } from '@/utils/speechText';
 import { formatMs } from '@/utils/transcriptionReport';
 import type { TestPhrase, TestPhraseResult, TestVerdict } from '@/types/speech';

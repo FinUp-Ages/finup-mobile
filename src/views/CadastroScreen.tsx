@@ -5,7 +5,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
-  Text,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
@@ -16,6 +15,7 @@ import { CadastroStepCodigo } from '@/components/common/CadastroStepCodigo';
 import { CadastroStepDados } from '@/components/common/CadastroStepDados';
 import { CadastroStepSenha } from '@/components/common/CadastroStepSenha';
 import { StepProgress } from '@/components/common/StepProgress';
+import { Text } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { colors } from '@/theme/colors';
 import { useCadastroViewModel } from '@/viewmodels/useCadastroViewModel';

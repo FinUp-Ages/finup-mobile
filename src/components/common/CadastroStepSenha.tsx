@@ -1,4 +1,5 @@
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
+import { Text } from '@/components/ui/AppText';
 import { PasswordField } from '@/components/ui/PasswordField';
 import type { CadastroFormData, CadastroFormErrors } from '@/types/cadastro';
 import { styles } from './cadastroStepStyles';

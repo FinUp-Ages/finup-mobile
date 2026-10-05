@@ -1,5 +1,6 @@
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { IntegrateCardsCard } from '@/components/home/IntegrateCardsCard';
+import { Text } from '@/components/ui/AppText';
 import { darkColors } from '@/theme/colors';
 import type { HomeExpense, HomeStatus } from '@/types/home';
 

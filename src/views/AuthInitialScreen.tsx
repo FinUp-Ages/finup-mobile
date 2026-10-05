@@ -1,10 +1,11 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { AppleIcon } from '@/components/ui/AppleIcon';
+import { Text } from '@/components/ui/AppText';
 import { AuthButton } from '@/components/ui/AuthButton';
 import { FinUpChartWatermark } from '@/components/ui/FinUpChartWatermark';
 import { FinUpLogo } from '@/components/ui/FinUpLogo';

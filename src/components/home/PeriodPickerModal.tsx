@@ -1,5 +1,6 @@
 import { Feather } from '@expo/vector-icons';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/ui/AppText';
 import { colors, darkColors } from '@/theme/colors';
 import { HOME_PERIODS, type HomePeriodKey } from '@/utils/homePeriods';
 
