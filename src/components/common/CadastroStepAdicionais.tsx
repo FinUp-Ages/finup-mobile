@@ -23,12 +23,16 @@ const OTHER = 'Outra';
  *
  * `birthDate`, `monthlyIncome` (faixa escolhida num dropdown) e `profissao`
  * seguem para o PATCH /users/me/additional-info (ver cadastroModel).
+ *
+ * `showCelular`: no cadastro retomado a Etapa 1 e pulada, entao o celular (o
+ * mesmo campo da Etapa 1) aparece aqui.
  */
 type CadastroStepAdicionaisProps = {
-  data: Pick<CadastroFormData, 'birthDate' | 'monthlyIncome' | 'profissao'>;
+  data: Pick<CadastroFormData, 'celular' | 'birthDate' | 'monthlyIncome' | 'profissao'>;
   errors: CadastroFormErrors;
   onChange: <K extends keyof CadastroFormData>(field: K, value: CadastroFormData[K]) => void;
   onTouch: (field: keyof CadastroFormData) => void;
+  showCelular?: boolean;
 };
 
 export function CadastroStepAdicionais({
@@ -36,6 +40,7 @@ export function CadastroStepAdicionais({
   errors,
   onChange,
   onTouch,
+  showCelular = false,
 }: CadastroStepAdicionaisProps) {
   const isCustomInitial = Boolean(
     data.profissao &&
@@ -63,6 +68,16 @@ export function CadastroStepAdicionais({
       <Text style={styles.subtitle}>Dados para traçar seu perfil financeiro</Text>
 
       <View style={styles.fields}>
+        {showCelular ? (
+          <TextField
+            placeholder="Celular"
+            value={data.celular}
+            onChangeText={(value) => onChange('celular', value)}
+            onBlur={() => onTouch('celular')}
+            error={errors.celular}
+            keyboardType="phone-pad"
+          />
+        ) : null}
         <DateField
           placeholder="Data de nascimento"
           value={data.birthDate}

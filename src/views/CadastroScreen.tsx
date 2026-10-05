@@ -48,6 +48,7 @@ export default function CadastroScreen() {
     isLastStep,
     canGoBack,
     showProgress,
+    showCelularInStep2,
     setField,
     touchField,
     setCode,
@@ -107,6 +108,7 @@ export default function CadastroScreen() {
                     errors={errors}
                     onChange={setField}
                     onTouch={touchField}
+                    showCelular={showCelularInStep2}
                   />
                 ) : (
                   <CadastroStepSenha
