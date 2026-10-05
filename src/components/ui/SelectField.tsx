@@ -1,6 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { useState, type ReactNode } from 'react';
-import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/ui/AppText';
 import { colors } from '@/theme/colors';
 
 /**
@@ -25,6 +26,8 @@ type SelectFieldProps<T extends string> = {
   onTouch?: () => void;
   error?: string | boolean;
   loading?: boolean;
+  /** `dark`: pilula translucida com texto branco, para telas escuras. */
+  tone?: 'light' | 'dark';
 };
 
 export function SelectField<T extends string>({
@@ -35,8 +38,10 @@ export function SelectField<T extends string>({
   onTouch,
   error,
   loading,
+  tone = 'light',
 }: SelectFieldProps<T>) {
   const [open, setOpen] = useState(false);
+  const dark = tone === 'dark';
   const hasError = Boolean(error);
   const message = typeof error === 'string' ? error : undefined;
   const selected = options.find((option) => option.value === value);
@@ -56,19 +61,23 @@ export function SelectField<T extends string>({
     <View style={styles.wrapper}>
       <Pressable
         onPress={handleOpen}
-        style={[styles.inputRow, hasError ? styles.inputError : null]}
+        style={[styles.inputRow, dark ? styles.inputRowDark : null, hasError ? styles.inputError : null]}
       >
         {selected?.icon ? <View style={styles.optionIcon}>{selected.icon}</View> : null}
         <Text
           numberOfLines={1}
-          style={[styles.label, selected ? null : styles.placeholder]}
+          style={[
+            styles.label,
+            dark ? styles.labelDark : null,
+            selected ? null : dark ? styles.placeholderDark : styles.placeholder,
+          ]}
         >
           {selected ? selected.label : placeholder}
         </Text>
         {loading ? (
           <ActivityIndicator color={colors.icon} size="small" />
         ) : (
-          <Feather color={colors.icon} name="chevron-down" size={18} />
+          <Feather color={dark ? colors.white : colors.icon} name="chevron-down" size={18} />
         )}
       </Pressable>
       {message ? <Text style={styles.errorText}>{message}</Text> : null}
@@ -81,6 +90,7 @@ export function SelectField<T extends string>({
       >
         <Pressable onPress={() => setOpen(false)} style={styles.overlay}>
           <View style={styles.optionsSheet}>
+            <ScrollView bounces={false} style={styles.optionsScroll}>
             {options.map((option) => (
               <Pressable
                 key={option.value}
@@ -91,6 +101,7 @@ export function SelectField<T extends string>({
                 <Text style={styles.optionLabel}>{option.label}</Text>
               </Pressable>
             ))}
+            </ScrollView>
           </View>
         </Pressable>
       </Modal>
@@ -117,6 +128,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 14,
   },
+  inputRowDark: {
+    backgroundColor: colors.glassSoft,
+    borderColor: colors.glassSoft,
+    borderRadius: 10000,
+  },
+  labelDark: {
+    color: colors.white,
+  },
+  placeholderDark: {
+    color: colors.placeholderOnDark,
+  },
   label: {
     color: colors.textPrimary,
     flex: 1,
@@ -134,6 +156,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 20,
     paddingVertical: 16,
+  },
+  optionsScroll: {
+    maxHeight: 420,
   },
   optionsSheet: {
     backgroundColor: colors.white,

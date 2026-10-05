@@ -11,9 +11,7 @@ import type {
   CadastroStep,
 } from '@/types/cadastro';
 import {
-  formatCurrency,
   formatPhone,
-  parseCurrencyToNumber,
   sanitizeEmail,
   sanitizeName,
 } from '@/utils/masks';
@@ -61,29 +59,32 @@ function computeStep1Errors(data: CadastroFormData): CadastroFormErrors {
     errors.email = 'Informe um e-mail válido (ex.: nome@exemplo.com).';
   }
 
-  if (!data.celular.trim()) {
-    errors.celular = true;
-  } else {
-    const digits = data.celular.replace(/\D/g, '');
-    if (digits.length !== 10 && digits.length !== 11) {
-      errors.celular = 'Informe um telefone celular válido com DDD (10 ou 11 dígitos).';
-    }
-  }
+  const celular = celularError(data);
+  if (celular) errors.celular = celular;
   return errors;
 }
 
-function computeStep2Errors(data: CadastroFormData): CadastroFormErrors {
+function celularError(data: CadastroFormData): string | true | undefined {
+  if (!data.celular.trim()) return true;
+  const digits = data.celular.replace(/\D/g, '');
+  if (digits.length !== 10 && digits.length !== 11) {
+    return 'Informe um telefone celular válido com DDD (10 ou 11 dígitos).';
+  }
+  return undefined;
+}
+
+// `withCelular`: no cadastro retomado a Etapa 1 e pulada, entao o celular e
+// pedido aqui.
+function computeStep2Errors(data: CadastroFormData, withCelular: boolean): CadastroFormErrors {
   const errors: CadastroFormErrors = {};
+  if (withCelular) {
+    const celular = celularError(data);
+    if (celular) errors.celular = celular;
+  }
   // Formato/data-no-passado nao precisa ser validado aqui: o calendario nativo
   // (DateField) so permite selecionar datas ate hoje, entao um valor presente
   // ja e garantidamente valido.
   if (!data.birthDate) errors.birthDate = true;
-  if (data.monthlyIncome.trim()) {
-    const value = parseCurrencyToNumber(data.monthlyIncome);
-    if (value === undefined || value < 0) {
-      errors.monthlyIncome = 'Deve ser um valor numérico e não negativo.';
-    }
-  }
   return errors;
 }
 
@@ -99,9 +100,13 @@ function computeStep3Errors(data: CadastroFormData): CadastroFormErrors {
   return errors;
 }
 
-function computeStepErrors(step: CadastroStep, data: CadastroFormData): CadastroFormErrors {
+function computeStepErrors(
+  step: CadastroStep,
+  data: CadastroFormData,
+  resume: boolean,
+): CadastroFormErrors {
   if (step === 1) return computeStep1Errors(data);
-  if (step === 2) return computeStep2Errors(data);
+  if (step === 2) return computeStep2Errors(data, resume);
   return computeStep3Errors(data);
 }
 
@@ -133,8 +138,9 @@ type TouchedFields = Partial<Record<keyof CadastroFormData, boolean>>;
  * A senha e o UUID ficam so em memoria. A senha e apagada logo depois do login.
  *
  * `resume`: a conta ja existe no Cognito, mas nao no back (GET /users/me = 404
- * no login ou na abertura do app). Abre direto na Etapa 2 e o Salvar faz so o
- * POST /users e o PATCH, com a sessao que ja esta no secureStorage.
+ * no login ou na abertura do app). Abre direto na Etapa 2, que tambem pede o
+ * celular (a Etapa 1 e pulada), e o Salvar faz so o POST /users e o PATCH, com a
+ * sessao que ja esta no secureStorage.
  */
 export function useCadastroViewModel({ resume = false }: { resume?: boolean } = {}) {
   const router = useRouter();
@@ -164,7 +170,7 @@ export function useCadastroViewModel({ resume = false }: { resume?: boolean } = 
   // Numera as consultas: resposta de um e-mail que ja mudou e descartada.
   const emailRequestRef = useRef(0);
 
-  const allErrors = useMemo(() => computeStepErrors(step, data), [step, data]);
+  const allErrors = useMemo(() => computeStepErrors(step, data, resume), [step, data, resume]);
   const formValid = Object.keys(allErrors).length === 0;
   const canProceed =
     phase === 'form'
@@ -192,8 +198,6 @@ export function useCadastroViewModel({ resume = false }: { resume?: boolean } = 
           formattedValue = sanitizeEmail(value) as CadastroFormData[K];
         } else if (field === 'celular') {
           formattedValue = formatPhone(value) as CadastroFormData[K];
-        } else if (field === 'monthlyIncome') {
-          formattedValue = formatCurrency(value) as CadastroFormData[K];
         }
       }
 
@@ -299,7 +303,7 @@ export function useCadastroViewModel({ resume = false }: { resume?: boolean } = 
 
     await userModel.ensureCreated();
     await userModel.updateAdditionalInfo(toAdditionalInfo(data));
-    router.replace('/transacao');
+    router.replace('/carteira');
   }, [data, resume, router]);
 
   const submit = useCallback(async () => {
@@ -374,6 +378,7 @@ export function useCadastroViewModel({ resume = false }: { resume?: boolean } = 
     isLastStep: step === lastStep,
     canGoBack: phase === 'code' || (phase === 'form' && step > firstStep),
     showProgress: !resume && phase === 'form',
+    showCelularInStep2: resume,
     setField,
     touchField,
     setCode,

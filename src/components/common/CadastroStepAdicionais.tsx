@@ -1,35 +1,38 @@
 import { useState } from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
+import { Text } from '@/components/ui/AppText';
 import { DateField } from '@/components/ui/DateField';
 import { SelectField, type SelectOption } from '@/components/ui/SelectField';
 import { TextField } from '@/components/ui/TextField';
+import { INCOME_RANGES, PROFESSIONS } from '@/utils/cadastroOptions';
 import type { CadastroFormData, CadastroFormErrors } from '@/types/cadastro';
 import { styles } from './cadastroStepStyles';
 
-const PROFISSAO_OPTIONS: SelectOption<string>[] = [
-  { value: 'CLT / Carteira assinada', label: 'CLT / Carteira assinada' },
-  { value: 'Autônomo / PJ', label: 'Autônomo / PJ' },
-  { value: 'Profissional liberal', label: 'Profissional liberal' },
-  { value: 'Servidor público', label: 'Servidor público' },
-  { value: 'Empresário / Empreendedor', label: 'Empresário / Empreendedor' },
-  { value: 'Estudante', label: 'Estudante' },
-  { value: 'Aposentado / Pensionista', label: 'Aposentado / Pensionista' },
-  { value: 'Outro', label: 'Outro' },
-];
+const PROFISSAO_OPTIONS: SelectOption<string>[] = PROFESSIONS.map((value) => ({
+  value,
+  label: value,
+}));
+const INCOME_OPTIONS: SelectOption<string>[] = INCOME_RANGES.map(({ value, label }) => ({
+  value,
+  label,
+}));
+const OTHER = 'Outra';
 
 /**
  * COMPONENT - campos da Etapa 2 (Dados adicionais).
  *
- * `birthDate` -> Users.BirthDate, `monthlyIncome` -> Users.MonthlyIncome: existem
- * na modelagem atual. `profissao` NAO existe em nenhuma tabela documentada -
- * aparece so para bater com o Figma, e nao e enviada em nenhum envio (ver
- * cadastroModel).
+ * `birthDate`, `monthlyIncome` (faixa escolhida num dropdown) e `profissao`
+ * seguem para o PATCH /users/me/additional-info (ver cadastroModel).
+ *
+ * `showCelular`: no cadastro retomado a Etapa 1 e pulada, entao o celular (o
+ * mesmo campo da Etapa 1) aparece aqui.
  */
 type CadastroStepAdicionaisProps = {
-  data: Pick<CadastroFormData, 'birthDate' | 'monthlyIncome' | 'profissao'>;
+  data: Pick<CadastroFormData, 'celular' | 'birthDate' | 'monthlyIncome' | 'profissao'>;
   errors: CadastroFormErrors;
   onChange: <K extends keyof CadastroFormData>(field: K, value: CadastroFormData[K]) => void;
   onTouch: (field: keyof CadastroFormData) => void;
+  showCelular?: boolean;
 };
 
 export function CadastroStepAdicionais({
@@ -37,15 +40,16 @@ export function CadastroStepAdicionais({
   errors,
   onChange,
   onTouch,
+  showCelular = false,
 }: CadastroStepAdicionaisProps) {
   const isCustomInitial = Boolean(
     data.profissao &&
-      !PROFISSAO_OPTIONS.some((opt) => opt.value !== 'Outro' && opt.value === data.profissao)
+      !PROFISSAO_OPTIONS.some((opt) => opt.value !== OTHER && opt.value === data.profissao)
   );
   const [isOtherSelected, setIsOtherSelected] = useState(isCustomInitial);
 
   function handleSelectProfissao(selected: string) {
-    if (selected === 'Outro') {
+    if (selected === OTHER) {
       setIsOtherSelected(true);
       onChange('profissao', '');
     } else {
@@ -55,7 +59,7 @@ export function CadastroStepAdicionais({
   }
 
   const selectValue = isOtherSelected
-    ? 'Outro'
+    ? OTHER
     : (PROFISSAO_OPTIONS.some((opt) => opt.value === data.profissao) ? data.profissao : null);
 
   return (
@@ -64,6 +68,16 @@ export function CadastroStepAdicionais({
       <Text style={styles.subtitle}>Dados para traçar seu perfil financeiro</Text>
 
       <View style={styles.fields}>
+        {showCelular ? (
+          <TextField
+            placeholder="Celular"
+            value={data.celular}
+            onChangeText={(value) => onChange('celular', value)}
+            onBlur={() => onTouch('celular')}
+            error={errors.celular}
+            keyboardType="phone-pad"
+          />
+        ) : null}
         <DateField
           placeholder="Data de nascimento"
           value={data.birthDate}
@@ -72,14 +86,13 @@ export function CadastroStepAdicionais({
           error={errors.birthDate}
           maximumDate={new Date()}
         />
-        <TextField
+        <SelectField
           placeholder="Renda fixa mensal"
-          value={data.monthlyIncome}
-          onChangeText={(value) => onChange('monthlyIncome', value)}
-          onBlur={() => onTouch('monthlyIncome')}
+          value={data.monthlyIncome || null}
+          options={INCOME_OPTIONS}
+          onChange={(value) => onChange('monthlyIncome', value)}
+          onTouch={() => onTouch('monthlyIncome')}
           error={errors.monthlyIncome}
-          keyboardType="numeric"
-          maxLength={18}
         />
         <SelectField
           placeholder="Profissão"

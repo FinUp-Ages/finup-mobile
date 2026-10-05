@@ -1,6 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
+import { Pressable, StyleSheet, View, type TextInputProps } from 'react-native';
+import { Text, TextInput } from '@/components/ui/AppText';
 import { colors } from '@/theme/colors';
 
 /**

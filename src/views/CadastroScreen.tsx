@@ -5,7 +5,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
-  Text,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
@@ -16,6 +15,7 @@ import { CadastroStepCodigo } from '@/components/common/CadastroStepCodigo';
 import { CadastroStepDados } from '@/components/common/CadastroStepDados';
 import { CadastroStepSenha } from '@/components/common/CadastroStepSenha';
 import { StepProgress } from '@/components/common/StepProgress';
+import { Text } from '@/components/ui/AppText';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { colors } from '@/theme/colors';
 import { useCadastroViewModel } from '@/viewmodels/useCadastroViewModel';
@@ -48,6 +48,7 @@ export default function CadastroScreen() {
     isLastStep,
     canGoBack,
     showProgress,
+    showCelularInStep2,
     setField,
     touchField,
     setCode,
@@ -107,6 +108,7 @@ export default function CadastroScreen() {
                     errors={errors}
                     onChange={setField}
                     onTouch={touchField}
+                    showCelular={showCelularInStep2}
                   />
                 ) : (
                   <CadastroStepSenha

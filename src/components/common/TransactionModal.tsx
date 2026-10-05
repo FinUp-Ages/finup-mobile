@@ -7,11 +7,11 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppleIcon } from '@/components/ui/AppleIcon';
+import { Text } from '@/components/ui/AppText';
 import { BrandGradient } from '@/components/ui/BrandGradient';
 import { CurrencyField } from '@/components/ui/CurrencyField';
 import { PillButton } from '@/components/ui/PillButton';
@@ -149,7 +149,7 @@ function TransactionModalContent({
                   pressed ? styles.closeButtonPressed : null,
                 ]}
               >
-                <Feather color={colors.textPrimary} name="x" size={16} />
+                <Feather color={colors.navy} name="x" size={20} />
               </Pressable>
             </View>
 
@@ -240,28 +240,26 @@ function TransactionModalContent({
 
 const styles = StyleSheet.create({
   actions: {
-    gap: 10,
-    marginTop: 4,
+    gap: 12,
   },
   balanceLabel: {
     color: colors.white,
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: '700',
   },
   balanceValue: {
     color: colors.white,
-    fontSize: 12,
+    fontSize: 14,
     fontVariant: ['tabular-nums'],
-    marginTop: 2,
+    fontWeight: '700',
   },
   card: {
-    backgroundColor: colors.glass,
-    borderColor: colors.glassBorder,
+    backgroundColor: colors.glassSoft,
     borderCurve: 'continuous',
-    borderRadius: 20,
-    borderWidth: 1,
-    gap: 14,
-    padding: 16,
+    borderRadius: 12,
+    gap: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 24,
   },
   cardArea: {
     flex: 1,
@@ -277,10 +275,10 @@ const styles = StyleSheet.create({
   closeButton: {
     alignItems: 'center',
     backgroundColor: colors.white,
-    borderRadius: 16,
-    height: 32,
+    borderRadius: 19,
+    height: 38,
     justifyContent: 'center',
-    width: 32,
+    width: 38,
   },
   closeButtonPressed: {
     transform: [{ scale: 0.95 }],
@@ -296,6 +294,6 @@ const styles = StyleSheet.create({
   },
   pillsRow: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
   },
 });

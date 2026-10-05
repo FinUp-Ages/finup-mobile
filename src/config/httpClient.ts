@@ -13,6 +13,10 @@ import { authModel } from '@/models/authModel';
 
 const baseURL = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
 
+// Padrao de cada requisicao; quem espera mais (ex.: o assistente de IA) passa
+// `timeoutMs` nas opcoes.
+const REQUEST_TIMEOUT_MS = 15000;
+
 export class HttpError extends Error {
   readonly status: number;
   /** `detail` do problem+json do back, quando vier: texto ja escrito para o usuario. */
@@ -68,20 +72,32 @@ async function resolveAccessToken(): Promise<string | null> {
 // `auth: false` para rota publica (ex.: consulta de e-mail no cadastro): nao manda
 // Authorization nem derruba a sessao num 401. O back recusa com 401 ate a rota
 // publica se vier um token invalido, entao quem nao precisa de token nao deve mandar.
-type RequestOptions = RequestInit & { auth?: boolean };
+type RequestOptions = RequestInit & { auth?: boolean; timeoutMs?: number };
 
-async function request<T>(path: string, { auth = true, ...init }: RequestOptions = {}): Promise<T> {
+async function request<T>(
+  path: string,
+  { auth = true, timeoutMs = REQUEST_TIMEOUT_MS, ...init }: RequestOptions = {},
+): Promise<T> {
   const accessToken = auth ? await resolveAccessToken() : null;
 
-  const response = await fetch(`${baseURL}${path}`, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      // Sempre o access token: o IdToken (token_use=id) o back recusa com 401.
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-      ...init.headers,
-    },
-  });
+  // Sem timeout, back fora do ar deixava a tela em "carregando" para sempre.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  let response: Response;
+  try {
+    response = await fetch(`${baseURL}${path}`, {
+      ...init,
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        // Sempre o access token: o IdToken (token_use=id) o back recusa com 401.
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        ...init.headers,
+      },
+    });
+  } finally {
+    clearTimeout(timer);
+  }
 
   if (auth && response.status === 401 && (await authModel.hasSession())) {
     return expireSession();

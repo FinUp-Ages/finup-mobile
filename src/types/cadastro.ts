@@ -1,10 +1,8 @@
 /**
  * TYPES - dados do fluxo de cadastro (3 etapas, ver Figma).
  *
- * `celular` e `profissao` nao tem correspondencia na modelagem atual do backend
- * (Users so tem Name, Email, BirthDate, MonthlyIncome, FinancialProfile). Ficam
- * aqui porque aparecem no Figma e a tela precisa coleta-los visualmente, mas sao
- * pendencia de definicao - nunca sao enviados em nenhum envio.
+ * `monthlyIncome` guarda o `value` da faixa escolhida (utils/cadastroOptions);
+ * `celular` e `profissao` seguem no PATCH additional-info.
  */
 export type CadastroFormData = {
   nome: string;

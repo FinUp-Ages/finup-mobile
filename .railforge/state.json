@@ -1,65 +1,58 @@
 {
   "stage": "REVIEWING",
-  "task": "PR #16 - [APP] Implementar tela de Chat com IA (ClickUp 86e3bcy5f): ajustes do review e contrato de conversas do finup-backend PR #39, assumidos por quem revisou",
-  "objective": "Integrar a aba Chatbot (ja criada na barra nativa pelo #11) ao assistente do back com conversas gravadas: continuar, abrir e comecar conversas",
-  "scope_changes": [
-    "2026-10-01: merge da develop (#11): a barra de abas fica a NativeTabs da develop e sai o guarda de sessao que o PR punha no layout de (tabs); a rota /chatbot passa a abrir a ChatbotScreen no lugar do 'Em breve'",
-    "2026-10-02: o finup-backend PR #39 passou a gravar as conversas (conversationId no POST, GET .../{id}/messages, messageCount, acao FINANCIAL_FEEDBACK, 422 com detail); a pedido do usuario o mobile segue esse contrato neste mesmo PR",
-    "2026-10-02: depois do teste no aparelho o usuario pediu: (1) o saldo recarregar quando o chatbot registra transacao ou responde sobre saldo; (2) a tela de saldo + Entrada/Saida sair da aba Analise e ir para a aba Transacao (Analise vira 'Em breve'; login, cadastro e abertura do app abrem em /transacao); (3) o composer do chat subir com o teclado"
-  ],
-  "requirements": [
-    "Enviar mensagens ao POST /api/v1/ai/assistant com o conversationId da conversa aberta; a primeira mensagem de uma conversa nova vai sem ele e o id da resposta passa a valer",
-    "Depois de cada envio com sucesso, recarregar a lista de conversas (titulo, ordem e contagem mudam)",
-    "Menu lateral: 'Nova conversa', lista com rolagem, conversa aberta destacada, tocar abre a conversa (GET /api/v1/assistant/conversations/{id}/messages); carregando, vazio, erro e nova tentativa",
-    "Abrir conversa: carregando, erro com nova tentativa (404 = conversa indisponivel); troca de conversa bloqueada enquanto uma mensagem e enviada",
-    "422 (assistente nao entendeu) vira fala do assistente com o detail do back, sem 'Tentar novamente'; demais erros marcam o balao e oferecem nova tentativa no mesmo balao",
-    "Boas-vindas com o primeiro nome do GET /users/me, utilizavel com o teclado aberto; composer acima da barra de abas nativa e do teclado",
-    "Cores so de src/theme/colors.ts; textos da interface com acentuacao",
-    "Resposta do chatbot com transacao criada ou FINANCIAL_FEEDBACK recarrega o saldo da aba Transacao",
-    "Aba Transacao com o saldo e Entrada/Saida; aba Analise com 'Em breve'; destino depois de login/cadastro/abertura = /transacao",
-    "Composer do chat visivel acima do teclado no Android e no iOS"
-  ],
-  "flow_and_states": "Fluxo: aba Chatbot -> boas-vindas -> enviar (abre conversa nova) -> resposta ('Transacao registrada' ou feedback) -> menu -> abrir outra conversa ou 'Nova conversa'. Estados: enviando ('FinUp esta pensando...'), erro com nova tentativa, 422 como resposta do assistente, conversa carregando/erro, menu carregando/vazio/erro/lista, teclado aberto (marca compacta)",
-  "files_in_scope": [
-    "app/(tabs)/chatbot.tsx",
-    "assets/logo-white.png",
-    "src/config/httpClient.ts (HttpError.detail)",
-    "src/components/chatbot/ (Composer, Header, Mark, Message, SideMenu, Welcome)",
-    "src/models/chatbotModel.ts",
-    "src/theme/colors.ts",
-    "src/types/chatbot.ts",
-    "src/viewmodels/useChatbotViewModel.ts",
-    "src/views/ChatbotScreen.tsx",
-    "app/(tabs)/analise.tsx, app/(tabs)/transacao.tsx",
-    "src/views/AnaliseScreen.tsx -> TransacaoScreen.tsx, src/viewmodels/useAnaliseViewModel.ts -> useTransacaoViewModel.ts",
-    "src/models/transactionEvents.ts",
-    "src/viewmodels/useLoginViewModel.ts, useCadastroViewModel.ts, useLoadingScreenViewModel.ts (destino /transacao)",
-    "comentarios: app/(tabs)/_layout.tsx, ComingSoonScreen, BrandGradient, PillButton, colors.ts"
-  ],
+  "task": "PR #18 - Home conectada ao back (nome, saldo total, entradas/saidas e gastos por periodo) + cadastro com renda em faixas e profissao em lista, celular/profissao enviados ao back, fonte Inter e ajustes visuais do Figma nas abas Transacao e Chatbot",
+  "branch": "feature/home-connected (atualizada com a develop em c892701)",
+  "objective": "Manter o design da Home e trocar os mocks de nome, saldo total e Gastos por dados do back, com loading, erro (tentar de novo) e vazio; login, fim do cadastro e abertura do app com sessao abrem a Home (/carteira)",
   "decisions": [
-    "Sessao: a Loading e o setSessionExpiredHandler do app/_layout.tsx ja cobrem o acesso sem sessao; o guarda extra no layout de (tabs) deixava todas as abas em branco enquanto conferia",
-    "Bump de expo/expo-router e o package-lock do PR revertidos para os da develop: fora do escopo e o lock novo duplicava expo-modules-core em expo/node_modules",
-    "Sem anexo e sem microfone no composer ate haver tarefa para isso; sem selecao de modelo (o back usa o padrao sem o campo model)",
-    "A transacao da resposta usa o TransactionResponse de src/types/transaction.ts (o back devolve o mesmo DTO)",
-    "HttpError ganhou `detail` (lido do problem+json do back) sem mudar `message`: quem ja usava HttpError continua igual",
-    "conversationId nulo na resposta (back nao gravou o historico) mantem a conversa atual; o turno com 422 nao e gravado no back, entao some ao reabrir a conversa",
-    "Resposta de uma conversa aberta antes e descartada se a pessoa trocou de conversa enquanto carregava (ref da conversa mostrada)",
-    "Saldo entre abas por um aviso simples (transactionEvents: subscribe/notifyChanged) em vez de recarregar no foco: as NativeTabs ficam montadas e o aviso nao depende de evento de foco da navegacao",
-    "Teclado do chat: KeyboardAvoidingView com padding tambem no Android (edge-to-edge nao encolhe a janela); o KAV recalcula pelo layout se a janela encolher, entao nao soma duas vezes",
-    "Tokens chat* em colors.ts para o degrade e os tons do chatbot; os gradientes do SVG da ChatbotMark ficam no componente (desenho, nao tema)"
+    "Nome: GET /api/v1/users/me; saudacao usa o primeiro nome",
+    "Saldo total: GET /transactions desde BALANCE_FROM (1970-01-01, em transactionModel) ate hoje, o mesmo da aba Transacao",
+    "Card de saldo com seletor de periodo (7/15/30 dias, 3/6/12 meses; padrao 7 dias) via GET /transactions?from&to; entradas, saidas e gastos seguem o periodo; olho oculta so o saldo",
+    "Gastos: 10 EXPENSE mais recentes do periodo com o nome da categoria (GET /api/v1/categories); sem descricao usa a categoria, sem categoria 'Gasto'; sem gastos, o card Integrar cartoes e o estado vazio",
+    "Falha so nas categorias nao derruba a Home: os gastos aparecem sem o nome da categoria",
+    "Home recarrega ao ganhar foco, por pull-to-refresh e quando o chatbot registra transacao (transactionEvents)",
+    "Carteira = HomeScreen; o botao Adicionar transacao abre a aba /transacao; abas nativas da develop mantidas",
+    "Celular (E.164 +55) e profissao vao no PATCH additional-info, que o back ja aceita",
+    "Valores em reais formatados pelo formatAmount (utils/masks), sem '-R$ 0,00'",
+    "Cores so de src/theme/colors.ts (colors + darkColors da Home), com os mesmos valores do Figma",
+    "Timeout padrao de 15s por requisicao no httpClient; o POST /ai/assistant usa 60s",
+    "2026-10-04, usuario: fonte Inter em todo o app pelo Text/TextInput de src/components/ui/AppText (mesma traducao de fontWeight para familia que o Willian fez); a troca global do react-native saiu",
+    "2026-10-04, usuario: ajustes visuais fora da Home ficam neste PR, explicados na descricao",
+    "2026-10-04, usuario: cadastro retomado pede o celular na Etapa 2 (mesmo campo, mascara e validacao da Etapa 1) e envia phone no PATCH additional-info"
   ],
+  "pending_decisions": [
+    "Renda em faixas no lugar do valor mascarado da issue #12: envia o limite superior da faixa e 'Mais de R$ 50.000' grava 50000, igual a faixa anterior"
+  ],
+  "files_in_scope": [
+    "app/_layout.tsx, app/(tabs)/_layout.tsx, app/(tabs)/carteira.tsx",
+    "src/views/HomeScreen.tsx, src/viewmodels/useHomeViewModel.ts, src/types/home.ts",
+    "src/components/home/* (BalanceCard, ExpenseList, HomeHeader, IntegrateCardsCard, PeriodPickerModal, ScoreBannerCard), src/components/ui/HomePillButton.tsx, assets/home/score-medal.png",
+    "src/utils/format.ts, src/utils/homePeriods.ts, src/utils/dates.ts, src/utils/masks.ts, src/utils/cadastroOptions.ts",
+    "src/theme/colors.ts, src/theme/fonts.ts, package.json, package-lock.json",
+    "src/config/httpClient.ts, src/models/chatbotModel.ts, src/models/transactionModel.ts, src/models/cadastroModel.ts, src/models/userModel.ts, src/types/cadastro.ts",
+    "src/components/common/CadastroStepAdicionais.tsx, CadastroStepDados.tsx, TransactionModal.tsx; src/components/ui/SelectField.tsx, PillButton.tsx, PillSelect.tsx, AuthButton.tsx, CurrencyField.tsx, BrandGradient.tsx; src/components/chatbot/ChatbotComposer.tsx",
+    "src/viewmodels/useCadastroViewModel.ts, useLoginViewModel.ts, useLoadingScreenViewModel.ts, useChatbotViewModel.ts, useTransacaoViewModel.ts; src/views/TransacaoScreen.tsx, ChatbotScreen.tsx",
+    "src/components/ui/AppText.tsx (novo) e os 45 arquivos que passaram a importar Text/TextInput dele"
+  ],
+  "flow_and_states": "Fluxos: abertura do app com sessao, login e fim do cadastro levam a Home; Home -> Adicionar transacao -> aba Transacao -> salvar -> Home atualizada ao voltar. Estados: carregando, erro com tentar de novo, sem gastos (Integrar cartoes), sucesso, sessao expirada (httpClient volta ao login)",
   "non_goals": [
-    "Apagar ou renomear conversas (o back nao tem rota)",
-    "Microfone com a transcricao da POC (#6) no composer: tarefa separada, exige build de desenvolvimento",
-    "Anexos, selecao de modelo e confirmacao da transacao antes de registrar"
+    "Score e os CTAs 'Adicionar agora' e 'Integrar cartoes' (onPress vazio)",
+    "Mudancas no back"
   ],
+  "updated_at": "2026-10-04",
   "validation": {
-    "typecheck": "ok, 2026-10-02",
-    "lint": "ok, 2026-10-02",
-    "prettier": "ok nos arquivos do chatbot e no httpClient",
-    "contrato_back": "conferido contra o finup-backend PR #39 (feature/integrate-ai-bedrock, 7b77121): AiAssistantRequest/Response com conversationId, ConversationResponse com messageCount, ConversationMessageResponse (role USER/ASSISTANT, text, action, createdAt), BusinessException -> 422 com detail. PR #39 ainda nao esta na develop do back; o PR #37 do back cria o mesmo GET de mensagens",
-    "expo_go": "nao verificado: com a barra nativa, as conversas e os ajustes ainda nao visto no aparelho; exige o back do PR #39 com Bedrock e S3 configurados"
+    "typecheck": "ok",
+    "lint": "0 erros",
+    "ci": "verde no head do PR antes dos ajustes do review",
+    "expo_go": "nao validado no aparelho: Home, seletor de periodo, banner, Adicionar transacao, cadastro (Etapa 2) e chatbot",
+    "cadastro_retomado": "2026-10-04, Expo Go + back da develop local: Etapa 2 com celular, salvo com phone +55 (E.164), profissao, nascimento e renda; POST /users e PATCH additional-info ok",
+    "android_barra_de_abas": "2026-10-04, usuario no aparelho Android: sem vao entre a Home e a barra de abas"
   },
-  "review": "Review de 2026-10-01 aplicado (conflitos, dependencias, cores, acentos, nova tentativa, botoes sem acao, tipos, nome do Welcome, driver nativo, submitBehavior) e contrato de conversas do back PR #39 em 2026-10-02. Pendente: Expo Go contra o back do PR #39 e merge do PR #39 antes deste",
-  "updated_at": "2026-10-02"
+  "review": "2026-10-04, review do PR #18: ajustes aplicados na branch - .gitignore sem pastas locais; formatBRL trocado pelo formatAmount e BALANCE_FROM unico em transactionModel; hasTransactions sem uso removido; timeout por requisicao (60s no assistente); cores fixas movidas para tokens com os mesmos valores e tokens mortos (brandBlue, glassBorder, pillDark, pillDarkBorder, darkColors sem uso) removidos; comentarios atualizados. package-lock.json mantido: o npm 11 gera o mesmo arquivo a partir da develop. Itens de pending_decisions ficam para o time. 2026-10-04: fonte refeita com AppText (bundle conferido sem a troca global); celular no cadastro retomado validado como bug. Celular do cadastro retomado corrigido (showCelularInStep2); toAdditionalInfo conferido com o regex E.164 do back.",
+  "follow_ups": [
+    "Score: expor finUpScore no GET /users/me",
+    "Destino dos CTAs 'Adicionar agora' e 'Integrar cartoes'",
+    "Issue #15: 'Outra' da profissao se perde ao voltar de etapa",
+    "Acesso ao Perfil/Sair pela interface (fora da barra de abas)",
+    "Runner de testes no mobile (jest-expo + Testing Library)"
+  ]
 }

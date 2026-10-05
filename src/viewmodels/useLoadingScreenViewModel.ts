@@ -26,7 +26,7 @@ async function resolveInitialRoute(): Promise<Href> {
 
   try {
     await userModel.getMe();
-    return '/transacao';
+    return '/carteira';
   } catch (error) {
     // 401: o httpClient ja limpou a sessao.
     if (error instanceof HttpError && error.status === 404) {

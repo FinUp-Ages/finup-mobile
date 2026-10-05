@@ -1,4 +1,5 @@
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/ui/AppText';
 
 /**
  * COMPONENT - relatorio em Markdown do roteiro. Sai do aparelho pelo

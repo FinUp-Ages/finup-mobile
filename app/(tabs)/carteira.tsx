@@ -1,6 +1,2 @@
-// ROTA "/carteira" - aba ainda sem tela propria; mostra o "Em breve" da barra.
-import ComingSoonScreen from '@/views/ComingSoonScreen';
-
-export default function CarteiraRoute() {
-  return <ComingSoonScreen title="Carteira" />;
-}
+// ROTA "/carteira" - so aponta para a tela. Toda a logica visual mora em views/.
+export { default } from '@/views/HomeScreen';

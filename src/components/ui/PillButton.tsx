@@ -1,5 +1,6 @@
 import { Feather } from '@expo/vector-icons';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/ui/AppText';
 import { colors } from '@/theme/colors';
 
 /**
@@ -37,14 +38,13 @@ export function PillButton({ label, onPress, variant, icon, disabled, loading }:
     >
       <Text style={[styles.label, isLight ? styles.labelLight : styles.labelDark]}>{label}</Text>
       {loading ? (
-        <ActivityIndicator color={isLight ? colors.textPrimary : colors.white} size="small" />
+        <ActivityIndicator
+          color={isLight ? colors.navy : colors.pillSoftText}
+          size="small"
+        />
       ) : (
         <View style={[styles.iconCircle, isLight ? styles.iconCircleLight : styles.iconCircleDark]}>
-          <Feather
-            color={isLight ? colors.white : colors.textPrimary}
-            name={icon}
-            size={14}
-          />
+          <Feather color={isLight ? colors.white : colors.navy} name={icon} size={14} />
         </View>
       )}
     </Pressable>
@@ -54,22 +54,20 @@ export function PillButton({ label, onPress, variant, icon, disabled, loading }:
 const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
-    borderRadius: 26,
+    borderRadius: 10000,
     flexDirection: 'row',
-    height: 52,
+    height: 55,
     justifyContent: 'space-between',
-    paddingHorizontal: 24,
+    paddingHorizontal: 40,
   },
   buttonDark: {
-    backgroundColor: colors.pillDark,
-    borderColor: colors.pillDarkBorder,
-    borderWidth: 1,
+    backgroundColor: colors.pillSoftFill,
   },
   buttonDisabled: {
     opacity: 0.45,
   },
   buttonLight: {
-    backgroundColor: colors.pillLight,
+    backgroundColor: colors.surfaceLight,
   },
   // Feedback no toque (press-in), como pede o guia da Expo: escala leve no lugar
   // de ripple, igual nas duas plataformas.
@@ -84,19 +82,18 @@ const styles = StyleSheet.create({
     width: 22,
   },
   iconCircleDark: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.pillSoftText,
   },
   iconCircleLight: {
-    backgroundColor: colors.textPrimary,
+    backgroundColor: colors.navy,
   },
   label: {
-    fontSize: 15,
-    fontWeight: '500',
+    fontSize: 16,
   },
   labelDark: {
-    color: colors.white,
+    color: colors.pillSoftText,
   },
   labelLight: {
-    color: colors.textPrimary,
+    color: colors.navy,
   },
 });

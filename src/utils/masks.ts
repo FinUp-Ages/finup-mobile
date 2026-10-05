@@ -37,10 +37,13 @@ export function formatCurrency(value: string): string {
 
 /**
  * Formata um valor em reais ja numerico, com sinal (ex.: -12.5 -> "-R$ 12,50").
+ * Arredonda para centavos antes, para nao exibir resto de ponto flutuante nem
+ * "-R$ 0,00".
  */
 export function formatAmount(value: number): string {
   const cents = Math.round(Math.abs(value) * 100);
-  return `${value < 0 ? '-' : ''}${formatCurrency(String(cents))}`;
+  const sign = value < 0 && cents > 0 ? '-' : '';
+  return `${sign}${formatCurrency(String(cents))}`;
 }
 
 /**

@@ -1,13 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { transactionEvents } from '@/models/transactionEvents';
-import { transactionModel } from '@/models/transactionModel';
+import { BALANCE_FROM, transactionModel } from '@/models/transactionModel';
 import type { TransactionType } from '@/types/transaction';
 import { todayIsoDate } from '@/utils/dates';
-
-// Inicio fixo para o "saldo total": o GET /transactions so devolve saldo de um
-// periodo, e nao ha endpoint de saldo acumulado. Transacoes futuras (data depois
-// de hoje) ficam fora, como num extrato.
-const BALANCE_FROM = '1970-01-01';
 
 export type BalanceState =
   { status: 'loading' } | { status: 'error' } | { status: 'ready'; value: number };

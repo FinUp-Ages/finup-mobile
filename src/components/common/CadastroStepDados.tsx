@@ -1,4 +1,5 @@
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
+import { Text } from '@/components/ui/AppText';
 import { TextField } from '@/components/ui/TextField';
 import type { CadastroFormData, CadastroFormErrors } from '@/types/cadastro';
 import { styles } from './cadastroStepStyles';
@@ -6,8 +7,7 @@ import { styles } from './cadastroStepStyles';
 /**
  * COMPONENT - campos da Etapa 1 (Dados cadastrais).
  *
- * `celular` nao tem correspondencia na modelagem atual do backend - aparece aqui
- * so para bater com o Figma, mas nao e enviado em nenhum envio (ver cadastroModel).
+ * `celular` segue no PATCH additional-info, em E.164 (ver cadastroModel).
  *
  * `onTouch` marca o campo como "tocado" ao perder o foco - so a partir dai o
  * erro daquele campo aparece (ver useCadastroViewModel).

@@ -7,6 +7,11 @@ import type {
 
 const GENERIC_MESSAGE = 'Não foi possível concluir a operação. Tente novamente.';
 
+// Inicio fixo para o "saldo total" (aba Transacao e Home): o GET /transactions so
+// devolve saldo de um periodo, e nao ha endpoint de saldo acumulado. Transacoes
+// futuras (data depois de hoje) ficam fora, como num extrato.
+export const BALANCE_FROM = '1970-01-01';
+
 /**
  * Mensagem para a pessoa usuaria a partir de um erro ao salvar uma transacao
  * (TransactionService.requireAvailableReferences, finup-backend): 404 cobre

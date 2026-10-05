@@ -1,6 +1,7 @@
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import type { ReactNode } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/ui/AppText';
 import { colors } from '@/theme/colors';
 
 /**
@@ -154,15 +155,15 @@ const styles = StyleSheet.create({
   },
   pill: {
     alignItems: 'center',
-    backgroundColor: colors.glassStrong,
+    backgroundColor: colors.glassSoft,
     borderColor: 'transparent',
-    borderRadius: 22,
+    borderRadius: 10000,
     borderWidth: 1,
     flex: 1,
     flexDirection: 'row',
     gap: 6,
-    minHeight: 44,
-    paddingHorizontal: 12,
+    minHeight: 45,
+    paddingHorizontal: 16,
   },
   pillError: {
     borderColor: colors.errorOnDark,
@@ -170,8 +171,7 @@ const styles = StyleSheet.create({
   pillLabel: {
     color: colors.white,
     flex: 1,
-    fontSize: 13,
-    fontWeight: '500',
+    fontSize: 16,
   },
   pillOpen: {
     borderColor: colors.white,

@@ -1,10 +1,11 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { DeviceSupportCard } from '@/components/common/DeviceSupportCard';
 import { MicLevelBar } from '@/components/common/MicLevelBar';
 import { RecordButton } from '@/components/common/RecordButton';
 import { TestScriptCard } from '@/components/common/TestScriptCard';
 import { TranscriptCard } from '@/components/common/TranscriptCard';
 import { TranscriptionReportCard } from '@/components/common/TranscriptionReportCard';
+import { Text } from '@/components/ui/AppText';
 import { useTranscriptionViewModel } from '@/viewmodels/useTranscriptionViewModel';
 import type { TranscriptionStatus } from '@/types/speech';
 

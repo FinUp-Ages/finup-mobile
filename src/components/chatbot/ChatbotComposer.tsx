@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { TextInput } from '@/components/ui/AppText';
 import { colors } from '@/theme/colors';
 
 interface ChatbotComposerProps {
@@ -25,10 +26,12 @@ export function ChatbotComposer({ draft, isSending, onChangeDraft, onSend }: Cha
         onChangeText={onChangeDraft}
         onSubmitEditing={onSend}
         placeholder="Digite sua mensagem"
-        placeholderTextColor={colors.chatText}
+        placeholderTextColor={colors.placeholderOnDark}
         returnKeyType="send"
         style={styles.input}
         submitBehavior="submit"
+        textAlignVertical="top"
+        underlineColorAndroid="transparent"
         value={draft}
       />
       <View style={styles.actions}>
@@ -51,33 +54,29 @@ export function ChatbotComposer({ draft, isSending, onChangeDraft, onSend }: Cha
   );
 }
 
+// Figma (Frame 84): padding 16, gap 24, raio 12, fundo branco 10%; texto 14/18 a 75%.
 const styles = StyleSheet.create({
   actions: {
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    paddingHorizontal: 16,
-    paddingTop: 22,
-    paddingBottom: 12,
+    minHeight: 26,
   },
   composer: {
-    backgroundColor: colors.glass,
-    borderRadius: 13,
-    elevation: 5,
-    minHeight: 92,
-    shadowColor: '#000000',
-    shadowOffset: { height: 0, width: 0 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
+    backgroundColor: colors.glassSoft,
+    borderRadius: 12,
+    gap: 24,
+    padding: 16,
   },
   input: {
+    backgroundColor: 'transparent',
     color: colors.white,
     fontSize: 14,
-    lineHeight: 20,
-    maxHeight: 70,
-    minHeight: 38,
-    paddingHorizontal: 16,
-    paddingTop: 14,
+    includeFontPadding: false,
+    lineHeight: 18,
+    maxHeight: 72,
+    minHeight: 18,
+    padding: 0,
   },
   sendAction: {
     alignItems: 'center',

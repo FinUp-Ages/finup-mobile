@@ -1,4 +1,5 @@
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Text, TextInput } from '@/components/ui/AppText';
 import { colors } from '@/theme/colors';
 import { formatCurrency } from '@/utils/masks';
 
@@ -83,16 +84,17 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   inputHero: {
-    backgroundColor: colors.white,
-    borderColor: colors.white,
+    backgroundColor: colors.surfaceLight,
+    borderColor: colors.surfaceLight,
     borderCurve: 'continuous',
     borderRadius: 12,
     borderWidth: 2,
-    color: colors.textPrimary,
-    fontSize: 28,
+    color: colors.navy,
+    fontSize: 36,
     fontVariant: ['tabular-nums'],
     fontWeight: '700',
-    paddingVertical: 14,
+    height: 71,
+    paddingVertical: 12,
     textAlign: 'center',
   },
   inputError: {
