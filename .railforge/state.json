@@ -25,6 +25,7 @@
   "pending_decisions": [
     "Renda em faixas no lugar do valor mascarado da issue #12: envia o limite superior da faixa e 'Mais de R$ 50.000' grava 50000, igual a faixa anterior"
   ],
+  "plan": "Adicionar react-native-markdown-display; configurar o parser para preservar quebras simples de linha; aplicar Markdown somente ao assistente; validar exemplos, typecheck, lint e bundle mobile; revisar o diff.",
   "files_in_scope": [
     "package-lock.json",
     ".railforge/state.json"
