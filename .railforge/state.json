@@ -1,58 +1,27 @@
 {
   "stage": "REVIEWING",
-  "task": "PR #18 - Home conectada ao back (nome, saldo total, entradas/saidas e gastos por periodo) + cadastro com renda em faixas e profissao em lista, celular/profissao enviados ao back, fonte Inter e ajustes visuais do Figma nas abas Transacao e Chatbot",
-  "branch": "feature/home-connected (atualizada com a develop em c892701)",
-  "objective": "Manter o design da Home e trocar os mocks de nome, saldo total e Gastos por dados do back, com loading, erro (tentar de novo) e vazio; login, fim do cadastro e abertura do app com sessao abrem a Home (/carteira)",
-  "decisions": [
-    "Nome: GET /api/v1/users/me; saudacao usa o primeiro nome",
-    "Saldo total: GET /transactions desde BALANCE_FROM (1970-01-01, em transactionModel) ate hoje, o mesmo da aba Transacao",
-    "Card de saldo com seletor de periodo (7/15/30 dias, 3/6/12 meses; padrao 7 dias) via GET /transactions?from&to; entradas, saidas e gastos seguem o periodo; olho oculta so o saldo",
-    "Gastos: 10 EXPENSE mais recentes do periodo com o nome da categoria (GET /api/v1/categories); sem descricao usa a categoria, sem categoria 'Gasto'; sem gastos, o card Integrar cartoes e o estado vazio",
-    "Falha so nas categorias nao derruba a Home: os gastos aparecem sem o nome da categoria",
-    "Home recarrega ao ganhar foco, por pull-to-refresh e quando o chatbot registra transacao (transactionEvents)",
-    "Carteira = HomeScreen; o botao Adicionar transacao abre a aba /transacao; abas nativas da develop mantidas",
-    "Celular (E.164 +55) e profissao vao no PATCH additional-info, que o back ja aceita",
-    "Valores em reais formatados pelo formatAmount (utils/masks), sem '-R$ 0,00'",
-    "Cores so de src/theme/colors.ts (colors + darkColors da Home), com os mesmos valores do Figma",
-    "Timeout padrao de 15s por requisicao no httpClient; o POST /ai/assistant usa 60s",
-    "2026-10-04, usuario: fonte Inter em todo o app pelo Text/TextInput de src/components/ui/AppText (mesma traducao de fontWeight para familia que o Willian fez); a troca global do react-native saiu",
-    "2026-10-04, usuario: ajustes visuais fora da Home ficam neste PR, explicados na descricao",
-    "2026-10-04, usuario: cadastro retomado pede o celular na Etapa 2 (mesmo campo, mascara e validacao da Etapa 1) e envia phone no PATCH additional-info"
+  "task": "Renderizar Markdown nas respostas do assistente",
+  "requirements": [
+    "Renderizar negrito e listas com bullets nas mensagens do assistente usando um parser compativel com React Native",
+    "Preservar emojis e quebras de linha, incluindo 🎯 Meta total, 📅 6 meses e - **item**: valor",
+    "Manter mensagens do usuario como texto puro e preservar a tipografia e as cores do chat"
   ],
-  "pending_decisions": [
-    "Renda em faixas no lugar do valor mascarado da issue #12: envia o limite superior da faixa e 'Mais de R$ 50.000' grava 50000, igual a faixa anterior"
-  ],
+  "plan": "Adicionar react-native-markdown-display; configurar o parser para preservar quebras simples de linha; aplicar Markdown somente ao assistente; validar exemplos, typecheck, lint e bundle mobile; revisar o diff.",
   "files_in_scope": [
-    "app/_layout.tsx, app/(tabs)/_layout.tsx, app/(tabs)/carteira.tsx",
-    "src/views/HomeScreen.tsx, src/viewmodels/useHomeViewModel.ts, src/types/home.ts",
-    "src/components/home/* (BalanceCard, ExpenseList, HomeHeader, IntegrateCardsCard, PeriodPickerModal, ScoreBannerCard), src/components/ui/HomePillButton.tsx, assets/home/score-medal.png",
-    "src/utils/format.ts, src/utils/homePeriods.ts, src/utils/dates.ts, src/utils/masks.ts, src/utils/cadastroOptions.ts",
-    "src/theme/colors.ts, src/theme/fonts.ts, package.json, package-lock.json",
-    "src/config/httpClient.ts, src/models/chatbotModel.ts, src/models/transactionModel.ts, src/models/cadastroModel.ts, src/models/userModel.ts, src/types/cadastro.ts",
-    "src/components/common/CadastroStepAdicionais.tsx, CadastroStepDados.tsx, TransactionModal.tsx; src/components/ui/SelectField.tsx, PillButton.tsx, PillSelect.tsx, AuthButton.tsx, CurrencyField.tsx, BrandGradient.tsx; src/components/chatbot/ChatbotComposer.tsx",
-    "src/viewmodels/useCadastroViewModel.ts, useLoginViewModel.ts, useLoadingScreenViewModel.ts, useChatbotViewModel.ts, useTransacaoViewModel.ts; src/views/TransacaoScreen.tsx, ChatbotScreen.tsx",
-    "src/components/ui/AppText.tsx (novo) e os 45 arquivos que passaram a importar Text/TextInput dele"
+    "src/components/chatbot/ChatbotMessage.tsx",
+    "package.json",
+    "package-lock.json",
+    ".railforge/state.json"
   ],
-  "flow_and_states": "Fluxos: abertura do app com sessao, login e fim do cadastro levam a Home; Home -> Adicionar transacao -> aba Transacao -> salvar -> Home atualizada ao voltar. Estados: carregando, erro com tentar de novo, sem gastos (Integrar cartoes), sucesso, sessao expirada (httpClient volta ao login)",
-  "non_goals": [
-    "Score e os CTAs 'Adicionar agora' e 'Integrar cartoes' (onPress vazio)",
-    "Mudancas no back"
-  ],
-  "updated_at": "2026-10-04",
+  "flow_and_states": "Aba Chatbot: resposta nova e historico reaberto com listas, negrito, emojis e quebras; mensagem do usuario com Markdown literal; preservar indicadores de erro e transacao registrada. Conferir que carregamento, boas-vindas e nova tentativa continuam no fluxo existente.",
   "validation": {
-    "typecheck": "ok",
-    "lint": "0 erros",
-    "ci": "verde no head do PR antes dos ajustes do review",
-    "expo_go": "nao validado no aparelho: Home, seletor de periodo, banner, Adicionar transacao, cadastro (Etapa 2) e chatbot",
-    "cadastro_retomado": "2026-10-04, Expo Go + back da develop local: Etapa 2 com celular, salvo com phone +55 (E.164), profissao, nascimento e renda; POST /users e PATCH additional-info ok",
-    "android_barra_de_abas": "2026-10-04, usuario no aparelho Android: sem vao entre a Home e a barra de abas"
+    "typecheck": "OK: npm run typecheck, 2026-10-05",
+    "lint": "OK: npm run lint, 2026-10-05",
+    "diff": "OK: git diff --check; componente e dependencias revisados, sem alteracao de versoes preexistentes",
+    "examples": "Inspecao do componente e das regras da biblioteca: strong em Text, bullets em lista e breaks=true preservando quebras. Execucao com exemplos e primitivas React Native simuladas nao realizada: autorizacao do terminal recusada",
+    "mobile_bundle": "Nao realizado: autorizacao da exportacao Android/iOS recusada",
+    "expo_go": "Nao verificado no aparelho; pendente validar respostas novas e historico com emojis, negrito, bullets e quebras"
   },
-  "review": "2026-10-04, review do PR #18: ajustes aplicados na branch - .gitignore sem pastas locais; formatBRL trocado pelo formatAmount e BALANCE_FROM unico em transactionModel; hasTransactions sem uso removido; timeout por requisicao (60s no assistente); cores fixas movidas para tokens com os mesmos valores e tokens mortos (brandBlue, glassBorder, pillDark, pillDarkBorder, darkColors sem uso) removidos; comentarios atualizados. package-lock.json mantido: o npm 11 gera o mesmo arquivo a partir da develop. Itens de pending_decisions ficam para o time. 2026-10-04: fonte refeita com AppText (bundle conferido sem a troca global); celular no cadastro retomado validado como bug. Celular do cadastro retomado corrigido (showCelularInStep2); toAdditionalInfo conferido com o regex E.164 do back.",
-  "follow_ups": [
-    "Score: expor finUpScore no GET /users/me",
-    "Destino dos CTAs 'Adicionar agora' e 'Integrar cartoes'",
-    "Issue #15: 'Outra' da profissao se perde ao voltar de etapa",
-    "Acesso ao Perfil/Sair pela interface (fora da barra de abas)",
-    "Runner de testes no mobile (jest-expo + Testing Library)"
-  ]
+  "review": "Implementacao restrita aos quatro arquivos previstos. Usuario continua em Text; assistente usa react-native-markdown-display 7.0.2 com cores e tipografia existentes. Indicadores de erro/transacao e demais estados da tela preservados por inspecao. Pendente validacao dos exemplos em execucao e no Expo Go. A validacao anterior contra o backend permanece pendente; esta tarefa nao altera o contrato do chat.",
+  "updated_at": "2026-10-05"
 }
