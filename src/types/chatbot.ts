@@ -40,6 +40,18 @@ export interface ConversationMessage {
   createdAt: string;
 }
 
+/** Etapa da mensagem de voz no composer. */
+export type VoiceStatus = 'idle' | 'starting' | 'recording' | 'processing';
+
+/**
+ * Gravacao de uma mensagem de voz, so para a animacao que transforma a forma de
+ * onda no texto: o audio nao e guardado e o back recebe apenas a transcricao.
+ * `levels` sao as barras da forma de onda, 0..1.
+ */
+export interface VoiceRecording {
+  levels: number[];
+}
+
 export interface ChatMessage {
   id: string;
   role: ChatMessageRole;
@@ -47,4 +59,6 @@ export interface ChatMessage {
   text: string;
   action?: string | null;
   transaction?: TransactionResponse | null;
+  /** Presente quando a mensagem do usuario acabou de ser gravada por voz: anima a transcricao. */
+  voice?: VoiceRecording;
 }

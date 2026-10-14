@@ -1,35 +1,47 @@
 {
   "stage": "REVIEWING",
   "task": "[APP] Implementar ditado por voz no chat",
-  "objective": "Transformar o icone de microfone do input do chat em ditado por voz: a fala vira texto no campo de digitacao e o envio continua manual.",
+  "objective": "Transformar o microfone do input do chat em mensagem de voz no estilo WhatsApp/Telegram: segurar grava, soltar envia; a mensagem enviada anima a forma de onda virando o texto transcrito e fica como mensagem de texto. Sem transcricao ao vivo visivel.",
   "requirements": [
-    "Tocar no microfone inicia o ditado; tocar de novo encerra. Segurar o microfone dita enquanto pressionado e encerra ao soltar",
-    "A transcricao parcial aparece no campo durante a fala e a final e acrescentada ao rascunho existente",
-    "O usuario revisa e edita o texto transcrito e envia pelo botao de envio, como uma mensagem digitada",
-    "Permissao negada, cancelamento, ausencia de fala, erro do reconhecedor e indisponibilidade no Expo Go exibem mensagem amigavel junto ao composer"
+    "Segurar o microfone grava, com indicador de gravacao (ponto vermelho e tempo) no lugar do campo de texto; nenhuma transcricao aparece durante a gravacao",
+    "Soltar envia: a fala transcrita vai ao assistente como mensagem do usuario, sem etapa de revisao ou edicao",
+    "Arrastar o dedo para a esquerda durante a gravacao cancela sem enviar; toque curto mostra a dica 'Segure para gravar'",
+    "Ao enviar, o balao do usuario mostra a forma de onda captada, que se desfaz num desfoque; o texto transcrito sai do desfoque e fica como mensagem de texto comum, sem elementos que sugiram reproducao de audio",
+    "Permissao negada, nenhuma fala captada, erro do reconhecedor e indisponibilidade no Expo Go exibem mensagem amigavel junto ao composer, sem enviar nada"
   ],
-  "user_flow": "Aba Chatbot > composer > microfone > fala > revisao/edicao do texto > envio manual",
+  "user_flow": "Aba Chatbot > composer > segurar microfone > gravacao (tempo, deslizar para cancelar) > soltar > animacao audio -> texto no balao > resposta do assistente",
   "states": [
-    "idle: microfone pronto",
-    "permissao: dialogo do sistema na primeira vez; negada mostra orientacao para liberar nas configuracoes",
-    "ouvindo: icone ativo, campo somente leitura com o parcial, botao Cancelar e envio desabilitado",
-    "sucesso: texto final no campo, editavel",
-    "vazio: nenhuma fala captada mostra aviso",
-    "erro: falha do reconhecedor mostra mensagem e o rascunho anterior e preservado",
-    "cancelado: descarta a fala e preserva o rascunho anterior"
+    "idle: microfone pronto; toque curto mostra a dica de segurar",
+    "permissao: dialogo do sistema no primeiro uso interrompe o gesto; negada mostra orientacao para liberar nas configuracoes",
+    "gravando: campo substituido por ponto vermelho, tempo e 'Deslize para cancelar'; envio de texto indisponivel",
+    "processando: apos soltar, aguarda o resultado final do reconhecedor",
+    "enviado: forma de onda desfoca e o texto sai do desfoque (pulado com 'reduzir movimento'); depois, mensagem de texto comum; falha de envio mostra 'Mensagem nao enviada' e 'Tentar novamente'",
+    "vazio: nenhuma fala captada mostra aviso e nada e enviado",
+    "cancelado: deslizar para a esquerda descarta a gravacao; o rascunho de texto fica como estava",
+    "erro: falha do reconhecedor mostra mensagem e nada e enviado"
   ],
   "files_in_scope": [
     "src/models/speechRecognitionModel.ts",
     "src/viewmodels/useVoiceDictationViewModel.ts",
     "src/viewmodels/useChatbotViewModel.ts",
+    "src/types/chatbot.ts",
     "src/components/chatbot/ChatbotComposer.tsx",
-    "src/views/ChatbotScreen.tsx"
+    "src/components/chatbot/ChatbotMessage.tsx",
+    "src/views/ChatbotScreen.tsx",
+    "src/utils/format.ts"
   ],
   "decisions": [
     "Branch baseada na develop (b91379f, #18, home conectada), que trouxe o composer no layout do Figma, a fonte Inter via AppText e a trava contra envio em dobro.",
     "O PR #16 removeu o microfone do composer por falta de contrato no back; o ditado e local ao aparelho e nao depende do back, entao o microfone volta. O anexo continua fora.",
     "Reaproveita expo-speech-recognition e o speechRecognitionModel da POC (#6); o ditado tem opcoes proprias sem requiresOnDeviceRecognition, para nao falhar em aparelhos sem o modelo offline de pt-BR.",
-    "Os eventos do reconhecedor sao globais; o ViewModel do ditado so reage a sessoes que ele mesmo iniciou."
+    "Os eventos do reconhecedor sao globais; o ViewModel do ditado so reage a sessoes que ele mesmo iniciou.",
+    "2026-10-14: o usuario trocou o fluxo de ditado no campo (revisar e editar antes de enviar) por mensagem de voz estilo WhatsApp: soltar envia direto, sem transcricao ao vivo.",
+    "O back recebe e guarda so o texto transcrito; ao reabrir uma conversa pelo historico, a mensagem aparece como texto normal.",
+    "Entrega no mesmo PR #20 (branch feat/ditado-por-voz-chat).",
+    "Gravacao em modo continuo (Android 13+ e iOS) para nao encerrar sozinha no silencio enquanto o dedo esta no microfone; no Android 12 ou anterior o reconhecedor pode encerrar no primeiro resultado final.",
+    "2026-10-14: o balao com icone, forma de onda e duracao sugeria que o audio podia ser ouvido; trocado por animacao que converte a forma de onda no texto e termina como mensagem de texto comum. O audio nao e gravado nem guardado (o back so armazena texto: ChatMessage(role, text, action, createdAt) no S3).",
+    "A transcricao continua acontecendo durante a fala; a animacao so mascara o resultado e nao atrasa o envio ao back.",
+    "2026-10-14: transicao audio -> texto com `filter: blur` do proprio React Native 0.86, animado no driver nativo a partir de um unico progresso (sem dependencia nova). O blur vale no Android 12+; no iOS a flag enableSwiftUIBasedFilters vem desligada e no Android antigo nao ha RenderEffect, entao a transicao fica so no esmaecer."
   ],
   "non_goals": [
     "Conversa por chamada continua, streaming de audio, sintese de voz ou resposta falada do assistente",
@@ -40,13 +52,14 @@
     "typecheck": "npm run typecheck passou sem erros.",
     "diff": "git diff --check passou; diff revisado e restrito aos arquivos em escopo.",
     "expo_doctor": "Falha preexistente na develop, sem relacao com esta tarefa: expo, expo-constants e expo-router atras do patch atual do SDK 57 (task registrada em finup/tasks/expo-sdk57-patches-desatualizados.md).",
-    "device": "Android fisico (SM-S921B, Android 16), development build desta branch com backend local (perfil dev, Cognito real): login ok; ditado preencheu o campo com a transcricao e a mensagem saiu pelo botao de envio como mensagem normal; silencio mostrou 'Nao captei nenhuma fala'. A resposta do assistente falhou por falta de credenciais do Bedrock no backend local, fora do app. Nao verificados: segurar/soltar, ditado com rascunho existente, cancelar, dialogo de permissao (ja concedida) e permissao negada. iOS nao testado."
+    "device": "Android fisico (SM-S921B, Android 16), development build com backend local (perfil dev, Cognito real, Bedrock): segurar/falar/soltar enviou a transcricao e o assistente respondeu; toque curto mostrou a dica de segurar; durante a gravacao o campo virou ponto vermelho, tempo e 'Deslize para cancelar'; deslizar para a esquerda cancelou sem enviar; segurar em silencio mostrou 'Nao captei nenhuma fala' sem enviar. A transicao final com desfoque (forma de onda -> texto) nao foi verificada no aparelho: a gravacao de tela nao foi salva. Nao verificados tambem: dialogo de permissao (ja concedida), permissao negada, Android 12 ou anterior e iOS."
   },
-  "review": "Diff revisado e restrito aos arquivos em escopo; criterios de aceite verificados no Android (gravar e preencher o campo; enviar como mensagem normal). Itens nao verificados no aparelho registrados em validation.device.",
+  "review": "Criterios de gravacao, envio, cancelamento e sem fala verificados no Android. Pendente: conferir no aparelho a transicao com desfoque, permissao negada e iOS.",
   "updated_at": "2026-10-14",
   "next_steps": [
-    "Revisao do PR contra a develop",
-    "Completar no aparelho os cenarios nao verificados (segurar, rascunho existente, cancelar, permissao negada) e testar no iOS"
+    "Conferir no Android a transicao com desfoque da forma de onda para o texto",
+    "Verificar permissao negada e testar no iOS (sem desfoque, so esmaecer)",
+    "Revisao do PR #20"
   ],
   "pending_decisions": [
     "Autorizar revogar a permissao de microfone do FinUp para o teste de permissao negada",
