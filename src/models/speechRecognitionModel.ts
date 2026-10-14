@@ -187,6 +187,29 @@ export function buildRecognitionOptions(
   };
 }
 
+/**
+ * Opcoes do ditado no chat.
+ *
+ * Diferente da POC, o ditado nao exige reconhecimento local: sem o modelo
+ * offline de pt-BR baixado, `requiresOnDeviceRecognition` faria a captura falhar
+ * em vez de cair no servico do sistema. A sessao segue fechando sozinha depois
+ * do silencio, como na POC.
+ */
+export function buildDictationOptions(): ExpoSpeechRecognitionOptions {
+  return {
+    addsPunctuation: true,
+    androidIntentOptions: {
+      EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS: SILENCE_TIMEOUT_MS,
+      EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS: SILENCE_TIMEOUT_MS,
+    },
+    continuous: false,
+    interimResults: true,
+    lang: SPEECH_LOCALE,
+    maxAlternatives: 1,
+    requiresOnDeviceRecognition: false,
+  };
+}
+
 /** Abre o microfone e comeca a reconhecer. Lanca se o servico recusar. */
 export function startTranscription(options: ExpoSpeechRecognitionOptions): void {
   nativeModule?.start(options);
