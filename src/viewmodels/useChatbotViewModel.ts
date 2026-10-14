@@ -4,10 +4,17 @@ import { chatbotModel } from '@/models/chatbotModel';
 import { transactionEvents } from '@/models/transactionEvents';
 import type { ChatMessage, ConversationMessage, ConversationSummary } from '@/types/chatbot';
 import { userModel } from '@/models/userModel';
+import { useVoiceDictationViewModel } from '@/viewmodels/useVoiceDictationViewModel';
 
 const MAX_MESSAGE_LENGTH = 500;
 const CONVERSATIONS_ERROR = 'Não foi possível carregar suas conversas.';
 const NOT_UNDERSTOOD = 'Não consegui entender todos os dados. Tente explicar de outra forma.';
+
+/** Acrescenta a fala ditada ao que ja estava digitado, separando por espaco. */
+function appendToDraft(draft: string, text: string): string {
+  const base = draft.trimEnd();
+  return (base ? `${base} ${text}` : text).slice(0, MAX_MESSAGE_LENGTH);
+}
 
 function createErrorMessage(error: unknown): string {
   if (!(error instanceof HttpError)) return 'Não foi possível falar com o assistente. Verifique sua conexão e tente novamente.';
@@ -71,6 +78,13 @@ export function useChatbotViewModel() {
   // aberta antes se a pessoa trocou de novo enquanto ela carregava.
   const shownConversation = useRef<string | null>(null);
   const sendLockRef = useRef(false);
+
+  const dictation = useVoiceDictationViewModel({
+    onTranscript: (text) => {
+      setDraft((current) => appendToDraft(current, text));
+      setErrorMessage(null);
+    },
+  });
 
   useEffect(() => {
     let active = true;
@@ -219,14 +233,14 @@ export function useChatbotViewModel() {
     // O ref fecha a janela entre o envio e o re-render: `onSubmitEditing` e o
     // botao (ou o "Enviar" do teclado, que pode disparar duas vezes) chegam com
     // o mesmo `draft`/`isSending` do render anterior e enviavam a mensagem em dobro.
-    if (!text || isSending || isLoadingMessages || sendLockRef.current) return;
+    if (!text || isSending || isLoadingMessages || dictation.isListening || sendLockRef.current) return;
     sendLockRef.current = true;
 
     const messageId = `user-${Date.now()}`;
     setDraft('');
     setMessages((current) => [...current, { id: messageId, role: 'user', status: 'sending', text }]);
     void deliver(messageId, text);
-  }, [deliver, draft, isLoadingMessages, isSending]);
+  }, [deliver, dictation.isListening, draft, isLoadingMessages, isSending]);
 
   // Reenvia a ultima mensagem que falhou no proprio balao, sem duplicar o texto.
   const retryLastMessage = useCallback(() => {
@@ -242,6 +256,11 @@ export function useChatbotViewModel() {
     conversationId,
     conversations,
     conversationsError,
+    dictation: {
+      ...dictation,
+      /** Rascunho com a fala parcial, exibido no campo enquanto o usuario dita. */
+      preview: dictation.partial ? appendToDraft(draft, dictation.partial) : draft,
+    },
     draft,
     errorMessage,
     hasConversation: conversationId !== null || messages.length > 0,
@@ -261,6 +280,7 @@ export function useChatbotViewModel() {
     setDraft: (value: string) => {
       setDraft(value.slice(0, MAX_MESSAGE_LENGTH));
       setErrorMessage(null);
+      dictation.dismissMessage();
     },
     setIsMenuOpen,
   };

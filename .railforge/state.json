@@ -1,25 +1,55 @@
-﻿{
-    "stage":  "COMPLETED",
-    "task":  "Corrigir os checks do CI e remover duplicação na Home",
-    "branch":  "feature/add-rich-text",
-    "objective":  "Manter package.json e package-lock.json sincronizados, fazer expo-doctor passar sem conflito de bibliotecas de ícones e exibir uma única lista de movimentações na Home.",
-    "plan":  "Atualizar lockfile, remover a dependência scoped de ícones não usada, usar Markdown 8.1 compatível com os ícones Expo, remover JSX duplicado e validar checks locais.",
-    "files_in_scope":  [
-                           "package.json",
-                           "package-lock.json",
-                           "src/views/HomeScreen.tsx",
-                           ".railforge/state.json"
-                       ],
-    "flow_and_states":  "Home: abrir e visualizar uma única seção de movimentações com filtros e lista.",
-    "validation":  {
-                       "npm_ci_dry_run":  "ok (npm 11.19.0 local)",
-                       "expo_doctor":  "20/20 checks passed (1.20.4, version check skip igual CI)",
-                       "typecheck":  "ok",
-                       "lint":  "ok",
-                       "diff_check":  "ok",
-                       "home_duplicates":  "1 ExpenseList e 1 TypeFilterPills",
-                       "expo_go":  "nao executado"
-                   },
-    "review":  "Removido @react-native-vector-icons/material-design-icons, sem imports no app; Markdown fixado na linha 8.1, cujo uso básico no ChatbotMessage passou typecheck. Lockfile consistente e expo-doctor não reporta conflito. Home tem uma única seção.",
-    "updated_at":  "2026-10-20"
+{
+  "stage": "REVIEWING",
+  "task": "[APP] Implementar ditado por voz no chat",
+  "objective": "Transformar o icone de microfone do input do chat em ditado por voz: a fala vira texto no campo de digitacao e o envio continua manual.",
+  "requirements": [
+    "Tocar no microfone inicia o ditado; tocar de novo encerra. Segurar o microfone dita enquanto pressionado e encerra ao soltar",
+    "A transcricao parcial aparece no campo durante a fala e a final e acrescentada ao rascunho existente",
+    "O usuario revisa e edita o texto transcrito e envia pelo botao de envio, como uma mensagem digitada",
+    "Permissao negada, cancelamento, ausencia de fala, erro do reconhecedor e indisponibilidade no Expo Go exibem mensagem amigavel junto ao composer"
+  ],
+  "user_flow": "Aba Chatbot > composer > microfone > fala > revisao/edicao do texto > envio manual",
+  "states": [
+    "idle: microfone pronto",
+    "permissao: dialogo do sistema na primeira vez; negada mostra orientacao para liberar nas configuracoes",
+    "ouvindo: icone ativo, campo somente leitura com o parcial, botao Cancelar e envio desabilitado",
+    "sucesso: texto final no campo, editavel",
+    "vazio: nenhuma fala captada mostra aviso",
+    "erro: falha do reconhecedor mostra mensagem e o rascunho anterior e preservado",
+    "cancelado: descarta a fala e preserva o rascunho anterior"
+  ],
+  "files_in_scope": [
+    "src/models/speechRecognitionModel.ts",
+    "src/viewmodels/useVoiceDictationViewModel.ts",
+    "src/viewmodels/useChatbotViewModel.ts",
+    "src/components/chatbot/ChatbotComposer.tsx",
+    "src/views/ChatbotScreen.tsx"
+  ],
+  "decisions": [
+    "Branch baseada na develop (b91379f, #18, home conectada), que trouxe o composer no layout do Figma, a fonte Inter via AppText e a trava contra envio em dobro.",
+    "O PR #16 removeu o microfone do composer por falta de contrato no back; o ditado e local ao aparelho e nao depende do back, entao o microfone volta. O anexo continua fora.",
+    "Reaproveita expo-speech-recognition e o speechRecognitionModel da POC (#6); o ditado tem opcoes proprias sem requiresOnDeviceRecognition, para nao falhar em aparelhos sem o modelo offline de pt-BR.",
+    "Os eventos do reconhecedor sao globais; o ViewModel do ditado so reage a sessoes que ele mesmo iniciou."
+  ],
+  "non_goals": [
+    "Conversa por chamada continua, streaming de audio, sintese de voz ou resposta falada do assistente",
+    "Anexos, alteracoes na POC de transcricao ou no envio de mensagens"
+  ],
+  "validation": {
+    "lint": "npm run lint passou sem erros.",
+    "typecheck": "npm run typecheck passou sem erros.",
+    "diff": "git diff --check passou; diff revisado e restrito aos arquivos em escopo.",
+    "expo_doctor": "Falha preexistente na develop, sem relacao com esta tarefa: expo, expo-constants e expo-router atras do patch atual do SDK 57 (task registrada em finup/tasks/expo-sdk57-patches-desatualizados.md).",
+    "device": "Android fisico (SM-S921B, Android 16), development build desta branch com backend local (perfil dev, Cognito real): login ok; ditado preencheu o campo com a transcricao e a mensagem saiu pelo botao de envio como mensagem normal; silencio mostrou 'Nao captei nenhuma fala'. A resposta do assistente falhou por falta de credenciais do Bedrock no backend local, fora do app. Nao verificados: segurar/soltar, ditado com rascunho existente, cancelar, dialogo de permissao (ja concedida) e permissao negada. iOS nao testado."
+  },
+  "review": "Diff revisado e restrito aos arquivos em escopo; criterios de aceite verificados no Android (gravar e preencher o campo; enviar como mensagem normal). Itens nao verificados no aparelho registrados em validation.device.",
+  "updated_at": "2026-10-14",
+  "next_steps": [
+    "Revisao do PR contra a develop",
+    "Completar no aparelho os cenarios nao verificados (segurar, rascunho existente, cancelar, permissao negada) e testar no iOS"
+  ],
+  "pending_decisions": [
+    "Autorizar revogar a permissao de microfone do FinUp para o teste de permissao negada",
+    "Apagar finup/tasks/poc-transcricao-reage-ao-ditado-do-chat.md, obsoleta: na develop a Transcricao e rota de stack e so fica montada quando visivel"
+  ]
 }
