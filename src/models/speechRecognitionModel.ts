@@ -187,6 +187,40 @@ export function buildRecognitionOptions(
   };
 }
 
+/** Volume nativo (-2 a 10) normalizado em 0..1. */
+export function normalizeVolume(value: number): number {
+  const { max, min } = VOLUME_RANGE;
+  if (value <= min) return 0;
+  return Math.min(1, (value - min) / (max - min));
+}
+
+/**
+ * Opcoes da mensagem de voz do chat.
+ *
+ * Diferente da POC, nao exige reconhecimento local: sem o modelo offline de
+ * pt-BR baixado, `requiresOnDeviceRecognition` faria a captura falhar em vez de
+ * cair no servico do sistema.
+ *
+ * `continuous: true` mantem a gravacao enquanto o dedo esta no microfone, mesmo
+ * com pausas na fala; quem encerra e o `stop()` ao soltar. No Android 12 ou
+ * anterior o modo continuo nao existe e o reconhecedor pode encerrar sozinho no
+ * primeiro resultado final. Os eventos de volume desenham a forma de onda.
+ */
+export function buildDictationOptions(): ExpoSpeechRecognitionOptions {
+  return {
+    addsPunctuation: true,
+    continuous: true,
+    interimResults: true,
+    lang: SPEECH_LOCALE,
+    maxAlternatives: 1,
+    requiresOnDeviceRecognition: false,
+    volumeChangeEventOptions: {
+      enabled: true,
+      intervalMillis: VOLUME_EVENT_INTERVAL_MS,
+    },
+  };
+}
+
 /** Abre o microfone e comeca a reconhecer. Lanca se o servico recusar. */
 export function startTranscription(options: ExpoSpeechRecognitionOptions): void {
   nativeModule?.start(options);

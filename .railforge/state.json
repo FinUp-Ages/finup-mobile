@@ -1,58 +1,68 @@
 {
   "stage": "REVIEWING",
-  "task": "PR #18 - Home conectada ao back (nome, saldo total, entradas/saidas e gastos por periodo) + cadastro com renda em faixas e profissao em lista, celular/profissao enviados ao back, fonte Inter e ajustes visuais do Figma nas abas Transacao e Chatbot",
-  "branch": "feature/home-connected (atualizada com a develop em c892701)",
-  "objective": "Manter o design da Home e trocar os mocks de nome, saldo total e Gastos por dados do back, com loading, erro (tentar de novo) e vazio; login, fim do cadastro e abertura do app com sessao abrem a Home (/carteira)",
-  "decisions": [
-    "Nome: GET /api/v1/users/me; saudacao usa o primeiro nome",
-    "Saldo total: GET /transactions desde BALANCE_FROM (1970-01-01, em transactionModel) ate hoje, o mesmo da aba Transacao",
-    "Card de saldo com seletor de periodo (7/15/30 dias, 3/6/12 meses; padrao 7 dias) via GET /transactions?from&to; entradas, saidas e gastos seguem o periodo; olho oculta so o saldo",
-    "Gastos: 10 EXPENSE mais recentes do periodo com o nome da categoria (GET /api/v1/categories); sem descricao usa a categoria, sem categoria 'Gasto'; sem gastos, o card Integrar cartoes e o estado vazio",
-    "Falha so nas categorias nao derruba a Home: os gastos aparecem sem o nome da categoria",
-    "Home recarrega ao ganhar foco, por pull-to-refresh e quando o chatbot registra transacao (transactionEvents)",
-    "Carteira = HomeScreen; o botao Adicionar transacao abre a aba /transacao; abas nativas da develop mantidas",
-    "Celular (E.164 +55) e profissao vao no PATCH additional-info, que o back ja aceita",
-    "Valores em reais formatados pelo formatAmount (utils/masks), sem '-R$ 0,00'",
-    "Cores so de src/theme/colors.ts (colors + darkColors da Home), com os mesmos valores do Figma",
-    "Timeout padrao de 15s por requisicao no httpClient; o POST /ai/assistant usa 60s",
-    "2026-10-04, usuario: fonte Inter em todo o app pelo Text/TextInput de src/components/ui/AppText (mesma traducao de fontWeight para familia que o Willian fez); a troca global do react-native saiu",
-    "2026-10-04, usuario: ajustes visuais fora da Home ficam neste PR, explicados na descricao",
-    "2026-10-04, usuario: cadastro retomado pede o celular na Etapa 2 (mesmo campo, mascara e validacao da Etapa 1) e envia phone no PATCH additional-info"
+  "task": "[APP] Implementar ditado por voz no chat",
+  "objective": "Transformar o microfone do input do chat em mensagem de voz no estilo WhatsApp/Telegram: segurar grava, soltar envia; a mensagem enviada anima a forma de onda virando o texto transcrito e fica como mensagem de texto. Sem transcricao ao vivo visivel.",
+  "requirements": [
+    "Segurar o microfone grava, com indicador de gravacao (ponto vermelho e tempo) no lugar do campo de texto; nenhuma transcricao aparece durante a gravacao",
+    "Soltar envia: a fala transcrita vai ao assistente como mensagem do usuario, sem etapa de revisao ou edicao",
+    "Arrastar o dedo para a esquerda durante a gravacao cancela sem enviar; toque curto mostra a dica 'Segure para gravar'",
+    "Ao enviar, o balao do usuario mostra a forma de onda captada, que se desfaz num desfoque; o texto transcrito sai do desfoque e fica como mensagem de texto comum, sem elementos que sugiram reproducao de audio",
+    "Permissao negada, nenhuma fala captada, erro do reconhecedor e indisponibilidade no Expo Go exibem mensagem amigavel junto ao composer, sem enviar nada"
   ],
-  "pending_decisions": [
-    "Renda em faixas no lugar do valor mascarado da issue #12: envia o limite superior da faixa e 'Mais de R$ 50.000' grava 50000, igual a faixa anterior"
+  "user_flow": "Aba Chatbot > composer > segurar microfone > gravacao (tempo, deslizar para cancelar) > soltar > animacao audio -> texto no balao > resposta do assistente",
+  "states": [
+    "idle: microfone pronto; toque curto mostra a dica de segurar",
+    "permissao: dialogo do sistema no primeiro uso interrompe o gesto; negada mostra orientacao para liberar nas configuracoes",
+    "gravando: campo substituido por ponto vermelho, tempo e 'Deslize para cancelar'; envio de texto indisponivel",
+    "processando: apos soltar, aguarda o resultado final do reconhecedor",
+    "enviado: forma de onda desfoca e o texto sai do desfoque (pulado com 'reduzir movimento'); depois, mensagem de texto comum; falha de envio mostra 'Mensagem nao enviada' e 'Tentar novamente'",
+    "vazio: nenhuma fala captada mostra aviso e nada e enviado",
+    "cancelado: deslizar para a esquerda descarta a gravacao; o rascunho de texto fica como estava",
+    "erro: falha do reconhecedor mostra mensagem e nada e enviado"
   ],
   "files_in_scope": [
-    "app/_layout.tsx, app/(tabs)/_layout.tsx, app/(tabs)/carteira.tsx",
-    "src/views/HomeScreen.tsx, src/viewmodels/useHomeViewModel.ts, src/types/home.ts",
-    "src/components/home/* (BalanceCard, ExpenseList, HomeHeader, IntegrateCardsCard, PeriodPickerModal, ScoreBannerCard), src/components/ui/HomePillButton.tsx, assets/home/score-medal.png",
-    "src/utils/format.ts, src/utils/homePeriods.ts, src/utils/dates.ts, src/utils/masks.ts, src/utils/cadastroOptions.ts",
-    "src/theme/colors.ts, src/theme/fonts.ts, package.json, package-lock.json",
-    "src/config/httpClient.ts, src/models/chatbotModel.ts, src/models/transactionModel.ts, src/models/cadastroModel.ts, src/models/userModel.ts, src/types/cadastro.ts",
-    "src/components/common/CadastroStepAdicionais.tsx, CadastroStepDados.tsx, TransactionModal.tsx; src/components/ui/SelectField.tsx, PillButton.tsx, PillSelect.tsx, AuthButton.tsx, CurrencyField.tsx, BrandGradient.tsx; src/components/chatbot/ChatbotComposer.tsx",
-    "src/viewmodels/useCadastroViewModel.ts, useLoginViewModel.ts, useLoadingScreenViewModel.ts, useChatbotViewModel.ts, useTransacaoViewModel.ts; src/views/TransacaoScreen.tsx, ChatbotScreen.tsx",
-    "src/components/ui/AppText.tsx (novo) e os 45 arquivos que passaram a importar Text/TextInput dele"
+    "src/models/speechRecognitionModel.ts",
+    "src/viewmodels/useVoiceDictationViewModel.ts",
+    "src/viewmodels/useChatbotViewModel.ts",
+    "src/types/chatbot.ts",
+    "src/components/chatbot/ChatbotComposer.tsx",
+    "src/components/chatbot/ChatbotMessage.tsx",
+    "src/views/ChatbotScreen.tsx",
+    "src/utils/format.ts"
   ],
-  "flow_and_states": "Fluxos: abertura do app com sessao, login e fim do cadastro levam a Home; Home -> Adicionar transacao -> aba Transacao -> salvar -> Home atualizada ao voltar. Estados: carregando, erro com tentar de novo, sem gastos (Integrar cartoes), sucesso, sessao expirada (httpClient volta ao login)",
+  "decisions": [
+    "Branch baseada na develop (b91379f, #18, home conectada), que trouxe o composer no layout do Figma, a fonte Inter via AppText e a trava contra envio em dobro.",
+    "O PR #16 removeu o microfone do composer por falta de contrato no back; o ditado e local ao aparelho e nao depende do back, entao o microfone volta. O anexo continua fora.",
+    "Reaproveita expo-speech-recognition e o speechRecognitionModel da POC (#6); o ditado tem opcoes proprias sem requiresOnDeviceRecognition, para nao falhar em aparelhos sem o modelo offline de pt-BR.",
+    "Os eventos do reconhecedor sao globais; o ViewModel do ditado so reage a sessoes que ele mesmo iniciou.",
+    "2026-10-14: o usuario trocou o fluxo de ditado no campo (revisar e editar antes de enviar) por mensagem de voz estilo WhatsApp: soltar envia direto, sem transcricao ao vivo.",
+    "O back recebe e guarda so o texto transcrito; ao reabrir uma conversa pelo historico, a mensagem aparece como texto normal.",
+    "Entrega no mesmo PR #20 (branch feat/ditado-por-voz-chat).",
+    "Gravacao em modo continuo (Android 13+ e iOS) para nao encerrar sozinha no silencio enquanto o dedo esta no microfone; no Android 12 ou anterior o reconhecedor pode encerrar no primeiro resultado final.",
+    "2026-10-14: o balao com icone, forma de onda e duracao sugeria que o audio podia ser ouvido; trocado por animacao que converte a forma de onda no texto e termina como mensagem de texto comum. O audio nao e gravado nem guardado (o back so armazena texto: ChatMessage(role, text, action, createdAt) no S3).",
+    "A transcricao continua acontecendo durante a fala; a animacao so mascara o resultado e nao atrasa o envio ao back.",
+    "2026-10-14: transicao audio -> texto com `filter: blur` do proprio React Native 0.86, animado no driver nativo a partir de um unico progresso (sem dependencia nova). O blur vale no Android 12+; no iOS a flag enableSwiftUIBasedFilters vem desligada e no Android antigo nao ha RenderEffect, entao a transicao fica so no esmaecer."
+  ],
   "non_goals": [
-    "Score e os CTAs 'Adicionar agora' e 'Integrar cartoes' (onPress vazio)",
-    "Mudancas no back"
+    "Conversa por chamada continua, streaming de audio, sintese de voz ou resposta falada do assistente",
+    "Anexos, alteracoes na POC de transcricao ou no envio de mensagens"
   ],
-  "updated_at": "2026-10-04",
   "validation": {
-    "typecheck": "ok",
-    "lint": "0 erros",
-    "ci": "verde no head do PR antes dos ajustes do review",
-    "expo_go": "nao validado no aparelho: Home, seletor de periodo, banner, Adicionar transacao, cadastro (Etapa 2) e chatbot",
-    "cadastro_retomado": "2026-10-04, Expo Go + back da develop local: Etapa 2 com celular, salvo com phone +55 (E.164), profissao, nascimento e renda; POST /users e PATCH additional-info ok",
-    "android_barra_de_abas": "2026-10-04, usuario no aparelho Android: sem vao entre a Home e a barra de abas"
+    "lint": "npm run lint passou sem erros.",
+    "typecheck": "npm run typecheck passou sem erros.",
+    "diff": "git diff --check passou; diff revisado e restrito aos arquivos em escopo.",
+    "expo_doctor": "Falha preexistente na develop, sem relacao com esta tarefa: expo, expo-constants e expo-router atras do patch atual do SDK 57 (task registrada em finup/tasks/expo-sdk57-patches-desatualizados.md).",
+    "device": "Android fisico (SM-S921B, Android 16), development build com backend local (perfil dev, Cognito real, Bedrock): segurar/falar/soltar enviou a transcricao e o assistente respondeu; toque curto mostrou a dica de segurar; durante a gravacao o campo virou ponto vermelho, tempo e 'Deslize para cancelar'; deslizar para a esquerda cancelou sem enviar; segurar em silencio mostrou 'Nao captei nenhuma fala' sem enviar. A transicao final com desfoque (forma de onda -> texto) nao foi verificada no aparelho: a gravacao de tela nao foi salva. Nao verificados tambem: dialogo de permissao (ja concedida), permissao negada, Android 12 ou anterior e iOS."
   },
-  "review": "2026-10-04, review do PR #18: ajustes aplicados na branch - .gitignore sem pastas locais; formatBRL trocado pelo formatAmount e BALANCE_FROM unico em transactionModel; hasTransactions sem uso removido; timeout por requisicao (60s no assistente); cores fixas movidas para tokens com os mesmos valores e tokens mortos (brandBlue, glassBorder, pillDark, pillDarkBorder, darkColors sem uso) removidos; comentarios atualizados. package-lock.json mantido: o npm 11 gera o mesmo arquivo a partir da develop. Itens de pending_decisions ficam para o time. 2026-10-04: fonte refeita com AppText (bundle conferido sem a troca global); celular no cadastro retomado validado como bug. Celular do cadastro retomado corrigido (showCelularInStep2); toAdditionalInfo conferido com o regex E.164 do back.",
-  "follow_ups": [
-    "Score: expor finUpScore no GET /users/me",
-    "Destino dos CTAs 'Adicionar agora' e 'Integrar cartoes'",
-    "Issue #15: 'Outra' da profissao se perde ao voltar de etapa",
-    "Acesso ao Perfil/Sair pela interface (fora da barra de abas)",
-    "Runner de testes no mobile (jest-expo + Testing Library)"
+  "review": "Criterios de gravacao, envio, cancelamento e sem fala verificados no Android. Pendente: conferir no aparelho a transicao com desfoque, permissao negada e iOS.",
+  "updated_at": "2026-10-14",
+  "next_steps": [
+    "Conferir no Android a transicao com desfoque da forma de onda para o texto",
+    "Verificar permissao negada e testar no iOS (sem desfoque, so esmaecer)",
+    "Revisao do PR #20"
+  ],
+  "pending_decisions": [
+    "Autorizar revogar a permissao de microfone do FinUp para o teste de permissao negada",
+    "Apagar finup/tasks/poc-transcricao-reage-ao-ditado-do-chat.md, obsoleta: na develop a Transcricao e rota de stack e so fica montada quando visivel"
   ]
 }
