@@ -15,13 +15,20 @@
   ],
   "flow_and_states": "Aba Chatbot: resposta nova e historico reaberto com listas, negrito, emojis e quebras; mensagem do usuario com Markdown literal; preservar indicadores de erro e transacao registrada. Conferir que carregamento, boas-vindas e nova tentativa continuam no fluxo existente.",
   "validation": {
-    "typecheck": "OK: npm run typecheck, 2026-10-05",
-    "lint": "OK: npm run lint, 2026-10-05",
+    "typecheck": "OK: npm run typecheck, 2026-10-15",
+    "lint": "OK: npm run lint, 2026-10-15",
     "diff": "OK: git diff --check; componente e dependencias revisados, sem alteracao de versoes preexistentes",
-    "examples": "Inspecao do componente e das regras da biblioteca: strong em Text, bullets em lista e breaks=true preservando quebras. Execucao com exemplos e primitivas React Native simuladas nao realizada: autorizacao do terminal recusada",
-    "mobile_bundle": "Nao realizado: autorizacao da exportacao Android/iOS recusada",
-    "expo_go": "Nao verificado no aparelho; pendente validar respostas novas e historico com emojis, negrito, bullets e quebras"
+    "examples": "OK em 2026-10-15: parser do componente executado com bullets, strong, emojis e quebras; links explicitos, autolinks e imagens nao geram tokens ativos",
+    "mobile_bundle": "Realizado: npx expo export --platform android, 2026-10-15; saida temporaria fora do repositorio",
+    "expo_go": "OK em 2026-10-15: testado pelo usuario em Android; iOS nao testado"
   },
-  "review": "Implementacao restrita aos quatro arquivos previstos. Usuario continua em Text; assistente usa react-native-markdown-display 7.0.2 com cores e tipografia existentes. Indicadores de erro/transacao e demais estados da tela preservados por inspecao. Pendente validacao dos exemplos em execucao e no Expo Go. A validacao anterior contra o backend permanece pendente; esta tarefa nao altera o contrato do chat.",
-  "updated_at": "2026-10-05"
+  "review": "Implementacao restrita aos quatro arquivos previstos. Usuario continua em Text; assistente usa react-native-markdown-display 7.0.2 com cores e tipografia existentes. Indicadores de erro/transacao e demais estados da tela preservados por inspecao.",
+  "follow_ups": [
+    "Score: expor finUpScore no GET /users/me",
+    "Destino dos CTAs 'Adicionar agora' e 'Integrar cartoes'",
+    "Issue #15: 'Outra' da profissao se perde ao voltar de etapa",
+    "Acesso ao Perfil/Sair pela interface (fora da barra de abas)",
+    "Runner de testes no mobile (jest-expo + Testing Library)"
+  ],
+  "updated_at": "2026-10-15"
 }
