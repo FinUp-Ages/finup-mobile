@@ -1,14 +1,16 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import Markdown, { MarkdownIt } from 'react-native-markdown-display';
+import { StyleSheet, View } from 'react-native';
+import Markdown, { MarkdownIt } from '@ronradtke/react-native-markdown-display';
+import { Text } from '@/components/ui/AppText';
 import { colors } from '@/theme/colors';
+import { interFamilyFor } from '@/theme/fonts';
 import type { ChatMessage } from '@/types/chatbot';
 
 interface ChatbotMessageProps {
   message: ChatMessage;
 }
 
-const markdownParser = MarkdownIt({ breaks: true, typographer: false });
+const markdownParser = MarkdownIt({ breaks: true, typographer: false }).disable(['link', 'image', 'autolink']);
 
 export function ChatbotMessage({ message }: ChatbotMessageProps) {
   const isUser = message.role === 'user';
@@ -38,9 +40,9 @@ const styles = StyleSheet.create({
 });
 
 const markdownStyles = StyleSheet.create({
-  body: { color: colors.chatText, fontSize: 14, lineHeight: 19 },
+  body: { color: colors.chatText, fontFamily: interFamilyFor('400'), fontSize: 14, lineHeight: 19 },
   paragraph: { marginTop: 0, marginBottom: 8 },
-  strong: { fontWeight: '700' },
+  strong: { fontFamily: interFamilyFor('700'), fontWeight: 'normal' },
   bullet_list: { marginBottom: 8 },
   ordered_list: { marginBottom: 8 },
   list_item: { marginBottom: 4 },
