@@ -1,23 +1,24 @@
 {
-  "extends": "./node_modules/expo/tsconfig.base",
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "strict": true,
-    "types": [
-      "expo/types"
-    ],
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    }
-  },
-  "exclude": [
-    "node_modules",
-    "expo-speech-recognition"
-  ],
-  "include": [
-    "**/*.ts",
-    "**/*.tsx"
-  ]
+    "extends":  "./node_modules/expo/tsconfig.base",
+    "compilerOptions":  {
+                            "jsx":  "react-jsx",
+                            "strict":  true,
+                            "types":  [
+                                          "expo/types",
+                                          "node"
+                                      ],
+                            "paths":  {
+                                          "@/*":  [
+                                                      "./src/*"
+                                                  ]
+                                      }
+                        },
+    "exclude":  [
+                    "node_modules",
+                    "expo-speech-recognition"
+                ],
+    "include":  [
+                    "**/*.ts",
+                    "**/*.tsx"
+                ]
 }

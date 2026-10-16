@@ -1,8 +1,8 @@
 {
   "stage": "REVIEWING",
-  "task": "PR #18 - Home conectada ao back (nome, saldo total, entradas/saidas e gastos por periodo) + cadastro com renda em faixas e profissao em lista, celular/profissao enviados ao back, fonte Inter e ajustes visuais do Figma nas abas Transacao e Chatbot",
+  "task": "Fix CI build job failure (npm ci lockfile mismatch)",
   "branch": "feature/home-connected (atualizada com a develop em c892701)",
-  "objective": "Manter o design da Home e trocar os mocks de nome, saldo total e Gastos por dados do back, com loading, erro (tentar de novo) e vazio; login, fim do cadastro e abertura do app com sessao abrem a Home (/carteira)",
+  "objective": "Restore GitHub Actions build by syncing package-lock.json with package.json for Node 20 / npm 10.",
   "decisions": [
     "Nome: GET /api/v1/users/me; saudacao usa o primeiro nome",
     "Saldo total: GET /transactions desde BALANCE_FROM (1970-01-01, em transactionModel) ate hoje, o mesmo da aba Transacao",
@@ -23,26 +23,19 @@
     "Renda em faixas no lugar do valor mascarado da issue #12: envia o limite superior da faixa e 'Mais de R$ 50.000' grava 50000, igual a faixa anterior"
   ],
   "files_in_scope": [
-    "app/_layout.tsx, app/(tabs)/_layout.tsx, app/(tabs)/carteira.tsx",
-    "src/views/HomeScreen.tsx, src/viewmodels/useHomeViewModel.ts, src/types/home.ts",
-    "src/components/home/* (BalanceCard, ExpenseList, HomeHeader, IntegrateCardsCard, PeriodPickerModal, ScoreBannerCard), src/components/ui/HomePillButton.tsx, assets/home/score-medal.png",
-    "src/utils/format.ts, src/utils/homePeriods.ts, src/utils/dates.ts, src/utils/masks.ts, src/utils/cadastroOptions.ts",
-    "src/theme/colors.ts, src/theme/fonts.ts, package.json, package-lock.json",
-    "src/config/httpClient.ts, src/models/chatbotModel.ts, src/models/transactionModel.ts, src/models/cadastroModel.ts, src/models/userModel.ts, src/types/cadastro.ts",
-    "src/components/common/CadastroStepAdicionais.tsx, CadastroStepDados.tsx, TransactionModal.tsx; src/components/ui/SelectField.tsx, PillButton.tsx, PillSelect.tsx, AuthButton.tsx, CurrencyField.tsx, BrandGradient.tsx; src/components/chatbot/ChatbotComposer.tsx",
-    "src/viewmodels/useCadastroViewModel.ts, useLoginViewModel.ts, useLoadingScreenViewModel.ts, useChatbotViewModel.ts, useTransacaoViewModel.ts; src/views/TransacaoScreen.tsx, ChatbotScreen.tsx",
-    "src/components/ui/AppText.tsx (novo) e os 45 arquivos que passaram a importar Text/TextInput dele"
+    "package-lock.json",
+    ".railforge/state.json"
   ],
   "flow_and_states": "Fluxos: abertura do app com sessao, login e fim do cadastro levam a Home; Home -> Adicionar transacao -> aba Transacao -> salvar -> Home atualizada ao voltar. Estados: carregando, erro com tentar de novo, sem gastos (Integrar cartoes), sucesso, sessao expirada (httpClient volta ao login)",
   "non_goals": [
     "Score e os CTAs 'Adicionar agora' e 'Integrar cartoes' (onPress vazio)",
     "Mudancas no back"
   ],
-  "updated_at": "2026-10-04",
+  "updated_at": "2026-10-16",
   "validation": {
     "typecheck": "ok",
     "lint": "0 erros",
-    "ci": "verde no head do PR antes dos ajustes do review",
+    "ci": "local reproduction fixed: npx npm@10.8.2 ci passa",
     "expo_go": "nao validado no aparelho: Home, seletor de periodo, banner, Adicionar transacao, cadastro (Etapa 2) e chatbot",
     "cadastro_retomado": "2026-10-04, Expo Go + back da develop local: Etapa 2 com celular, salvo com phone +55 (E.164), profissao, nascimento e renda; POST /users e PATCH additional-info ok",
     "android_barra_de_abas": "2026-10-04, usuario no aparelho Android: sem vao entre a Home e a barra de abas"
