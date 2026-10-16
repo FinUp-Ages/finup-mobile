@@ -1,14 +1,18 @@
 import { useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { categoriesModel } from '@/models/categoriesModel';
 import { transactionEvents } from '@/models/transactionEvents';
 import { BALANCE_FROM, transactionModel } from '@/models/transactionModel';
 import { userModel } from '@/models/userModel';
-import type { HomeExpense, HomeStatus } from '@/types/home';
+import type { HomeStatus, TransactionTypeFilter } from '@/types/home';
 import type { Category, TransactionListResponse } from '@/types/transaction';
-import { firstName, formatShortDate } from '@/utils/format';
+import { firstName } from '@/utils/format';
 import { DEFAULT_HOME_PERIOD, homePeriodRange, type HomePeriodKey } from '@/utils/homePeriods';
 import { formatAmount } from '@/utils/masks';
+import {
+  DEFAULT_TYPE_FILTER,
+  processHomeTransactions,
+} from '@/utils/transactionFilters';
 
 type TransactionListItem = TransactionListResponse['transactions'][number];
 
@@ -16,57 +20,27 @@ type TransactionListItem = TransactionListResponse['transactions'][number];
  * VIEWMODEL - dados da Home.
  *
  *   GET /api/v1/users/me              -> nome da saudacao
- *   GET /api/v1/transactions?from&to  -> entradas, saidas e gastos do periodo; e
+ *   GET /api/v1/transactions?from&to  -> entradas, saidas e movimentacoes do periodo; e
  *                                        de novo desde BALANCE_FROM para o saldo total
- *   GET /api/v1/categories            -> nome da categoria de cada gasto
+ *   GET /api/v1/categories            -> nome da categoria de cada transacao
  *
  * O periodo (7/15/30 dias, 3/6/12 meses) e escolhido no card e vale para entradas,
- * saidas e gastos; o saldo total e sempre o acumulado ate hoje, igual ao da aba
- * Transacao. Trocar de periodo volta ao loading do card e busca de novo.
+ * saidas e gastos; o saldo total e sempre o acumulado ate hoje.
  *
- * Tudo vem do usuario do access token (o httpClient injeta); nenhum id e
- * enviado. Sessao expirada (401) ja e tratada no httpClient, que volta ao
- * login. Falha so nas categorias nao derruba a tela: os gastos aparecem sem o
- * nome da categoria.
- *
- * Recarrega sempre que a Home ganha foco, para gastos cadastrados em outra
- * tela aparecerem; se ja ha dados do mesmo periodo, recarrega sem loading.
+ * O filtro por tipo ('ALL' | 'INCOME' | 'EXPENSE') filtra os itens exibidos na
+ * listagem/carrossel da Home sem afetar os totais de saldo, entrada e saida.
  */
 
 const MAX_EXPENSES = 10;
-// O saldo total nao depende do periodo escolhido: vem de uma consulta propria
-// desde BALANCE_FROM (o GET /transactions so devolve saldo de um intervalo).
 
 type HomeData = {
   userName: string;
   balance: string;
   income: string;
   expense: string;
-  expenses: HomeExpense[];
+  rawTransactions: TransactionListItem[];
+  categories: Category[];
 };
-
-function toExpenses(transactions: TransactionListItem[], categories: Category[]): HomeExpense[] {
-  const categoryNames = new Map(categories.map((category) => [category.id, category.name]));
-
-  return [...transactions]
-    .filter((transaction) => transaction.type === 'EXPENSE')
-    .sort(
-      (a, b) =>
-        b.transactionDate.localeCompare(a.transactionDate) ||
-        b.createdAt.localeCompare(a.createdAt),
-    )
-    .slice(0, MAX_EXPENSES)
-    .map((transaction) => {
-      const categoryName = categoryNames.get(transaction.categoryId) ?? null;
-      return {
-        id: transaction.id,
-        title: transaction.description?.trim() || categoryName || 'Gasto',
-        categoryName,
-        date: formatShortDate(transaction.transactionDate),
-        amount: formatAmount(-transaction.amount),
-      };
-    });
-}
 
 async function fetchHomeData(periodKey: HomePeriodKey): Promise<HomeData> {
   const period = homePeriodRange(periodKey);
@@ -81,14 +55,15 @@ async function fetchHomeData(periodKey: HomePeriodKey): Promise<HomeData> {
   const sum = (type: TransactionListItem['type']) =>
     list.transactions
       .filter((transaction) => transaction.type === type)
-      .reduce((total, transaction) => total + transaction.amount, 0);
+      .reduce((accumulator, transaction) => accumulator + transaction.amount, 0);
 
   return {
     userName: firstName(user.name),
     balance: formatAmount(total.balance),
     income: `+ ${formatAmount(sum('INCOME'))}`,
     expense: `- ${formatAmount(sum('EXPENSE'))}`,
-    expenses: toExpenses(list.transactions, categories),
+    rawTransactions: list.transactions,
+    categories,
   };
 }
 
@@ -97,6 +72,7 @@ export function useHomeViewModel() {
   const [data, setData] = useState<HomeData | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [periodKey, setPeriodKey] = useState<HomePeriodKey>(DEFAULT_HOME_PERIOD);
+  const [typeFilter, setTypeFilter] = useState<TransactionTypeFilter>(DEFAULT_TYPE_FILTER);
 
   // Descarta resposta de uma carga anterior que termine depois da mais nova.
   const requestIdRef = useRef(0);
@@ -134,16 +110,28 @@ export function useHomeViewModel() {
   const retry = useCallback(() => load('initial', periodKey), [load, periodKey]);
   const refresh = useCallback(() => load('pull', periodKey), [load, periodKey]);
 
+  const expenses = useMemo(() => {
+    if (!data) return [];
+    return processHomeTransactions(
+      data.rawTransactions,
+      data.categories,
+      typeFilter,
+      MAX_EXPENSES,
+    );
+  }, [data, typeFilter]);
+
   return {
     status,
     userName: data?.userName ?? null,
     balance: data?.balance ?? null,
     income: data?.income ?? null,
     expense: data?.expense ?? null,
-    expenses: data?.expenses ?? [],
+    expenses,
     periodKey,
     periodLabel: homePeriodRange(periodKey).label,
     setPeriodKey,
+    typeFilter,
+    setTypeFilter,
     refreshing,
     retry,
     refresh,

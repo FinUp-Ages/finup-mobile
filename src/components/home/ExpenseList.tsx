@@ -4,21 +4,19 @@ import { Text } from '@/components/ui/AppText';
 import { darkColors } from '@/theme/colors';
 import type { HomeExpense, HomeStatus } from '@/types/home';
 
-/**
- * COMPONENT - conteudo da secao "Gastos" da Home.
- *
- * Lista as despesas do periodo (GET /api/v1/transactions, ja filtradas e
- * formatadas pelo ViewModel). Sem gastos, o card "Integrar cartoes" do design
- * e o estado vazio. O "tentar novamente" fica so no card de saldo: as duas
- * secoes vem da mesma chamada.
- */
 type ExpenseListProps = {
   status: HomeStatus;
   expenses: HomeExpense[];
   onPressIntegrate: () => void;
+  emptyMessage?: string;
 };
 
-export function ExpenseList({ status, expenses, onPressIntegrate }: ExpenseListProps) {
+export function ExpenseList({
+  status,
+  expenses,
+  onPressIntegrate,
+  emptyMessage,
+}: ExpenseListProps) {
   if (status === 'loading') {
     return (
       <View style={styles.feedback}>
@@ -36,29 +34,42 @@ export function ExpenseList({ status, expenses, onPressIntegrate }: ExpenseListP
   }
 
   if (expenses.length === 0) {
+    if (emptyMessage) {
+      return (
+        <View style={styles.feedback}>
+          <Text style={styles.feedbackText}>{emptyMessage}</Text>
+        </View>
+      );
+    }
     return <IntegrateCardsCard onPressIntegrate={onPressIntegrate} />;
   }
 
   return (
     <View style={styles.card}>
-      {expenses.map((expense, index) => (
-        <View
-          key={expense.id}
-          style={[styles.row, index > 0 ? styles.rowDivider : null]}
-          accessible
-          accessibilityLabel={`${expense.title}, ${expense.amount}, ${expense.date}`}
-        >
-          <View style={styles.rowText}>
-            <Text numberOfLines={1} style={styles.title}>
-              {expense.title}
-            </Text>
-            <Text numberOfLines={1} style={styles.subtitle}>
-              {expense.categoryName ? `${expense.categoryName} · ${expense.date}` : expense.date}
+      {expenses.map((expense, index) => {
+        const isIncome = expense.type === 'INCOME';
+
+        return (
+          <View
+            accessibilityLabel={`${expense.title}, ${expense.amount}, ${expense.date}`}
+            accessible
+            key={expense.id}
+            style={[styles.row, index > 0 ? styles.rowDivider : null]}
+          >
+            <View style={styles.rowText}>
+              <Text numberOfLines={1} style={styles.title}>
+                {expense.title}
+              </Text>
+              <Text numberOfLines={1} style={styles.subtitle}>
+                {expense.categoryName ? `${expense.categoryName} • ${expense.date}` : expense.date}
+              </Text>
+            </View>
+            <Text style={[styles.amount, isIncome ? styles.amountIncome : null]}>
+              {expense.amount}
             </Text>
           </View>
-          <Text style={styles.amount}>{expense.amount}</Text>
-        </View>
-      ))}
+        );
+      })}
     </View>
   );
 }
@@ -69,6 +80,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     marginLeft: 12,
+  },
+  amountIncome: {
+    color: darkColors.incomeText,
   },
   card: {
     backgroundColor: darkColors.surface,
@@ -89,6 +103,7 @@ const styles = StyleSheet.create({
     color: darkColors.textMuted,
     fontSize: 13,
     lineHeight: 18,
+    textAlign: 'center',
   },
   row: {
     alignItems: 'center',

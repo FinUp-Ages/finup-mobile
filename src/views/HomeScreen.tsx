@@ -5,6 +5,7 @@ import { BalanceCard } from '@/components/home/BalanceCard';
 import { ExpenseList } from '@/components/home/ExpenseList';
 import { HomeHeader } from '@/components/home/HomeHeader';
 import { ScoreBannerCard } from '@/components/home/ScoreBannerCard';
+import { TypeFilterPills } from '@/components/home/TypeFilterPills';
 import { Text } from '@/components/ui/AppText';
 import { darkColors } from '@/theme/colors';
 import { useHomeViewModel } from '@/viewmodels/useHomeViewModel';
@@ -12,10 +13,9 @@ import { useHomeViewModel } from '@/viewmodels/useHomeViewModel';
 /**
  * VIEW - Home do FinUp (ver Figma).
  *
- * Nome, saldo total e entradas, saidas e gastos do periodo escolhido vem do back
- * (useHomeViewModel). Ainda mockados: score e os CTAs "Adicionar agora" e
- * "Integrar cartoes" - o `onPress` deles e ponto de integracao para tarefas
- * futuras. A barra de baixo e a de abas nativa, de app/(tabs)/_layout.tsx.
+ * Nome, saldo total e entradas, saidas e movimentacoes do periodo escolhido vem do back
+ * (useHomeViewModel). O filtro de tipo ('Todos' | 'Entrada' | 'Saida') filtra a listagem
+ * de movimentacoes da Home de forma puramente reativa sem alterar o saldo ou totais.
  */
 export default function HomeScreen() {
   const router = useRouter();
@@ -29,10 +29,22 @@ export default function HomeScreen() {
     periodKey,
     periodLabel,
     setPeriodKey,
+    typeFilter,
+    setTypeFilter,
     refreshing,
     retry,
     refresh,
   } = useHomeViewModel();
+
+  const sectionTitle =
+    typeFilter === 'INCOME' ? 'Entradas' : typeFilter === 'EXPENSE' ? 'Gastos' : 'Movimentações';
+
+  const emptyMessage =
+    typeFilter === 'INCOME'
+      ? 'Nenhuma entrada neste período.'
+      : typeFilter === 'EXPENSE'
+        ? 'Nenhum gasto neste período.'
+        : undefined;
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.screen}>
@@ -64,8 +76,16 @@ export default function HomeScreen() {
         />
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Gastos</Text>
-          <ExpenseList expenses={expenses} onPressIntegrate={() => {}} status={status} />
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>{sectionTitle}</Text>
+            <TypeFilterPills onSelect={setTypeFilter} selected={typeFilter} />
+          </View>
+          <ExpenseList
+            emptyMessage={emptyMessage}
+            expenses={expenses}
+            onPressIntegrate={() => {}}
+            status={status}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -85,6 +105,13 @@ const styles = StyleSheet.create({
   },
   section: {
     gap: 12,
+  },
+  sectionHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    justifyContent: 'space-between',
   },
   sectionTitle: {
     color: darkColors.textPrimary,
