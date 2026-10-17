@@ -1,58 +1,51 @@
 {
   "stage": "REVIEWING",
-  "task": "PR #18 - Home conectada ao back (nome, saldo total, entradas/saidas e gastos por periodo) + cadastro com renda em faixas e profissao em lista, celular/profissao enviados ao back, fonte Inter e ajustes visuais do Figma nas abas Transacao e Chatbot",
-  "branch": "feature/home-connected (atualizada com a develop em c892701)",
-  "objective": "Manter o design da Home e trocar os mocks de nome, saldo total e Gastos por dados do back, com loading, erro (tentar de novo) e vazio; login, fim do cadastro e abertura do app com sessao abrem a Home (/carteira)",
+  "task": "[APP] Ícone e animação do Alerta",
+  "objective": "Usar o SVG de alerta fornecido e animar a abertura e o recolhimento da mensagem.",
+  "scope": [
+    "app/(tabs)/analise.tsx",
+    "src/views/AnaliseScreen.tsx",
+    "src/viewmodels/useAnaliseViewModel.ts",
+    "src/components/analise/AnaliseMovimentacoes.tsx",
+    "src/components/analise/AnaliseMovimentacoesModal.tsx",
+    "src/components/home/PeriodPickerModal.tsx",
+    "src/components/home/BalanceCard.tsx",
+    "src/components/analise/AnaliseGastoCategorias.tsx",
+    "src/components/analise/AnaliseAlerta.tsx",
+    "src/components/ui/AlertIcon.tsx",
+    "src/types/analise.ts",
+    "src/utils/analisePeriods.ts",
+    "src/utils/analiseGastosCategorias.ts",
+    "src/utils/analiseMovimentacoes.ts",
+    "src/utils/analiseFiltrosMovimentacoes.ts",
+    "src/theme/colors.ts"
+  ],
   "decisions": [
-    "Nome: GET /api/v1/users/me; saudacao usa o primeiro nome",
-    "Saldo total: GET /transactions desde BALANCE_FROM (1970-01-01, em transactionModel) ate hoje, o mesmo da aba Transacao",
-    "Card de saldo com seletor de periodo (7/15/30 dias, 3/6/12 meses; padrao 7 dias) via GET /transactions?from&to; entradas, saidas e gastos seguem o periodo; olho oculta so o saldo",
-    "Gastos: 10 EXPENSE mais recentes do periodo com o nome da categoria (GET /api/v1/categories); sem descricao usa a categoria, sem categoria 'Gasto'; sem gastos, o card Integrar cartoes e o estado vazio",
-    "Falha so nas categorias nao derruba a Home: os gastos aparecem sem o nome da categoria",
-    "Home recarrega ao ganhar foco, por pull-to-refresh e quando o chatbot registra transacao (transactionEvents)",
-    "Carteira = HomeScreen; o botao Adicionar transacao abre a aba /transacao; abas nativas da develop mantidas",
-    "Celular (E.164 +55) e profissao vao no PATCH additional-info, que o back ja aceita",
-    "Valores em reais formatados pelo formatAmount (utils/masks), sem '-R$ 0,00'",
-    "Cores so de src/theme/colors.ts (colors + darkColors da Home), com os mesmos valores do Figma",
-    "Timeout padrao de 15s por requisicao no httpClient; o POST /ai/assistant usa 60s",
-    "2026-10-04, usuario: fonte Inter em todo o app pelo Text/TextInput de src/components/ui/AppText (mesma traducao de fontWeight para familia que o Willian fez); a troca global do react-native saiu",
-    "2026-10-04, usuario: ajustes visuais fora da Home ficam neste PR, explicados na descricao",
-    "2026-10-04, usuario: cadastro retomado pede o celular na Etapa 2 (mesmo campo, mascara e validacao da Etapa 1) e envia phone no PATCH additional-info"
+    "Períodos: 7, 10 e 20 dias; eles afetam carrossel, Ver mais e categorias.",
+    "Tipo e ordenação afetam somente carrossel e Ver mais.",
+    "O Alerta é um componente visual separado e, temporariamente, exibe conteúdo hardcoded.",
+    "A criação de transações permanece disponível na aba Transação; não há botão de adição no card da Análise.",
+    "O carrossel recebe movements do ViewModel, que já aplica o período, tipo e ordenação ativos.",
+    "Valores do carrossel usam + R$ para entradas e - R$ para saídas.",
+    "PeriodPickerModal é reutilizável por opções; na Análise recebe apenas 7, 10 e 20 dias.",
+    "Percentuais de categorias usam maiores restos para somar exatamente 100% após arredondamento.",
+    "Ordenação e associação da categoria são funções puras em analiseMovimentacoes.ts.",
+    "Filtro e ordenação de movimentações são puros; empates por valor preservam a recência.",
+    "Ver mais de Movimentações usa a mesma lista movements já filtrada e ordenada pelo ViewModel; o Ver mais de Categorias é mantido separado.",
+    "Sessão expirada é tratada pelo httpClient, que limpa a sessão e volta à autenticação.",
+    "A origem, as condições de exibição e as regras do Alerta serão definidas pela equipe antes da integração com dados reais.",
+    "O botão de adicionar transação foi removido do card; a criação continua disponível na aba Transação.",
+    "Ver mais permanece no card, alinhado à direita e acompanhado pelo ícone de seta para a direita.",
+    "O Alerta aparece recolhido, usa a paleta amarela da referência e alterna a mensagem hardcoded ao toque.",
+    "A mensagem usa Animated para transicionar altura, margem e opacidade em 220 ms."
   ],
-  "pending_decisions": [
-    "Renda em faixas no lugar do valor mascarado da issue #12: envia o limite superior da faixa e 'Mais de R$ 50.000' grava 50000, igual a faixa anterior"
-  ],
-  "files_in_scope": [
-    "app/_layout.tsx, app/(tabs)/_layout.tsx, app/(tabs)/carteira.tsx",
-    "src/views/HomeScreen.tsx, src/viewmodels/useHomeViewModel.ts, src/types/home.ts",
-    "src/components/home/* (BalanceCard, ExpenseList, HomeHeader, IntegrateCardsCard, PeriodPickerModal, ScoreBannerCard), src/components/ui/HomePillButton.tsx, assets/home/score-medal.png",
-    "src/utils/format.ts, src/utils/homePeriods.ts, src/utils/dates.ts, src/utils/masks.ts, src/utils/cadastroOptions.ts",
-    "src/theme/colors.ts, src/theme/fonts.ts, package.json, package-lock.json",
-    "src/config/httpClient.ts, src/models/chatbotModel.ts, src/models/transactionModel.ts, src/models/cadastroModel.ts, src/models/userModel.ts, src/types/cadastro.ts",
-    "src/components/common/CadastroStepAdicionais.tsx, CadastroStepDados.tsx, TransactionModal.tsx; src/components/ui/SelectField.tsx, PillButton.tsx, PillSelect.tsx, AuthButton.tsx, CurrencyField.tsx, BrandGradient.tsx; src/components/chatbot/ChatbotComposer.tsx",
-    "src/viewmodels/useCadastroViewModel.ts, useLoginViewModel.ts, useLoadingScreenViewModel.ts, useChatbotViewModel.ts, useTransacaoViewModel.ts; src/views/TransacaoScreen.tsx, ChatbotScreen.tsx",
-    "src/components/ui/AppText.tsx (novo) e os 45 arquivos que passaram a importar Text/TextInput dele"
-  ],
-  "flow_and_states": "Fluxos: abertura do app com sessao, login e fim do cadastro levam a Home; Home -> Adicionar transacao -> aba Transacao -> salvar -> Home atualizada ao voltar. Estados: carregando, erro com tentar de novo, sem gastos (Integrar cartoes), sucesso, sessao expirada (httpClient volta ao login)",
-  "non_goals": [
-    "Score e os CTAs 'Adicionar agora' e 'Integrar cartoes' (onPress vazio)",
-    "Mudancas no back"
-  ],
-  "updated_at": "2026-10-04",
   "validation": {
     "typecheck": "ok",
     "lint": "0 erros",
-    "ci": "verde no head do PR antes dos ajustes do review",
-    "expo_go": "nao validado no aparelho: Home, seletor de periodo, banner, Adicionar transacao, cadastro (Etapa 2) e chatbot",
-    "cadastro_retomado": "2026-10-04, Expo Go + back da develop local: Etapa 2 com celular, salvo com phone +55 (E.164), profissao, nascimento e renda; POST /users e PATCH additional-info ok",
-    "android_barra_de_abas": "2026-10-04, usuario no aparelho Android: sem vao entre a Home e a barra de abas"
+    "diff_check": "ok",
+    "figma_html": "estrutura e tokens comparados com o HTML/CSS fornecido e com o screenshot Analise.png",
+    "expo_go": "pendente: requer dispositivos Android e iOS disponíveis"
   },
-  "review": "2026-10-04, review do PR #18: ajustes aplicados na branch - .gitignore sem pastas locais; formatBRL trocado pelo formatAmount e BALANCE_FROM unico em transactionModel; hasTransactions sem uso removido; timeout por requisicao (60s no assistente); cores fixas movidas para tokens com os mesmos valores e tokens mortos (brandBlue, glassBorder, pillDark, pillDarkBorder, darkColors sem uso) removidos; comentarios atualizados. package-lock.json mantido: o npm 11 gera o mesmo arquivo a partir da develop. Itens de pending_decisions ficam para o time. 2026-10-04: fonte refeita com AppText (bundle conferido sem a troca global); celular no cadastro retomado validado como bug. Celular do cadastro retomado corrigido (showCelularInStep2); toAdditionalInfo conferido com o regex E.164 do back.",
-  "follow_ups": [
-    "Score: expor finUpScore no GET /users/me",
-    "Destino dos CTAs 'Adicionar agora' e 'Integrar cartoes'",
-    "Issue #15: 'Outra' da profissao se perde ao voltar de etapa",
-    "Acesso ao Perfil/Sair pela interface (fora da barra de abas)",
-    "Runner de testes no mobile (jest-expo + Testing Library)"
-  ]
+  "review": "Revisão local: AlertIcon reproduz o SVG fornecido; a mensagem do Alerta anima altura, margem e opacidade em 220 ms ao expandir e recolher. Typecheck, lint e diff check passaram; validação visual no Expo Go permanece pendente.",
+  "updated_at": "2026-10-16"
 }

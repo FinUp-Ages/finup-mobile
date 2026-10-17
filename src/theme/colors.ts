@@ -92,4 +92,11 @@ export const darkColors = {
   // Seletor de periodo: fundo escurecido atras da lista e opcao pressionada.
   overlay: 'rgba(0, 0, 0, 0.55)',
   pressed: 'rgba(255, 255, 255, 0.08)',
+  // Análise: superfícies, barras e alerta.
+  analiseCard: 'rgba(255, 255, 255, 0.05)',
+  analiseBar: '#027dc4',
+  analiseAlert: 'rgba(255, 174, 0, 0.1)',
+  analiseAlertBorder: 'rgba(255, 174, 0, 0.32)',
+  analiseAlertText: '#FFC038',
+  analiseMovementGradient: ['#2343BD', '#3B82F6'] as const,
 } as const;

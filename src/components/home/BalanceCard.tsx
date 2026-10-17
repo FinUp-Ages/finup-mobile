@@ -7,7 +7,7 @@ import { Text } from '@/components/ui/AppText';
 import { HomePillButton } from '@/components/ui/HomePillButton';
 import { colors, darkColors } from '@/theme/colors';
 import type { HomeStatus } from '@/types/home';
-import type { HomePeriodKey } from '@/utils/homePeriods';
+import { HOME_PERIODS, type HomePeriodKey } from '@/utils/homePeriods';
 
 /**
  * COMPONENT - card de saldo da Home (ver Figma): saldo total acumulado ate hoje,
@@ -87,11 +87,7 @@ export function BalanceCard({
               hitSlop={12}
               onPress={() => setHidden((value) => !value)}
             >
-              <Feather
-                color={darkColors.iconOnCard}
-                name={hidden ? 'eye-off' : 'eye'}
-                size={20}
-              />
+              <Feather color={darkColors.iconOnCard} name={hidden ? 'eye-off' : 'eye'} size={20} />
             </Pressable>
           </View>
 
@@ -125,6 +121,7 @@ export function BalanceCard({
       <PeriodPickerModal
         onClose={() => setPickerOpen(false)}
         onSelect={onSelectPeriod}
+        options={HOME_PERIODS}
         selected={periodKey}
         visible={pickerOpen}
       />
