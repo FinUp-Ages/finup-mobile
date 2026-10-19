@@ -2,28 +2,36 @@ import { Feather } from '@expo/vector-icons';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { Text } from '@/components/ui/AppText';
 import { colors, darkColors } from '@/theme/colors';
-import { HOME_PERIODS, type HomePeriodKey } from '@/utils/homePeriods';
 
-/** COMPONENT - lista de periodos do card de saldo (7/15/30 dias, 3/6/12 meses). */
-type PeriodPickerModalProps = {
+export type PeriodPickerOption<TKey extends string> = {
+  key: TKey;
+  label: string;
+};
+
+/** COMPONENT - seletor reutilizável de períodos para os cards financeiros. */
+type PeriodPickerModalProps<TKey extends string> = {
+  title?: string;
   visible: boolean;
-  selected: HomePeriodKey;
-  onSelect: (key: HomePeriodKey) => void;
+  options: readonly PeriodPickerOption<TKey>[];
+  selected: TKey;
+  onSelect: (key: TKey) => void;
   onClose: () => void;
 };
 
-export function PeriodPickerModal({
+export function PeriodPickerModal<TKey extends string>({
+  title = 'Período',
   visible,
+  options,
   selected,
   onSelect,
   onClose,
-}: PeriodPickerModalProps) {
+}: PeriodPickerModalProps<TKey>) {
   return (
     <Modal animationType="fade" onRequestClose={onClose} transparent visible={visible}>
       <Pressable accessibilityLabel="Fechar" onPress={onClose} style={styles.backdrop}>
         <View style={styles.sheet}>
-          <Text style={styles.title}>Período</Text>
-          {HOME_PERIODS.map((option) => {
+          <Text style={styles.title}>{title}</Text>
+          {options.map((option) => {
             const active = option.key === selected;
             return (
               <Pressable
