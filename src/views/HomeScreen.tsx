@@ -16,6 +16,9 @@ import { useHomeViewModel } from '@/viewmodels/useHomeViewModel';
  * Nome, saldo total e entradas, saidas e movimentacoes do periodo escolhido vem do back
  * (useHomeViewModel). O filtro de tipo ('Todos' | 'Entrada' | 'Saida') filtra a listagem
  * de movimentacoes da Home de forma puramente reativa sem alterar o saldo ou totais.
+ * Nome, saldo total e entradas, saidas e movimentacoes do periodo escolhido vem do back
+ * (useHomeViewModel). O filtro de tipo ('Todos' | 'Entrada' | 'Saida') filtra a listagem
+ * de movimentacoes da Home de forma puramente reativa sem alterar o saldo ou totais.
  */
 export default function HomeScreen() {
   const router = useRouter();
@@ -76,6 +79,16 @@ export default function HomeScreen() {
         />
 
         <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>{sectionTitle}</Text>
+            <TypeFilterPills onSelect={setTypeFilter} selected={typeFilter} />
+          </View>
+          <ExpenseList
+            emptyMessage={emptyMessage}
+            expenses={expenses}
+            onPressIntegrate={() => {}}
+            status={status}
+          />
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>{sectionTitle}</Text>
             <TypeFilterPills onSelect={setTypeFilter} selected={typeFilter} />
