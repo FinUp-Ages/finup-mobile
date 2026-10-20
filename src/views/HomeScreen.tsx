@@ -107,8 +107,8 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   sectionHeader: {
-    alignItems: 'center',
-    flexDirection: 'row',
+    alignItems: 'flex-start',
+    flexDirection: 'column',
     flexWrap: 'wrap',
     gap: 8,
     justifyContent: 'space-between',
