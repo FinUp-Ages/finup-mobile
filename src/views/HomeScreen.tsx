@@ -89,16 +89,6 @@ export default function HomeScreen() {
             onPressIntegrate={() => {}}
             status={status}
           />
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{sectionTitle}</Text>
-            <TypeFilterPills onSelect={setTypeFilter} selected={typeFilter} />
-          </View>
-          <ExpenseList
-            emptyMessage={emptyMessage}
-            expenses={expenses}
-            onPressIntegrate={() => {}}
-            status={status}
-          />
         </View>
       </ScrollView>
     </SafeAreaView>
