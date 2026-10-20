@@ -1,48 +1,25 @@
-{
-  "stage": "REVIEWING",
-  "task": "Fix CI build job failure (npm ci lockfile mismatch)",
-  "branch": "feature/home-connected (atualizada com a develop em c892701)",
-  "objective": "Restore GitHub Actions build by syncing package-lock.json with package.json for Node 20 / npm 10.",
-  "decisions": [
-    "Períodos: 7, 10 e 20 dias; eles afetam carrossel, Ver mais e categorias.",
-    "Tipo e ordenação afetam somente carrossel e Ver mais.",
-    "O Alerta é um componente visual separado e, temporariamente, exibe conteúdo hardcoded.",
-    "A criação de transações permanece disponível na aba Transação; não há botão de adição no card da Análise.",
-    "O carrossel recebe movements do ViewModel, que já aplica o período, tipo e ordenação ativos.",
-    "Valores do carrossel usam + R$ para entradas e - R$ para saídas.",
-    "PeriodPickerModal é reutilizável por opções; na Análise recebe apenas 7, 10 e 20 dias.",
-    "Percentuais de categorias usam maiores restos para somar exatamente 100% após arredondamento.",
-    "Ordenação e associação da categoria são funções puras em analiseMovimentacoes.ts.",
-    "Filtro e ordenação de movimentações são puros; empates por valor preservam a recência.",
-    "Ver mais de Movimentações usa a mesma lista movements já filtrada e ordenada pelo ViewModel; o Ver mais de Categorias é mantido separado.",
-    "Sessão expirada é tratada pelo httpClient, que limpa a sessão e volta à autenticação.",
-    "A origem, as condições de exibição e as regras do Alerta serão definidas pela equipe antes da integração com dados reais.",
-    "O botão de adicionar transação foi removido do card; a criação continua disponível na aba Transação.",
-    "Ver mais permanece no card, alinhado à direita e acompanhado pelo ícone de seta para a direita.",
-    "O Alerta aparece recolhido, usa a paleta amarela da referência e alterna a mensagem hardcoded ao toque.",
-    "A mensagem usa Animated para transicionar altura, margem e opacidade em 220 ms."
-  ],
-  "pending_decisions": [
-    "Renda em faixas no lugar do valor mascarado da issue #12: envia o limite superior da faixa e 'Mais de R$ 50.000' grava 50000, igual a faixa anterior"
-  ],
-  "files_in_scope": [
-    "package-lock.json",
-    ".railforge/state.json"
-  ],
-  "flow_and_states": "Fluxos: abertura do app com sessao, login e fim do cadastro levam a Home; Home -> Adicionar transacao -> aba Transacao -> salvar -> Home atualizada ao voltar. Estados: carregando, erro com tentar de novo, sem gastos (Integrar cartoes), sucesso, sessao expirada (httpClient volta ao login)",
-  "non_goals": [
-    "Score e os CTAs 'Adicionar agora' e 'Integrar cartoes' (onPress vazio)",
-    "Mudancas no back"
-  ],
-  "updated_at": "2026-10-16",
-  "validation": {
-    "typecheck": "ok",
-    "lint": "0 erros",
-    "ci": "local reproduction fixed: npx npm@10.8.2 ci passa",
-    "expo_go": "nao validado no aparelho: Home, seletor de periodo, banner, Adicionar transacao, cadastro (Etapa 2) e chatbot",
-    "cadastro_retomado": "2026-10-04, Expo Go + back da develop local: Etapa 2 com celular, salvo com phone +55 (E.164), profissao, nascimento e renda; POST /users e PATCH additional-info ok",
-    "android_barra_de_abas": "2026-10-04, usuario no aparelho Android: sem vao entre a Home e a barra de abas"
-  },
-  "review": "Revisão local: AlertIcon reproduz o SVG fornecido; a mensagem do Alerta anima altura, margem e opacidade em 220 ms ao expandir e recolher. Typecheck, lint e diff check passaram; validação visual no Expo Go permanece pendente.",
-  "updated_at": "2026-10-16"
+﻿{
+    "stage":  "COMPLETED",
+    "task":  "Corrigir os checks do CI e remover duplicação na Home",
+    "branch":  "feature/add-rich-text",
+    "objective":  "Manter package.json e package-lock.json sincronizados, fazer expo-doctor passar sem conflito de bibliotecas de ícones e exibir uma única lista de movimentações na Home.",
+    "plan":  "Atualizar lockfile, remover a dependência scoped de ícones não usada, usar Markdown 8.1 compatível com os ícones Expo, remover JSX duplicado e validar checks locais.",
+    "files_in_scope":  [
+                           "package.json",
+                           "package-lock.json",
+                           "src/views/HomeScreen.tsx",
+                           ".railforge/state.json"
+                       ],
+    "flow_and_states":  "Home: abrir e visualizar uma única seção de movimentações com filtros e lista.",
+    "validation":  {
+                       "npm_ci_dry_run":  "ok (npm 11.19.0 local)",
+                       "expo_doctor":  "20/20 checks passed (1.20.4, version check skip igual CI)",
+                       "typecheck":  "ok",
+                       "lint":  "ok",
+                       "diff_check":  "ok",
+                       "home_duplicates":  "1 ExpenseList e 1 TypeFilterPills",
+                       "expo_go":  "nao executado"
+                   },
+    "review":  "Removido @react-native-vector-icons/material-design-icons, sem imports no app; Markdown fixado na linha 8.1, cujo uso básico no ChatbotMessage passou typecheck. Lockfile consistente e expo-doctor não reporta conflito. Home tem uma única seção.",
+    "updated_at":  "2026-10-20"
 }
