@@ -1,6 +1,8 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import React from 'react';
+import { Platform } from 'react-native';
+import { GlassTabs } from '@/components/navigation/GlassTabs';
 import { colors } from '@/theme/colors';
 
 /**
@@ -19,7 +21,7 @@ import { colors } from '@/theme/colors';
  * (Home). Perfil e Transcricao
  * ficam fora da barra, como rotas da pilha raiz (app/_layout.tsx).
  */
-export default function TabsLayout() {
+function NativeTabsLayout() {
   return (
     <NativeTabs indicatorColor={colors.tabIndicator} tintColor={colors.tabActive}>
       <NativeTabs.Trigger disableTransparentOnScrollEdge name="carteira">
@@ -59,4 +61,12 @@ export default function TabsLayout() {
       </NativeTabs.Trigger>
     </NativeTabs>
   );
+}
+
+/**
+ * Android: barra "liquid glass" simulada (GlassTabs), so para a apresentacao.
+ * iOS: NativeTabs, que ja desenha o vidro nativo do iOS 26.
+ */
+export default function TabsLayout() {
+  return Platform.OS === 'android' ? <GlassTabs /> : <NativeTabsLayout />;
 }
