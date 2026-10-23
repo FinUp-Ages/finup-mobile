@@ -26,7 +26,6 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.finupmobile2",
       "infoPlist": {
         "NSSpeechRecognitionUsageDescription": "Permitir que o FinUp use o reconhecimento de fala do aparelho.",
         "NSMicrophoneUsageDescription": "Permitir que o FinUp use o microfone para transcrever sua fala."
@@ -40,20 +39,11 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "permissions": [
-        "android.permission.RECORD_AUDIO"
-      ],
+      "permissions": ["android.permission.RECORD_AUDIO"],
       "package": "com.anonymous.finupmobile2"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    },
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "cb21bab2-1645-4773-ad18-573c50030697"
-      }
-    },
-    "owner": "is_real"
+    }
   }
 }
