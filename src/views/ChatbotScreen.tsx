@@ -121,7 +121,19 @@ export default function ChatbotScreen() {
               </TouchableWithoutFeedback>
             )}
 
-            <ChatbotComposer draft={vm.draft} isSending={vm.isSending} onChangeDraft={vm.setDraft} onSend={vm.sendMessage} />
+            <ChatbotComposer
+              draft={vm.draft}
+              isSending={vm.isSending}
+              onCancelVoice={vm.voice.cancel}
+              onChangeDraft={vm.setDraft}
+              onSend={vm.sendMessage}
+              onStartVoice={vm.voice.start}
+              onStopVoice={vm.voice.stop}
+              voiceDisabled={vm.voice.isDisabled}
+              voiceMessage={vm.voice.message}
+              voiceStartedAt={vm.voice.recordingStartedAt}
+              voiceStatus={vm.voice.status}
+            />
           </View>
         </KeyboardAvoidingView>
       </SafeAreaView>

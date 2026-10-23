@@ -2,8 +2,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { HttpError } from '@/config/httpClient';
 import { chatbotModel } from '@/models/chatbotModel';
 import { transactionEvents } from '@/models/transactionEvents';
-import type { ChatMessage, ConversationMessage, ConversationSummary } from '@/types/chatbot';
+import type { ChatMessage, ConversationMessage, ConversationSummary, VoiceRecording } from '@/types/chatbot';
 import { userModel } from '@/models/userModel';
+import { useVoiceDictationViewModel } from '@/viewmodels/useVoiceDictationViewModel';
 
 const MAX_MESSAGE_LENGTH = 500;
 const CONVERSATIONS_ERROR = 'Não foi possível carregar suas conversas.';
@@ -71,6 +72,12 @@ export function useChatbotViewModel() {
   // aberta antes se a pessoa trocou de novo enquanto ela carregava.
   const shownConversation = useRef<string | null>(null);
   const sendLockRef = useRef(false);
+
+  // Soltar o microfone envia direto, como no WhatsApp: a transcricao vai ao back
+  // como texto e a forma de onda so anima a mensagem virando texto.
+  const voice = useVoiceDictationViewModel({
+    onRecorded: (text, recording) => sendVoiceMessage(text, recording),
+  });
 
   useEffect(() => {
     let active = true;
@@ -219,14 +226,26 @@ export function useChatbotViewModel() {
     // O ref fecha a janela entre o envio e o re-render: `onSubmitEditing` e o
     // botao (ou o "Enviar" do teclado, que pode disparar duas vezes) chegam com
     // o mesmo `draft`/`isSending` do render anterior e enviavam a mensagem em dobro.
-    if (!text || isSending || isLoadingMessages || sendLockRef.current) return;
+    if (!text || isSending || isLoadingMessages || voice.isActive || sendLockRef.current) return;
     sendLockRef.current = true;
 
     const messageId = `user-${Date.now()}`;
     setDraft('');
     setMessages((current) => [...current, { id: messageId, role: 'user', status: 'sending', text }]);
     void deliver(messageId, text);
-  }, [deliver, draft, isLoadingMessages, isSending]);
+  }, [deliver, draft, isLoadingMessages, isSending, voice.isActive]);
+
+  // O microfone fica desabilitado enquanto uma mensagem esta sendo enviada; a
+  // trava cobre o resto. O rascunho digitado nao e tocado.
+  function sendVoiceMessage(transcript: string, recording: VoiceRecording) {
+    if (isSending || isLoadingMessages || sendLockRef.current) return;
+    sendLockRef.current = true;
+
+    const text = transcript.slice(0, MAX_MESSAGE_LENGTH);
+    const messageId = `user-${Date.now()}`;
+    setMessages((current) => [...current, { id: messageId, role: 'user', status: 'sending', text, voice: recording }]);
+    void deliver(messageId, text);
+  }
 
   // Reenvia a ultima mensagem que falhou no proprio balao, sem duplicar o texto.
   const retryLastMessage = useCallback(() => {
@@ -261,7 +280,12 @@ export function useChatbotViewModel() {
     setDraft: (value: string) => {
       setDraft(value.slice(0, MAX_MESSAGE_LENGTH));
       setErrorMessage(null);
+      voice.dismissMessage();
     },
     setIsMenuOpen,
+    voice: {
+      ...voice,
+      isDisabled: isSending || isLoadingMessages,
+    },
   };
 }
