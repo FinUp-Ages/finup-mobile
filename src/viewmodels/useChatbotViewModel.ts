@@ -1,7 +1,9 @@
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { HttpError } from '@/config/httpClient';
 import { chatbotModel } from '@/models/chatbotModel';
 import { transactionEvents } from '@/models/transactionEvents';
+import { isChatbotLaunchMode } from '@/models/widgetLaunchModel';
 import type { ChatMessage, ConversationMessage, ConversationSummary, VoiceRecording } from '@/types/chatbot';
 import { userModel } from '@/models/userModel';
 import { useVoiceDictationViewModel } from '@/viewmodels/useVoiceDictationViewModel';
@@ -78,6 +80,21 @@ export function useChatbotViewModel() {
   const voice = useVoiceDictationViewModel({
     onRecorded: (text, recording) => sendVoiceMessage(text, recording),
   });
+
+  // Aberto pelo widget (`/chatbot?modo=...`): "texto" pede foco no campo e "voz"
+  // ja comeca a gravar. O parametro e limpo em seguida, para o proximo toque no
+  // widget (mesmo modo) ser percebido de novo.
+  const router = useRouter();
+  const { modo } = useLocalSearchParams<{ modo?: string }>();
+  const [inputFocusRequest, setInputFocusRequest] = useState(0);
+  const startVoice = voice.start;
+
+  useEffect(() => {
+    if (!isChatbotLaunchMode(modo)) return;
+    router.setParams({ modo: undefined });
+    if (modo === 'voz') void startVoice({ handsFree: true });
+    else setInputFocusRequest((current) => current + 1);
+  }, [modo, router, startVoice]);
 
   useEffect(() => {
     let active = true;
@@ -264,6 +281,7 @@ export function useChatbotViewModel() {
     draft,
     errorMessage,
     hasConversation: conversationId !== null || messages.length > 0,
+    inputFocusRequest,
     isLoadingConversations,
     isLoadingMessages,
     isMenuOpen,

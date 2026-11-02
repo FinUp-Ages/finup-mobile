@@ -34,6 +34,7 @@ const WAVEFORM_BARS = 28;
 const WAVEFORM_FLOOR = 0.15;
 
 const NO_SPEECH_MESSAGE = 'Não captei nenhuma fala. Segure o microfone enquanto fala.';
+const NO_SPEECH_HANDS_FREE_MESSAGE = 'Não captei nenhuma fala. Tente de novo ou digite a mensagem.';
 
 function createErrorMessage(code: ExpoSpeechRecognitionErrorCode): string {
   switch (code) {
@@ -75,6 +76,11 @@ export function useVoiceDictationViewModel({ onRecorded }: UseVoiceDictationOpti
   const [message, setMessage] = useState<string | null>(null);
   /** Inicio da gravacao (epoch ms), para o cronometro do composer. */
   const [recordingStartedAt, setRecordingStartedAt] = useState<number | null>(null);
+  /**
+   * Gravacao sem o dedo no microfone (aberta pelo widget): continua ate a pessoa
+   * tocar em enviar ou cancelar.
+   */
+  const [handsFree, setHandsFree] = useState(false);
 
   /** Marcadores da sessao em andamento: so lidos e escritos em handlers. */
   const ownsSession = useRef(false);
@@ -132,7 +138,7 @@ export function useVoiceDictationViewModel({ onRecorded }: UseVoiceDictationOpti
       if (text) {
         onRecorded(text, { levels: toWaveform(volumeSamples.current) });
       } else {
-        setMessage(NO_SPEECH_MESSAGE);
+        setMessage(handsFree ? NO_SPEECH_HANDS_FREE_MESSAGE : NO_SPEECH_MESSAGE);
       }
     }
 
@@ -141,14 +147,20 @@ export function useVoiceDictationViewModel({ onRecorded }: UseVoiceDictationOpti
     lastPartial.current = '';
     volumeSamples.current = [];
     setRecordingStartedAt(null);
+    setHandsFree(false);
     setStatus('idle');
   });
 
   /* ---------------- acoes ---------------- */
 
-  const start = useCallback(async () => {
+  /**
+   * Comeca a gravar. Pelo microfone, o dedo segura a gravacao (`stop` ao soltar);
+   * com `handsFree` (widget), ela segue ate o toque em enviar ou cancelar.
+   */
+  const start = useCallback(async (options?: { handsFree?: boolean }) => {
     if (ownsSession.current) return;
     setMessage(null);
+    setHandsFree(options?.handsFree ?? false);
 
     if (!isSpeechRecognitionAvailable()) {
       setMessage('O envio de áudio não está disponível nesta versão do app.');
@@ -194,7 +206,7 @@ export function useVoiceDictationViewModel({ onRecorded }: UseVoiceDictationOpti
     }
   }, []);
 
-  /** Soltou o microfone: encerra a gravacao e envia o que foi transcrito. */
+  /** Soltou o microfone (ou tocou em enviar): encerra e envia o que foi transcrito. */
   const stop = useCallback(() => {
     if (!ownsSession.current) {
       cancelledBeforeStart.current = true;
@@ -230,6 +242,7 @@ export function useVoiceDictationViewModel({ onRecorded }: UseVoiceDictationOpti
   return {
     cancel,
     dismissMessage,
+    handsFree: handsFree && status !== 'idle',
     isActive: status !== 'idle',
     message,
     recordingStartedAt,

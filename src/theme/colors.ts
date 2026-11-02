@@ -61,6 +61,10 @@ export const colors = {
   chatDrawer: '#082544',
   chatDrawerItem: '#103456',
   chatOverlay: 'rgba(0, 12, 28, 0.65)',
+  // Widget da tela inicial (Figma, no 223-13475): degrade navy -> azul e campo translucido.
+  widgetGradientBottom: '#0060c8',
+  widgetField: 'rgba(217, 217, 217, 0.38)',
+  widgetFieldText: 'rgba(255, 255, 255, 0.67)',
 } as const;
 
 /**
