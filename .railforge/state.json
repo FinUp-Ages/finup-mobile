@@ -1,68 +1,85 @@
 {
   "stage": "REVIEWING",
-  "task": "[APP] Implementar ditado por voz no chat",
-  "objective": "Transformar o microfone do input do chat em mensagem de voz no estilo WhatsApp/Telegram: segurar grava, soltar envia; a mensagem enviada anima a forma de onda virando o texto transcrito e fica como mensagem de texto. Sem transcricao ao vivo visivel.",
+  "task": "[ Mobile ] - Widget (ClickUp 1dfcuabc1av)",
+  "objective": "Widget do FinUp na tela inicial do Android para registrar gastos por texto ou voz, no estilo da barra de pesquisa do Google: o widget nao recebe digitacao, cada area abre o Chatbot ja pronto para escrever ou falar.",
   "requirements": [
-    "Segurar o microfone grava, com indicador de gravacao (ponto vermelho e tempo) no lugar do campo de texto; nenhuma transcricao aparece durante a gravacao",
-    "Soltar envia: a fala transcrita vai ao assistente como mensagem do usuario, sem etapa de revisao ou edicao",
-    "Arrastar o dedo para a esquerda durante a gravacao cancela sem enviar; toque curto mostra a dica 'Segure para gravar'",
-    "Ao enviar, o balao do usuario mostra a forma de onda captada, que se desfaz num desfoque; o texto transcrito sai do desfoque e fica como mensagem de texto comum, sem elementos que sugiram reproducao de audio",
-    "Permissao negada, nenhuma fala captada, erro do reconhecedor e indisponibilidade no Expo Go exibem mensagem amigavel junto ao composer, sem enviar nada"
+    "Widget disponivel no seletor de widgets do Android, partindo do Figma (no 223-13475, mockup da direita): fundo em degrade marinho -> azul, logo FinUp, campo de texto e microfone",
+    "Toque no campo abre `finup://chatbot?modo=texto`: Chatbot com o campo em foco e teclado aberto",
+    "Toque no microfone abre `finup://chatbot?modo=voz`: Chatbot ja gravando; envia ao tocar em enviar, o X cancela",
+    "Com o app fechado, o link passa pela tela de carregamento; sem sessao, pelo login, e depois segue para o chat",
+    "O registro do gasto e o do assistente (acao REGISTER_TRANSACTION), sem mudanca no back",
+    "2026-11-05: conteudo dinamico no widget (widget do Android nao anima): saudacao pelo horario com o primeiro nome, gastos do dia e do mes (GET /users/me e GET /transactions do mes) e um exemplo de frase no campo que muda a cada atualizacao; sem sessao ou sem rede, so saudacao e dica",
+    "O widget e redesenhado quando o app abre, quando o chat registra transacao e quando o app vai para segundo plano (cobre login, logout e lancamentos em outras telas)",
+    "2026-11-05: o toque no widget (campo ou microfone) sempre abre uma conversa nova no Chatbot, como o Nova conversa do menu; a conversa anterior continua no historico"
   ],
-  "user_flow": "Aba Chatbot > composer > segurar microfone > gravacao (tempo, deslizar para cancelar) > soltar > animacao audio -> texto no balao > resposta do assistente",
+  "user_flow": "Tela inicial do Android > widget FinUp > toque no campo (chat com teclado) ou no microfone (chat gravando) > enviar > resposta do assistente registra o gasto",
   "states": [
-    "idle: microfone pronto; toque curto mostra a dica de segurar",
-    "permissao: dialogo do sistema no primeiro uso interrompe o gesto; negada mostra orientacao para liberar nas configuracoes",
-    "gravando: campo substituido por ponto vermelho, tempo e 'Deslize para cancelar'; envio de texto indisponivel",
-    "processando: apos soltar, aguarda o resultado final do reconhecedor",
-    "enviado: forma de onda desfoca e o texto sai do desfoque (pulado com 'reduzir movimento'); depois, mensagem de texto comum; falha de envio mostra 'Mensagem nao enviada' e 'Tentar novamente'",
-    "vazio: nenhuma fala captada mostra aviso e nada e enviado",
-    "cancelado: deslizar para a esquerda descarta a gravacao; o rascunho de texto fica como estava",
-    "erro: falha do reconhecedor mostra mensagem e nada e enviado"
+    "app fechado com sessao: carregamento -> chat no modo pedido",
+    "app fechado sem sessao: tela inicial de autenticacao -> login -> chat no modo pedido",
+    "app aberto: vai direto para a aba Chatbot no modo pedido",
+    "voz: permissao no primeiro uso; negada mostra a orientacao ja existente; gravando mostra tempo e 'Toque em enviar ao terminar'; X cancela sem enviar",
+    "texto: campo em foco com teclado aberto",
+    "widget sem sessao: 'Boa noite' + 'Registre gastos por texto ou voz' + dica",
+    "widget com sessao: 'Boa noite, Marco' + 'Hoje R$ X · Mês R$ Y' + dica",
+    "widget com falha de rede: igual ao sem sessao, sem erro na tela"
   ],
   "files_in_scope": [
-    "src/models/speechRecognitionModel.ts",
-    "src/viewmodels/useVoiceDictationViewModel.ts",
+    "app.json",
+    "package.json",
+    "package-lock.json",
+    "index.ts",
+    "app/+native-intent.tsx",
+    "src/widgets/widgetSvgs.ts",
+    "src/widgets/RegistroGastosWidget.tsx",
+    "src/widgets/widgetTaskHandler.tsx",
+    "src/models/widgetLaunchModel.ts",
+    "src/viewmodels/useLoadingScreenViewModel.ts",
+    "src/viewmodels/useLoginViewModel.ts",
     "src/viewmodels/useChatbotViewModel.ts",
-    "src/types/chatbot.ts",
+    "src/viewmodels/useVoiceDictationViewModel.ts",
     "src/components/chatbot/ChatbotComposer.tsx",
-    "src/components/chatbot/ChatbotMessage.tsx",
+    "src/components/ui/AppText.tsx",
+    "src/theme/colors.ts",
     "src/views/ChatbotScreen.tsx",
-    "src/utils/format.ts"
+    "app/_layout.tsx",
+    "src/models/widgetModel.ts",
+    "src/utils/widgetContent.ts",
+    "src/utils/widgetContent.test.ts",
+    "src/widgets/refreshRegistroGastosWidget.tsx"
   ],
   "decisions": [
-    "Branch baseada na develop (b91379f, #18, home conectada), que trouxe o composer no layout do Figma, a fonte Inter via AppText e a trava contra envio em dobro.",
-    "O PR #16 removeu o microfone do composer por falta de contrato no back; o ditado e local ao aparelho e nao depende do back, entao o microfone volta. O anexo continua fora.",
-    "Reaproveita expo-speech-recognition e o speechRecognitionModel da POC (#6); o ditado tem opcoes proprias sem requiresOnDeviceRecognition, para nao falhar em aparelhos sem o modelo offline de pt-BR.",
-    "Os eventos do reconhecedor sao globais; o ViewModel do ditado so reage a sessoes que ele mesmo iniciou.",
-    "2026-10-14: o usuario trocou o fluxo de ditado no campo (revisar e editar antes de enviar) por mensagem de voz estilo WhatsApp: soltar envia direto, sem transcricao ao vivo.",
-    "O back recebe e guarda so o texto transcrito; ao reabrir uma conversa pelo historico, a mensagem aparece como texto normal.",
-    "Entrega no mesmo PR #20 (branch feat/ditado-por-voz-chat).",
-    "Gravacao em modo continuo (Android 13+ e iOS) para nao encerrar sozinha no silencio enquanto o dedo esta no microfone; no Android 12 ou anterior o reconhecedor pode encerrar no primeiro resultado final.",
-    "2026-10-14: o balao com icone, forma de onda e duracao sugeria que o audio podia ser ouvido; trocado por animacao que converte a forma de onda no texto e termina como mensagem de texto comum. O audio nao e gravado nem guardado (o back so armazena texto: ChatMessage(role, text, action, createdAt) no S3).",
-    "A transcricao continua acontecendo durante a fala; a animacao so mascara o resultado e nao atrasa o envio ao back.",
-    "2026-10-14: transicao audio -> texto com `filter: blur` do proprio React Native 0.86, animado no driver nativo a partir de um unico progresso (sem dependencia nova). O blur vale no Android 12+; no iOS a flag enableSwiftUIBasedFilters vem desligada e no Android antigo nao ha RenderEffect, entao a transicao fica so no esmaecer."
+    "2026-11-02: o widget e para escrever e mandar audio 'igual ao Google'. Widget nao aceita digitacao no Android, entao cada area abre o app por deep link (esquema `finup`, ja no app.json).",
+    "Destino: Chatbot, porque o assistente ja registra gasto por texto livre (REGISTER_TRANSACTION) e o chat ja tem ditado por voz.",
+    "2026-11-02: pelo microfone do widget o chat abre ja gravando e so envia ao tocar em enviar (escolha do usuario entre parar no silencio, tocar enviar ou so abrir o chat).",
+    "Android apenas, com `react-native-android-widget` (config plugin do Expo). iOS fica como ponto a confirmar na task (WidgetKit em Swift e conta Apple Developer).",
+    "Desfoques do Figma (brilho atras do logo) nao existem em widgets do Android (RemoteViews): o brilho e aproximado com degrade radial no SVG do logo.",
+    "Teste so com development build (APK via EAS): widget e codigo nativo e nao roda no Expo Go.",
+    "2026-11-05: react-native-reanimated 4.5.1 e react-native-worklets 0.10.1 declarados no package.json (versoes do SDK 57). Vinham so pelo expo-router e o npm resolvia o reanimated 4.2.2, que derruba o build Android com o React Native 0.86.3.",
+    "2026-11-05: escolha do usuario para deixar o widget mais vivo: saudacao + dica rotativa e gastos do dia/mes. Os valores de gasto ficam visiveis na tela inicial.",
+    "2026-11-05: layout escolhido pelo usuario entre 4 variacoes desenhadas no Figma (arquivo \"FinUp - Widget (variacoes)\", fyPlN81lyizviYxgHl35e0, opcao C): logo ao centro, saudacao e resumo centralizados, campo branco de 48dp com lapis e o microfone dentro (circulo marinho). Difere do mockup original so no campo (branco em vez de translucido).",
+    "2026-11-05: com altura real menor que 170dp (WidgetInfo.height) a logo some, para o widget caber no minHeight de 140dp sem gerar outro APK. Textos em Inter Regular (a unica fonte registrada no widget); Medium exigiria mudar o app.json e gerar APK."
   ],
   "non_goals": [
-    "Conversa por chamada continua, streaming de audio, sintese de voz ou resposta falada do assistente",
-    "Anexos, alteracoes na POC de transcricao ou no envio de mensagens"
+    "Widget no iOS",
+    "Notificacao push 'Alerta de gastos' (mockup da esquerda do mesmo no)",
+    "Digitar ou gravar dentro do proprio widget",
+    "Mudancas no back ou no assistente",
+    "Animacao no widget (RemoteViews nao suporta GIF, Lottie ou animacao em JS)"
   ],
   "validation": {
-    "lint": "npm run lint passou sem erros.",
-    "typecheck": "npm run typecheck passou sem erros.",
-    "diff": "git diff --check passou; diff revisado e restrito aos arquivos em escopo.",
-    "expo_doctor": "Falha preexistente na develop, sem relacao com esta tarefa: expo, expo-constants e expo-router atras do patch atual do SDK 57 (task registrada em finup/tasks/expo-sdk57-patches-desatualizados.md).",
-    "device": "Android fisico (SM-S921B, Android 16), development build com backend local (perfil dev, Cognito real, Bedrock): segurar/falar/soltar enviou a transcricao e o assistente respondeu; toque curto mostrou a dica de segurar; durante a gravacao o campo virou ponto vermelho, tempo e 'Deslize para cancelar'; deslizar para a esquerda cancelou sem enviar; segurar em silencio mostrou 'Nao captei nenhuma fala' sem enviar. A transicao final com desfoque (forma de onda -> texto) nao foi verificada no aparelho: a gravacao de tela nao foi salva. Nao verificados tambem: dialogo de permissao (ja concedida), permissao negada, Android 12 ou anterior e iOS."
+    "typecheck": "2026-11-05: tsc --noEmit sem erros.",
+    "lint": "2026-11-05: eslint nos arquivos alterados sem erros.",
+    "prettier": "2026-11-05: arquivos do widget formatados (prettier --write).",
+    "tests": "2026-11-05: npm test 17/17 (inclui src/utils/widgetContent.test.ts).",
+    "device": "2026-11-05: APK de desenvolvimento EAS no Android do usuario; login e widget testados. Layout C pendente de conferencia no aparelho."
   },
-  "review": "Criterios de gravacao, envio, cancelamento e sem fala verificados no Android. Pendente: conferir no aparelho a transicao com desfoque, permissao negada e iOS.",
-  "updated_at": "2026-10-14",
+  "review": "PR #25 (feat/widget-registro-gastos -> develop) aberto em 2026-11-06 com video do widget no Android; aguardando revisao do time.",
+  "updated_at": "2026-11-06",
   "next_steps": [
-    "Conferir no Android a transicao com desfoque da forma de onda para o texto",
-    "Verificar permissao negada e testar no iOS (sem desfoque, so esmaecer)",
-    "Revisao do PR #20"
+    "Revisao do PR #25 pelo time",
+    "Combinar o projeto EAS da org (eas.json e extra.eas.projectId ficaram fora do PR)"
   ],
   "pending_decisions": [
-    "Autorizar revogar a permissao de microfone do FinUp para o teste de permissao negada",
-    "Apagar finup/tasks/poc-transcricao-reage-ao-ditado-do-chat.md, obsoleta: na develop a Transcricao e rota de stack e so fica montada quando visivel"
+    "`eas.json`, `expo-dev-client` e `extra.eas.projectId` (conta pessoal marcolaimer) entram no repo ou vao para um projeto EAS da org do time?"
   ]
 }

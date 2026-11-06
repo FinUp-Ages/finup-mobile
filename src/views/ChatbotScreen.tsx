@@ -123,6 +123,7 @@ export default function ChatbotScreen() {
 
             <ChatbotComposer
               draft={vm.draft}
+              focusRequest={vm.inputFocusRequest}
               isSending={vm.isSending}
               onCancelVoice={vm.voice.cancel}
               onChangeDraft={vm.setDraft}
@@ -130,6 +131,7 @@ export default function ChatbotScreen() {
               onStartVoice={vm.voice.start}
               onStopVoice={vm.voice.stop}
               voiceDisabled={vm.voice.isDisabled}
+              voiceHandsFree={vm.voice.handsFree}
               voiceMessage={vm.voice.message}
               voiceStartedAt={vm.voice.recordingStartedAt}
               voiceStatus={vm.voice.status}

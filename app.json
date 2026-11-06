@@ -22,6 +22,25 @@
             "com.google.android.googlequicksearchbox"
           ]
         }
+      ],
+      [
+        "react-native-android-widget",
+        {
+          "fonts": ["./node_modules/@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf"],
+          "widgets": [
+            {
+              "name": "RegistroGastos",
+              "label": "FinUp",
+              "description": "Registre seus gastos por texto ou voz",
+              "minWidth": "250dp",
+              "minHeight": "140dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 0
+            }
+          ]
+        }
       ]
     ],
     "ios": {

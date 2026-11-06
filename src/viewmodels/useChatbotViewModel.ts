@@ -1,7 +1,9 @@
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { HttpError } from '@/config/httpClient';
 import { chatbotModel } from '@/models/chatbotModel';
 import { transactionEvents } from '@/models/transactionEvents';
+import { isChatbotLaunchMode } from '@/models/widgetLaunchModel';
 import type { ChatMessage, ConversationMessage, ConversationSummary, VoiceRecording } from '@/types/chatbot';
 import { userModel } from '@/models/userModel';
 import { useVoiceDictationViewModel } from '@/viewmodels/useVoiceDictationViewModel';
@@ -78,6 +80,11 @@ export function useChatbotViewModel() {
   const voice = useVoiceDictationViewModel({
     onRecorded: (text, recording) => sendVoiceMessage(text, recording),
   });
+
+  const router = useRouter();
+  const { modo } = useLocalSearchParams<{ modo?: string }>();
+  const [inputFocusRequest, setInputFocusRequest] = useState(0);
+  const startVoice = voice.start;
 
   useEffect(() => {
     let active = true;
@@ -169,6 +176,18 @@ export function useChatbotViewModel() {
     setMessagesError(null);
     setIsLoadingMessages(false);
   }, [isSending]);
+
+  // Aberto pelo widget (`/chatbot?modo=...`): sempre numa conversa nova, como o
+  // "Nova conversa" do menu; "texto" pede foco no campo e "voz" ja comeca a
+  // gravar. O parametro e limpo em seguida, para o proximo toque no widget (mesmo
+  // modo) ser percebido de novo.
+  useEffect(() => {
+    if (!isChatbotLaunchMode(modo)) return;
+    router.setParams({ modo: undefined });
+    newConversation();
+    if (modo === 'voz') void startVoice({ handsFree: true });
+    else setInputFocusRequest((current) => current + 1);
+  }, [modo, newConversation, router, startVoice]);
 
   // Envia uma mensagem do usuario que ja esta na lista, na conversa aberta.
   const deliver = useCallback(
@@ -264,6 +283,7 @@ export function useChatbotViewModel() {
     draft,
     errorMessage,
     hasConversation: conversationId !== null || messages.length > 0,
+    inputFocusRequest,
     isLoadingConversations,
     isLoadingMessages,
     isMenuOpen,

@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import { HttpError } from '@/config/httpClient';
 import { authErrorMessage, authModel } from '@/models/authModel';
 import { userModel } from '@/models/userModel';
+import { widgetLaunchModel } from '@/models/widgetLaunchModel';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -59,7 +60,8 @@ export function useLoginViewModel() {
     try {
       await userModel.getMe();
       setPasswordValue('');
-      router.replace('/carteira');
+      // Aberto pelo widget sem sessao: depois do login segue para o chat.
+      router.replace(widgetLaunchModel.consumePending() ?? '/carteira');
     } catch (meError) {
       if (meError instanceof HttpError && meError.status === 404) {
         setPasswordValue('');

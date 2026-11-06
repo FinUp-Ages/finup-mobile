@@ -3,6 +3,7 @@ import { useRouter, type Href } from 'expo-router';
 import { HttpError } from '@/config/httpClient';
 import { authModel } from '@/models/authModel';
 import { userModel } from '@/models/userModel';
+import { widgetLaunchModel } from '@/models/widgetLaunchModel';
 
 /**
  * Decide a primeira tela a partir da sessao salva (contrato
@@ -26,7 +27,8 @@ async function resolveInitialRoute(): Promise<Href> {
 
   try {
     await userModel.getMe();
-    return '/carteira';
+    // Aberto pelo widget: segue para o chat em vez da Home.
+    return widgetLaunchModel.consumePending() ?? '/carteira';
   } catch (error) {
     // 401: o httpClient ja limpou a sessao.
     if (error instanceof HttpError && error.status === 404) {
