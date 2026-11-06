@@ -1,68 +1,47 @@
 {
   "stage": "REVIEWING",
-  "task": "[APP] Implementar ditado por voz no chat",
-  "objective": "Transformar o microfone do input do chat em mensagem de voz no estilo WhatsApp/Telegram: segurar grava, soltar envia; a mensagem enviada anima a forma de onda virando o texto transcrito e fica como mensagem de texto. Sem transcricao ao vivo visivel.",
-  "requirements": [
-    "Segurar o microfone grava, com indicador de gravacao (ponto vermelho e tempo) no lugar do campo de texto; nenhuma transcricao aparece durante a gravacao",
-    "Soltar envia: a fala transcrita vai ao assistente como mensagem do usuario, sem etapa de revisao ou edicao",
-    "Arrastar o dedo para a esquerda durante a gravacao cancela sem enviar; toque curto mostra a dica 'Segure para gravar'",
-    "Ao enviar, o balao do usuario mostra a forma de onda captada, que se desfaz num desfoque; o texto transcrito sai do desfoque e fica como mensagem de texto comum, sem elementos que sugiram reproducao de audio",
-    "Permissao negada, nenhuma fala captada, erro do reconhecedor e indisponibilidade no Expo Go exibem mensagem amigavel junto ao composer, sem enviar nada"
-  ],
-  "user_flow": "Aba Chatbot > composer > segurar microfone > gravacao (tempo, deslizar para cancelar) > soltar > animacao audio -> texto no balao > resposta do assistente",
-  "states": [
-    "idle: microfone pronto; toque curto mostra a dica de segurar",
-    "permissao: dialogo do sistema no primeiro uso interrompe o gesto; negada mostra orientacao para liberar nas configuracoes",
-    "gravando: campo substituido por ponto vermelho, tempo e 'Deslize para cancelar'; envio de texto indisponivel",
-    "processando: apos soltar, aguarda o resultado final do reconhecedor",
-    "enviado: forma de onda desfoca e o texto sai do desfoque (pulado com 'reduzir movimento'); depois, mensagem de texto comum; falha de envio mostra 'Mensagem nao enviada' e 'Tentar novamente'",
-    "vazio: nenhuma fala captada mostra aviso e nada e enviado",
-    "cancelado: deslizar para a esquerda descarta a gravacao; o rascunho de texto fica como estava",
-    "erro: falha do reconhecedor mostra mensagem e nada e enviado"
+  "task": "Implementar tela da Trilha de aprendizado",
+  "objective": "Aba Educacional com selecao de cursos, trilha C6 e abertura dos niveis conforme Figma 204:1350.",
+  "decisions": [
+    "C6 conferido em origin/feat/leitura-da-trilha do backend: contracts/study-track-c6.md e DTOs de leitura.",
+    "Categoria = curso; item publicado = nivel, na ordem da API. C6 nao define topicos nem ordem pedagogica.",
+    "Topico unico usa nome da categoria no real; CDB e demonstracao no mock.",
+    "Progresso/estrelas sao demonstrativos e identificados na interface; no real nao inventar conclusao.",
+    "Inter e Educacional ativa conforme task; Figma usa DM Sans e Analise ativa.",
+    "Abertura apresenta conteudo/enunciado; respostas e conclusao pertencem a outra task.",
+    "Revisao 2026-11-05: suporta leitura dos formatos publicados atual (body/statement) e legado (content/textWithBlanks), conforme contrato de escrita C6."
   ],
   "files_in_scope": [
-    "src/models/speechRecognitionModel.ts",
-    "src/viewmodels/useVoiceDictationViewModel.ts",
-    "src/viewmodels/useChatbotViewModel.ts",
-    "src/types/chatbot.ts",
-    "src/components/chatbot/ChatbotComposer.tsx",
-    "src/components/chatbot/ChatbotMessage.tsx",
-    "src/views/ChatbotScreen.tsx",
-    "src/utils/format.ts"
-  ],
-  "decisions": [
-    "Branch baseada na develop (b91379f, #18, home conectada), que trouxe o composer no layout do Figma, a fonte Inter via AppText e a trava contra envio em dobro.",
-    "O PR #16 removeu o microfone do composer por falta de contrato no back; o ditado e local ao aparelho e nao depende do back, entao o microfone volta. O anexo continua fora.",
-    "Reaproveita expo-speech-recognition e o speechRecognitionModel da POC (#6); o ditado tem opcoes proprias sem requiresOnDeviceRecognition, para nao falhar em aparelhos sem o modelo offline de pt-BR.",
-    "Os eventos do reconhecedor sao globais; o ViewModel do ditado so reage a sessoes que ele mesmo iniciou.",
-    "2026-10-14: o usuario trocou o fluxo de ditado no campo (revisar e editar antes de enviar) por mensagem de voz estilo WhatsApp: soltar envia direto, sem transcricao ao vivo.",
-    "O back recebe e guarda so o texto transcrito; ao reabrir uma conversa pelo historico, a mensagem aparece como texto normal.",
-    "Entrega no mesmo PR #20 (branch feat/ditado-por-voz-chat).",
-    "Gravacao em modo continuo (Android 13+ e iOS) para nao encerrar sozinha no silencio enquanto o dedo esta no microfone; no Android 12 ou anterior o reconhecedor pode encerrar no primeiro resultado final.",
-    "2026-10-14: o balao com icone, forma de onda e duracao sugeria que o audio podia ser ouvido; trocado por animacao que converte a forma de onda no texto e termina como mensagem de texto comum. O audio nao e gravado nem guardado (o back so armazena texto: ChatMessage(role, text, action, createdAt) no S3).",
-    "A transcricao continua acontecendo durante a fala; a animacao so mascara o resultado e nao atrasa o envio ao back.",
-    "2026-10-14: transicao audio -> texto com `filter: blur` do proprio React Native 0.86, animado no driver nativo a partir de um unico progresso (sem dependencia nova). O blur vale no Android 12+; no iOS a flag enableSwiftUIBasedFilters vem desligada e no Android antigo nao ha RenderEffect, entao a transicao fica so no esmaecer."
-  ],
-  "non_goals": [
-    "Conversa por chamada continua, streaming de audio, sintese de voz ou resposta falada do assistente",
-    "Anexos, alteracoes na POC de transcricao ou no envio de mensagens"
+    "app/(tabs)/educacional.tsx",
+    "assets/learning/",
+    "src/components/learning/",
+    "src/views/StudyTrackScreen.tsx",
+    "src/types/studyTrack.ts",
+    "src/models/studyTrackModel.ts",
+    "src/models/studyTrackMock.ts",
+    "src/viewmodels/useStudyTrackViewModel.ts",
+    "src/utils/studyTrack.ts",
+    "src/utils/studyTrack.test.ts",
+    "src/theme/colors.ts",
+    ".env.example",
+    "docs/study-track-mobile.md",
+    ".railforge/state.json"
   ],
   "validation": {
-    "lint": "npm run lint passou sem erros.",
-    "typecheck": "npm run typecheck passou sem erros.",
-    "diff": "git diff --check passou; diff revisado e restrito aos arquivos em escopo.",
-    "expo_doctor": "Falha preexistente na develop, sem relacao com esta tarefa: expo, expo-constants e expo-router atras do patch atual do SDK 57 (task registrada em finup/tasks/expo-sdk57-patches-desatualizados.md).",
-    "device": "Android fisico (SM-S921B, Android 16), development build com backend local (perfil dev, Cognito real, Bedrock): segurar/falar/soltar enviou a transcricao e o assistente respondeu; toque curto mostrou a dica de segurar; durante a gravacao o campo virou ponto vermelho, tempo e 'Deslize para cancelar'; deslizar para a esquerda cancelou sem enviar; segurar em silencio mostrou 'Nao captei nenhuma fala' sem enviar. A transicao final com desfoque (forma de onda -> texto) nao foi verificada no aparelho: a gravacao de tela nao foi salva. Nao verificados tambem: dialogo de permissao (ja concedida), permissao negada, Android 12 ou anterior e iOS."
+    "lint": "2026-11-05: npm run lint passou sem erros ou avisos.",
+    "typecheck": "2026-11-05: npm run typecheck passou.",
+    "tests": "2026-11-05: npm test passou com 15 testes, incluindo compatibilidade dos formatos C6 atual e legado.",
+    "android_bundle": "Bundle Android com Hermes validado em 2026-10-30; nao repetido apos ajuste de leitura C6 de 2026-11-05.",
+    "diff": "git diff --check passou; alteracoes revisadas e restritas a task.",
+    "device": "Expo Go SDK 57 abriu, mas login/acesso ao backend pelo celular bloqueou a validacao da trilha.",
+    "real_api": "Contrato e DTOs consultados na branch de leitura; chamadas autenticadas contra servidor real ainda nao verificadas.",
+    "rebase": "git fetch origin e git rebase origin/develop executados; base ja atualizada em 9e93d80, sem conflitos. Mudancas locais preservadas; stash de seguranca mantido."
   },
-  "review": "Criterios de gravacao, envio, cancelamento e sem fala verificados no Android. Pendente: conferir no aparelho a transicao com desfoque, permissao negada e iOS.",
-  "updated_at": "2026-10-14",
+  "review": "Revisao para preparacao do commit: implementacao parcial dos criterios. Seletor tem um topico por curso; hierarquia curso/topico/nivel ainda e premissa. Progresso e estrelas existem somente no mock. Sem validacao visual/funcional em aparelho nem API real. Indicado PR em rascunho. Usuario autorizou criar o commit com essas limitacoes em 2026-11-05; manter REVIEWING.",
+  "updated_at": "2026-11-05",
   "next_steps": [
-    "Conferir no Android a transicao com desfoque da forma de onda para o texto",
-    "Verificar permissao negada e testar no iOS (sem desfoque, so esmaecer)",
-    "Revisao do PR #20"
-  ],
-  "pending_decisions": [
-    "Autorizar revogar a permissao de microfone do FinUp para o teste de permissao negada",
-    "Apagar finup/tasks/poc-transcricao-reage-ao-ditado-do-chat.md, obsoleta: na develop a Transcricao e rota de stack e so fica montada quando visivel"
+    "Confirmar mapeamento curso/topico/nivel e se topico unico atende ao aceite.",
+    "Validar a tela em aparelho e a API real por outro ambiente ou revisor.",
+    "Commit autorizado pelo usuario; push e PR ainda pendentes."
   ]
 }
