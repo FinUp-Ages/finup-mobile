@@ -14,6 +14,8 @@ export type SpendingAlert = {
   message: string;
   projection: SpendingAlertProjection;
   source: string;
+  /** Preenchido pelo backend quando a categoria já foi dispensada. */
+  dismissedAt?: string | null;
 };
 
 export type SpendingAlertsResponse = {
