@@ -17,10 +17,12 @@ import { AnaliseMovimentacoesModal } from '@/components/analise/AnaliseMovimenta
 import { Text } from '@/components/ui/AppText';
 import { colors, darkColors } from '@/theme/colors';
 import { useAnaliseViewModel } from '@/viewmodels/useAnaliseViewModel';
+import { useSpendingAlertsViewModel } from '@/viewmodels/useSpendingAlertsViewModel';
 
 /** VIEW - aba Análise: Transações, gastos por categoria e alerta. */
 export default function AnaliseScreen() {
   const viewModel = useAnaliseViewModel();
+  const spendingAlerts = useSpendingAlertsViewModel();
   const [movementsModalOpen, setMovementsModalOpen] = useState(false);
 
   return (
@@ -30,15 +32,18 @@ export default function AnaliseScreen() {
         contentContainerStyle={styles.content}
         refreshControl={
           <RefreshControl
-            onRefresh={viewModel.refresh}
-            refreshing={viewModel.refreshing}
+            onRefresh={() => {
+              viewModel.refresh();
+              spendingAlerts.refresh();
+            }}
+            refreshing={viewModel.refreshing || spendingAlerts.refreshing}
             tintColor={darkColors.textMuted}
           />
         }
         showsVerticalScrollIndicator={false}
       >
         <AnaliseHeader />
-        <AnaliseAlerta />
+        <AnaliseAlerta alert={spendingAlerts.alert} />
         {viewModel.status === 'loading' ? <LoadingState /> : null}
         {viewModel.status === 'error' ? <ErrorState onRetry={viewModel.retry} /> : null}
         {viewModel.status === 'sessionExpired' ? <SessionExpiredState /> : null}

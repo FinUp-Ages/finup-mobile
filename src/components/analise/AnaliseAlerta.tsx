@@ -3,14 +3,18 @@ import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
 import { Text } from '@/components/ui/AppText';
 import { AlertIcon } from '@/components/ui/AlertIcon';
 import { darkColors } from '@/theme/colors';
+import type { SpendingAlert } from '@/types/spendingAlert';
+import { formatAmount } from '@/utils/masks';
 
-const ALERTA_MENSAGEM =
-  'R$ 3.000,00 em apostas esse mês. Esse dinheiro guardado renderia R$ 4.831,53 em 5 anos guardando a 10% a.a. Tigrinho não é investimento.';
-
-/** Conteúdo temporariamente estático até a equipe definir a origem e a regra do alerta. */
-export function AnaliseAlerta() {
+/** Card de alerta C1. Recebe dados prontos para não conhecer API nem regras de risco. */
+export function AnaliseAlerta({ alert }: { alert: SpendingAlert | null }) {
   const [expanded, setExpanded] = useState(false);
   const [expansion] = useState(() => new Animated.Value(0));
+  if (!alert) return null;
+
+  const projectionMessage = `Se esse valor fosse investido, poderia chegar a ${formatAmount(
+    alert.projection.futureValue,
+  )} em ${alert.projection.years} anos, a ${alert.projection.annualRatePct}% ao ano.`;
   const messageMargin = expansion.interpolate({ inputRange: [0, 1], outputRange: [0, 6] });
   const messageMaxHeight = expansion.interpolate({ inputRange: [0, 1], outputRange: [0, 300] });
 
@@ -28,7 +32,7 @@ export function AnaliseAlerta() {
   return (
     <Pressable
       accessibilityHint={expanded ? 'Toque para recolher o alerta' : 'Toque para expandir o alerta'}
-      accessibilityLabel={`Atenção sobre BETS. ${expanded ? ALERTA_MENSAGEM : ''}`}
+      accessibilityLabel={`Atenção sobre ${alert.categoryName}. ${expanded ? `${alert.message} ${projectionMessage}` : ''}`}
       accessibilityRole="button"
       accessibilityState={{ expanded }}
       onPress={toggleExpanded}
@@ -41,7 +45,7 @@ export function AnaliseAlerta() {
           </View>
           <Text style={styles.titleText}>Atenção!</Text>
         </View>
-        <Text style={styles.category}>BETS</Text>
+        <Text style={styles.category}>{alert.riskKind}</Text>
       </View>
       <Animated.View
         style={[
@@ -49,7 +53,8 @@ export function AnaliseAlerta() {
           { marginTop: messageMargin, maxHeight: messageMaxHeight, opacity: expansion },
         ]}
       >
-        <Text style={styles.message}>{ALERTA_MENSAGEM}</Text>
+        <Text style={styles.message}>{alert.message}</Text>
+        <Text style={styles.message}>{projectionMessage}</Text>
       </Animated.View>
     </Pressable>
   );
@@ -92,7 +97,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.24,
     lineHeight: 20,
   },
-  messageContainer: { overflow: 'hidden' },
+  messageContainer: { gap: 6, overflow: 'hidden' },
   pressed: { opacity: 0.8 },
   title: { alignItems: 'center', flexDirection: 'row', gap: 12 },
   titleText: {

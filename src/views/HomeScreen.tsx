@@ -5,10 +5,12 @@ import { BalanceCard } from '@/components/home/BalanceCard';
 import { ExpenseList } from '@/components/home/ExpenseList';
 import { HomeHeader } from '@/components/home/HomeHeader';
 import { ScoreBannerCard } from '@/components/home/ScoreBannerCard';
+import { SpendingAlertPopup } from '@/components/home/SpendingAlertPopup';
 import { TypeFilterPills } from '@/components/home/TypeFilterPills';
 import { Text } from '@/components/ui/AppText';
 import { darkColors } from '@/theme/colors';
 import { useHomeViewModel } from '@/viewmodels/useHomeViewModel';
+import { useSpendingAlertPopupViewModel } from '@/viewmodels/useSpendingAlertPopupViewModel';
 
 /**
  * VIEW - Home do FinUp (ver Figma).
@@ -38,6 +40,7 @@ export default function HomeScreen() {
     retry,
     refresh,
   } = useHomeViewModel();
+  const spendingAlertPopup = useSpendingAlertPopupViewModel();
 
   const sectionTitle =
     typeFilter === 'INCOME' ? 'Entradas' : typeFilter === 'EXPENSE' ? 'Gastos' : 'Movimentações';
@@ -91,6 +94,11 @@ export default function HomeScreen() {
           />
         </View>
       </ScrollView>
+      <SpendingAlertPopup
+        alert={spendingAlertPopup.alert}
+        onDismiss={() => void spendingAlertPopup.dismiss()}
+        visible={spendingAlertPopup.visible}
+      />
     </SafeAreaView>
   );
 }
