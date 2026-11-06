@@ -17,7 +17,6 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.screen}>
-      <Text style={styles.heading}>Perfil</Text>
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Perfil de investidor</Text>
         {loading ? <ActivityIndicator color={colors.navy} /> : loadError ? <>
@@ -58,8 +57,9 @@ const styles = StyleSheet.create({
   screen: {
     backgroundColor: '#f8fafc',
     flex: 1,
+    marginTop: 56,
     paddingHorizontal: 20,
-    paddingTop: 16,
+    paddingTop: 46,
   },
   signOutButton: {
     alignSelf: 'flex-start',
