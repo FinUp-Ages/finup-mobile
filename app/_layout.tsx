@@ -41,6 +41,7 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" />
         {/* Fora da barra de abas: abrem por cima, com cabecalho e voltar. */}
         <Stack.Screen name="profile" options={{ headerShown: true, title: 'Perfil' }} />
+        <Stack.Screen name="triage" options={{ gestureEnabled: false }} />
         <Stack.Screen name="transcricao" options={{ headerShown: true, title: 'Transcrição' }} />
       </Stack>
     </SafeAreaProvider>

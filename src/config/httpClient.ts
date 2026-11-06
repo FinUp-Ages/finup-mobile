@@ -18,26 +18,32 @@ const baseURL = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
 const REQUEST_TIMEOUT_MS = 15000;
 
 export class HttpError extends Error {
+  readonly fields: { field: string; message: string }[];
   readonly status: number;
   /** `detail` do problem+json do back, quando vier: texto ja escrito para o usuario. */
   readonly detail: string | null;
 
-  constructor(status: number, message: string, detail: string | null = null) {
+  constructor(status: number, message: string, detail: string | null = null, fields: { field: string; message: string }[] = []) {
     super(message);
     this.name = 'HttpError';
     this.status = status;
     this.detail = detail;
+    this.fields = fields;
   }
 }
 
 // O back responde erro em problem+json ({ title, status, detail }). Corpo vazio
 // ou fora desse formato vira null: quem chama cai na propria mensagem.
-async function readProblemDetail(response: Response): Promise<string | null> {
+async function readProblemDetail(response: Response): Promise<{ detail: string | null; fields: { field: string; message: string }[] }> {
   try {
-    const body = (await response.json()) as { detail?: unknown };
-    return typeof body.detail === 'string' && body.detail.trim() ? body.detail.trim() : null;
+    const body = (await response.json()) as { detail?: unknown; fields?: unknown };
+    return {
+      detail: typeof body.detail === 'string' && body.detail.trim() ? body.detail.trim() : null,
+      fields: Array.isArray(body.fields) ? body.fields.filter((item): item is { field: string; message: string } =>
+        item !== null && typeof item === 'object' && typeof item.field === 'string' && typeof item.message === 'string') : [],
+    };
   } catch {
-    return null;
+    return { detail: null, fields: [] };
   }
 }
 
@@ -104,7 +110,8 @@ async function request<T>(
   }
 
   if (!response.ok) {
-    throw new HttpError(response.status, `Falha na requisicao: ${response.status}`, await readProblemDetail(response));
+    const problem = await readProblemDetail(response);
+    throw new HttpError(response.status, `Falha na requisicao: ${response.status}`, problem.detail, problem.fields);
   }
 
   if (response.status === 204) {

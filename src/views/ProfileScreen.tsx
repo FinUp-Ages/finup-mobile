@@ -1,23 +1,35 @@
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { Text } from '@/components/ui/AppText';
 import { useProfileViewModel } from '@/viewmodels/useProfileViewModel';
+import { PrimaryButton } from '@/components/ui/PrimaryButton';
+import { colors } from '@/theme/colors';
+import { investorProfileLabels } from '@/types/triage';
 
 /**
  * VIEW - tela de perfil do usuario final.
  *
  * A rota que aponta para esta tela e app/profile.tsx (fora da barra de abas).
  *
- * TODO: implementar em tarefa futura - dados reais do perfil.
+ * Consulta a avaliação da triagem e abre o questionário fora da barra de abas.
  */
 export default function ProfileScreen() {
-  const { signingOut, signOut } = useProfileViewModel();
+  const { signingOut, signOut, assessment, loading, loadError, retry, openTriage } = useProfileViewModel();
 
   return (
     <View style={styles.screen}>
       <Text style={styles.heading}>Perfil</Text>
-      <Text style={styles.subtitle}>
-        Tela de exemplo. A logica visual mora em views/, nunca em app/.
-      </Text>
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Perfil de investidor</Text>
+        {loading ? <ActivityIndicator color={colors.navy} /> : loadError ? <>
+          <Text style={styles.subtitle}>Não foi possível consultar seu perfil.</Text>
+          <PrimaryButton label="Tentar novamente" onPress={retry} />
+        </> : <>
+          <Text style={styles.subtitle}>{assessment
+            ? `Seu perfil é ${investorProfileLabels[assessment.assessment.profile].toLowerCase()}. Consulte sua avaliação ou atualize suas respostas.`
+            : 'Conheça seu perfil e receba orientações a partir da sua realidade financeira.'}</Text>
+          <PrimaryButton label={assessment ? 'Ver meu perfil de investidor' : 'Fazer perfil de investidor'} onPress={openTriage} />
+        </>}
+      </View>
 
       <Pressable
         accessibilityRole="button"
@@ -36,6 +48,8 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
+  card: { backgroundColor: colors.white, borderRadius: 16, padding: 20, gap: 16, marginTop: 24 },
+  cardTitle: { color: colors.navy, fontSize: 20, fontWeight: '600' },
   heading: {
     color: '#0f172a',
     fontSize: 24,
