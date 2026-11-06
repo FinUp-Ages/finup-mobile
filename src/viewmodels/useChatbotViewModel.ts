@@ -81,20 +81,10 @@ export function useChatbotViewModel() {
     onRecorded: (text, recording) => sendVoiceMessage(text, recording),
   });
 
-  // Aberto pelo widget (`/chatbot?modo=...`): "texto" pede foco no campo e "voz"
-  // ja comeca a gravar. O parametro e limpo em seguida, para o proximo toque no
-  // widget (mesmo modo) ser percebido de novo.
   const router = useRouter();
   const { modo } = useLocalSearchParams<{ modo?: string }>();
   const [inputFocusRequest, setInputFocusRequest] = useState(0);
   const startVoice = voice.start;
-
-  useEffect(() => {
-    if (!isChatbotLaunchMode(modo)) return;
-    router.setParams({ modo: undefined });
-    if (modo === 'voz') void startVoice({ handsFree: true });
-    else setInputFocusRequest((current) => current + 1);
-  }, [modo, router, startVoice]);
 
   useEffect(() => {
     let active = true;
@@ -186,6 +176,18 @@ export function useChatbotViewModel() {
     setMessagesError(null);
     setIsLoadingMessages(false);
   }, [isSending]);
+
+  // Aberto pelo widget (`/chatbot?modo=...`): sempre numa conversa nova, como o
+  // "Nova conversa" do menu; "texto" pede foco no campo e "voz" ja comeca a
+  // gravar. O parametro e limpo em seguida, para o proximo toque no widget (mesmo
+  // modo) ser percebido de novo.
+  useEffect(() => {
+    if (!isChatbotLaunchMode(modo)) return;
+    router.setParams({ modo: undefined });
+    newConversation();
+    if (modo === 'voz') void startVoice({ handsFree: true });
+    else setInputFocusRequest((current) => current + 1);
+  }, [modo, newConversation, router, startVoice]);
 
   // Envia uma mensagem do usuario que ja esta na lista, na conversa aberta.
   const deliver = useCallback(

@@ -5,6 +5,7 @@ import { useFonts } from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { setSessionExpiredHandler } from '@/config/httpClient';
 import { interFonts } from '@/theme/fonts';
+import { useRegistroGastosWidgetRefresh } from '@/widgets/refreshRegistroGastosWidget';
 
 /**
  * Rota raiz do Expo Router.
@@ -22,6 +23,8 @@ import { interFonts } from '@/theme/fonts';
 export default function RootLayout() {
   const router = useRouter();
   const [fontsLoaded, fontError] = useFonts(interFonts);
+  // Widget da tela inicial (Android): saudacao e gastos atualizados com o app.
+  useRegistroGastosWidgetRefresh();
 
   useEffect(() => {
     setSessionExpiredHandler(() => router.replace('/(auth)'));
