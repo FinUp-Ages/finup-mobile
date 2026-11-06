@@ -1,6 +1,6 @@
 ﻿{
     "stage":  "REVIEWING",
-    "task":  "Investor profile triage from Profile",
+    "task":  "Fix triage hook lint diagnostics",
     "objective":  "Complete or retake the authenticated backend questionnaire after account creation.",
     "requirements":  [
                          "Render API question metadata and conditions",
@@ -35,10 +35,10 @@
                            "docs/triage.md"
                        ],
     "plan":  [
-                 "Inspect Figma and backend",
-                 "Add typed model and validation",
-                 "Build sheet and Profile entry",
-                 "Validate and review diff"
+                 "Replace artificial Profile retry dependency with a reload callback guarded against stale responses",
+                 "Keep synchronous triage loading resets in the retry event handler",
+                 "Destructure close for the Android back subscription",
+                 "Run available checks and review the scoped diff"
              ],
     "decisions":  [
                       "Backend has 27 questions and recalculates score inside POST transaction",
@@ -46,12 +46,12 @@
                   ],
     "validation":  {
                        "questionnaire_tests":  "5 passed via Node native TypeScript stripping and temporary module resolver",
-                       "syntax":  "All 13 changed TS/TSX files parsed successfully with Babel",
-                       "diff":  "git diff --check passed; reviewed existing-file diff and new files",
-                       "lint_typecheck_suite":  "Attempted npm run lint, npm run typecheck and npm test; tools unavailable because node_modules was absent. npm ci failed with registry EACCES, offline retry failed ENOTCACHED.",
+                       "syntax":  "All 3 changed TS/TSX files parsed successfully with Babel",
+                       "diff":  "git diff --check passed; reviewed all three hook fixes",
+                       "lint_typecheck_suite":  "Retried npm run lint and npm run typecheck; eslint and tsc remain unavailable because dependencies are not installed. Five questionnaire tests passed via Node.",
                        "device":  "Not verified: dependencies could not be installed, so Expo preview and authenticated end-to-end flow remain pending",
                        "backend":  "Read controller, DTOs, questionnaire, validator and service; no backend changes"
                    },
     "updated_at":  "2026-11-06",
-    "review":  "Implementation ready for review. Pending dependency-based checks and device verification; no commit created."
+    "review":  "Three reported hook diagnostics addressed without rule suppressions. Pending CI lint/typecheck verification because local dependencies are unavailable."
 }

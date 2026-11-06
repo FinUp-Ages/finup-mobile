@@ -1,5 +1,5 @@
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { authModel } from '@/models/authModel';
 import { triageModel } from '@/models/triageModel';
 import type { AssessmentResponse } from '@/types/triage';
@@ -17,21 +17,26 @@ export function useProfileViewModel() {
   const [assessment, setAssessment] = useState<AssessmentResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
-  const [retry, setRetry] = useState(0);
+  const requestId = useRef(0);
 
-  useFocusEffect(useCallback(() => {
-    let active = true;
+  const load = useCallback(async () => {
+    const currentRequest = ++requestId.current;
     setLoading(true);
     setLoadError(false);
-    void triageModel.getAssessment().then((result) => {
-      if (active) setAssessment(result);
-    }).catch(() => {
-      if (active) setLoadError(true);
-    }).finally(() => {
-      if (active) setLoading(false);
-    });
-    return () => { active = false; };
-  }, [retry]));
+    try {
+      const result = await triageModel.getAssessment();
+      if (currentRequest === requestId.current) setAssessment(result);
+    } catch {
+      if (currentRequest === requestId.current) setLoadError(true);
+    } finally {
+      if (currentRequest === requestId.current) setLoading(false);
+    }
+  }, []);
+
+  useFocusEffect(useCallback(() => {
+    void load();
+    return () => { requestId.current += 1; };
+  }, [load]));
 
   const signOut = useCallback(async () => {
     setSigningOut(true);
@@ -45,7 +50,7 @@ export function useProfileViewModel() {
 
   return {
     signingOut, signOut, assessment, loading, loadError,
-    retry: () => setRetry((previous) => previous + 1),
+    retry: load,
     openTriage: () => router.push('/triage'),
   };
 }

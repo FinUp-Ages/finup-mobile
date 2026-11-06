@@ -14,10 +14,11 @@ import { useTriageViewModel } from '@/viewmodels/useTriageViewModel';
 
 export default function TriageScreen() {
   const vm = useTriageViewModel();
+  const { close } = vm;
   useFocusEffect(useCallback(() => {
-    const subscription = BackHandler.addEventListener('hardwareBackPress', () => { vm.close(); return true; });
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => { close(); return true; });
     return () => subscription.remove();
-  }, [vm.close]));
+  }, [close]));
   const form = vm.status === 'form';
   return <SafeAreaView style={styles.screen} edges={['top']}>
     <StatusBar style="light" />

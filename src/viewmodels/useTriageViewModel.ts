@@ -19,9 +19,9 @@ export function useTriageViewModel() {
   const busy = useRef(false);
   const alive = useRef(true);
   const dirty = useRef(false);
+  // Initial state already represents loading. Only async request results update
+  // state here, so the mounting effect does not trigger a synchronous render.
   const load = useCallback(async () => {
-    setStatus('loading');
-    setNotice(null);
     try {
       const [questions, saved, result] = await Promise.all([
         triageModel.getQuestions(), triageModel.getAnswers(), triageModel.getAssessment(),
@@ -114,7 +114,12 @@ export function useTriageViewModel() {
   };
   return {
     status, current, answers, assessment, index, total: questions.length, errors, notice, submitting,
-    load, close, setAnswer, next,
+    load: () => {
+      setStatus('loading');
+      setNotice(null);
+      void load();
+    },
+    close, setAnswer, next,
     back: () => { if (!busy.current) setIndex((previous) => Math.max(0, previous - 1)); },
     retake: () => { setIndex(0); setNotice(null); setErrors({}); setStatus('form'); },
   };
