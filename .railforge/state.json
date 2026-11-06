@@ -1,5 +1,5 @@
 {
-  "stage": "VALIDATING",
+  "stage": "REVIEWING",
   "task": "[ Mobile ] - Widget (ClickUp 1dfcuabc1av)",
   "objective": "Widget do FinUp na tela inicial do Android para registrar gastos por texto ou voz, no estilo da barra de pesquisa do Google: o widget nao recebe digitacao, cada area abre o Chatbot ja pronto para escrever ou falar.",
   "requirements": [
@@ -73,11 +73,11 @@
     "tests": "2026-11-05: npm test 17/17 (inclui src/utils/widgetContent.test.ts).",
     "device": "2026-11-05: APK de desenvolvimento EAS no Android do usuario; login e widget testados. Layout C pendente de conferencia no aparelho."
   },
-  "review": "",
-  "updated_at": "2026-11-05",
+  "review": "PR #25 (feat/widget-registro-gastos -> develop) aberto em 2026-11-06 com video do widget no Android; aguardando revisao do time.",
+  "updated_at": "2026-11-06",
   "next_steps": [
-    "Conferir no aparelho o layout C (saudacao, gastos, dica e microfone dentro do campo) e a atualizacao apos registrar um gasto no chat",
-    "Decidir o que do ambiente EAS entra no repo e commitar"
+    "Revisao do PR #25 pelo time",
+    "Combinar o projeto EAS da org (eas.json e extra.eas.projectId ficaram fora do PR)"
   ],
   "pending_decisions": [
     "`eas.json`, `expo-dev-client` e `extra.eas.projectId` (conta pessoal marcolaimer) entram no repo ou vao para um projeto EAS da org do time?"
