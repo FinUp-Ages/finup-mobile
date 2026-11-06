@@ -35,10 +35,9 @@
                            "docs/triage.md"
                        ],
     "plan":  [
-                 "Replace artificial Profile retry dependency with a reload callback guarded against stale responses",
-                 "Keep synchronous triage loading resets in the retry event handler",
-                 "Destructure close for the Android back subscription",
-                 "Run available checks and review the scoped diff"
+                 "Move request-only triage fetching outside the hook",
+                 "Apply results only from Promise callbacks with unmount and Strict Mode cleanup guards",
+                 "Run available checks and inspect the diff"
              ],
     "decisions":  [
                       "Backend has 27 questions and recalculates score inside POST transaction",
@@ -46,12 +45,12 @@
                   ],
     "validation":  {
                        "questionnaire_tests":  "5 passed via Node native TypeScript stripping and temporary module resolver",
-                       "syntax":  "All 3 changed TS/TSX files parsed successfully with Babel",
-                       "diff":  "git diff --check passed; reviewed all three hook fixes",
+                       "syntax":  "Changed useTriageViewModel.ts parsed successfully with Babel; five questionnaire tests passed via Node",
+                       "diff":  "git diff --check passed; reviewed request-only fetch, Promise callbacks, retry, and unmount guards",
                        "lint_typecheck_suite":  "Retried npm run lint and npm run typecheck; eslint and tsc remain unavailable because dependencies are not installed. Five questionnaire tests passed via Node.",
                        "device":  "Not verified: dependencies could not be installed, so Expo preview and authenticated end-to-end flow remain pending",
                        "backend":  "Read controller, DTOs, questionnaire, validator and service; no backend changes"
                    },
     "updated_at":  "2026-11-06",
-    "review":  "Three reported hook diagnostics addressed without rule suppressions. Pending CI lint/typecheck verification because local dependencies are unavailable."
+    "review":  "Removed the effect call to a state-updating load function. Effect now starts a request-only function and applies state in Promise callbacks. ESLint execution remains unavailable locally (eslint not installed); CI confirmation pending."
 }

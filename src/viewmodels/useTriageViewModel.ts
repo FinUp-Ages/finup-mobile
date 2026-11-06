@@ -6,6 +6,15 @@ import { triageModel } from '@/models/triageModel';
 import type { Answer, Answers, AssessmentResponse, Questionnaire } from '@/types/triage';
 import { answerError, compatibleAnswers, submissionAnswers, visibleQuestions } from '@/utils/triage';
 
+// Request-only function: it never reads or updates React state.
+async function fetchTriageData() {
+  const [questions, saved, result] = await Promise.all([
+    triageModel.getQuestions(), triageModel.getAnswers(), triageModel.getAssessment(),
+  ]);
+  if (!questions.questions.length) throw new Error('Questionnaire unavailable');
+  return { questions, saved, result };
+}
+
 export function useTriageViewModel() {
   const router = useRouter();
   const [questionnaire, setQuestionnaire] = useState<Questionnaire | null>(null);
@@ -19,31 +28,29 @@ export function useTriageViewModel() {
   const busy = useRef(false);
   const alive = useRef(true);
   const dirty = useRef(false);
-  // Initial state already represents loading. Only async request results update
-  // state here, so the mounting effect does not trigger a synchronous render.
-  const load = useCallback(async () => {
-    try {
-      const [questions, saved, result] = await Promise.all([
-        triageModel.getQuestions(), triageModel.getAnswers(), triageModel.getAssessment(),
-      ]);
-      if (!alive.current) return;
-      if (!questions.questions.length) throw new Error('Questionnaire unavailable');
-      setQuestionnaire(questions);
-      setAnswers(compatibleAnswers(questions.questions, saved?.answers ?? {}));
-      setAssessment(result);
-      setIndex(0);
-      setErrors({});
-      setStatus(result ? 'assessment' : 'form');
-      if (saved && saved.version !== questions.version) setNotice('O questionário foi atualizado. Revise suas respostas.');
-    } catch {
-      if (alive.current) setStatus('error');
-    }
+  const applyLoadedData = useCallback(({ questions, saved, result }: Awaited<ReturnType<typeof fetchTriageData>>) => {
+    if (!alive.current) return;
+    setQuestionnaire(questions);
+    setAnswers(compatibleAnswers(questions.questions, saved?.answers ?? {}));
+    setAssessment(result);
+    setIndex(0);
+    setErrors({});
+    setStatus(result ? 'assessment' : 'form');
+    if (saved && saved.version !== questions.version) setNotice('O questionário foi atualizado. Revise suas respostas.');
   }, []);
   useEffect(() => {
+    let active = true;
     alive.current = true;
-    void load();
-    return () => { alive.current = false; };
-  }, [load]);
+    void fetchTriageData().then((data) => {
+      if (active) applyLoadedData(data);
+    }).catch(() => {
+      if (active) setStatus('error');
+    });
+    return () => {
+      active = false;
+      alive.current = false;
+    };
+  }, [applyLoadedData]);
 
   const questions = visibleQuestions(questionnaire?.questions ?? [], answers);
   const current = questions[index];
@@ -117,7 +124,9 @@ export function useTriageViewModel() {
     load: () => {
       setStatus('loading');
       setNotice(null);
-      void load();
+      void fetchTriageData().then(applyLoadedData).catch(() => {
+        if (alive.current) setStatus('error');
+      });
     },
     close, setAnswer, next,
     back: () => { if (!busy.current) setIndex((previous) => Math.max(0, previous - 1)); },
