@@ -12,18 +12,25 @@ import { darkColors } from '@/theme/colors';
  * o detalhe do FinUp Score).
  */
 type HomeHeaderProps = {
+  onPressProfile: () => void;
   userName: string | null;
   score: string;
   onPressScore: () => void;
 };
 
-export function HomeHeader({ userName, score, onPressScore }: HomeHeaderProps) {
+export function HomeHeader({ onPressProfile, userName, score, onPressScore }: HomeHeaderProps) {
   return (
     <View style={styles.container}>
       <View style={styles.identity}>
-        <View style={styles.avatar}>
+        <Pressable
+          accessibilityLabel="Abrir perfil"
+          accessibilityRole="button"
+          hitSlop={8}
+          onPress={onPressProfile}
+          style={({ pressed }) => [styles.avatar, pressed ? styles.avatarPressed : null]}
+        >
           <Feather color={darkColors.textMuted} name="user" size={20} />
-        </View>
+        </Pressable>
         <View>
           <Text style={styles.eyebrow}>Sua conta</Text>
           <Text style={styles.greeting}>{userName ? `Olá, ${userName}!` : 'Olá!'}</Text>
@@ -49,6 +56,9 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
     width: 40,
+  },
+  avatarPressed: {
+    opacity: 0.8,
   },
   container: {
     alignItems: 'center',
