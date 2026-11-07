@@ -1,9 +1,10 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { HttpError } from '@/config/httpClient';
 import { authErrorMessage, authModel, type AuthOperation } from '@/models/authModel';
 import { toAdditionalInfo, toSignUpInput } from '@/models/cadastroModel';
 import { userModel } from '@/models/userModel';
+import { widgetLaunchModel } from '@/models/widgetLaunchModel';
 import type {
   CadastroFormData,
   CadastroFormErrors,
@@ -146,6 +147,13 @@ export function useCadastroViewModel({ resume = false }: { resume?: boolean } = 
   const router = useRouter();
   const firstStep: CadastroStep = resume ? 2 : 1;
   const lastStep: CadastroStep = resume ? 2 : 3;
+
+  // Um toque no widget sem sessao guarda o chat para depois do login. Quem vem
+  // para o cadastro desistiu desse caminho: o chat (e a gravacao, no modo voz)
+  // nao pode abrir sozinho num login posterior.
+  useEffect(() => {
+    widgetLaunchModel.discardPending();
+  }, []);
 
   const [step, setStep] = useState<CadastroStep>(firstStep);
   const [data, setData] = useState<CadastroFormData>(INITIAL_DATA);

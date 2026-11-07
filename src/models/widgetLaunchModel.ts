@@ -43,4 +43,8 @@ export const widgetLaunchModel = {
     pendingRoute = null;
     return route;
   },
+  /** Esquece a rota guardada (a pessoa seguiu para o cadastro em vez do login). */
+  discardPending(): void {
+    pendingRoute = null;
+  },
 };

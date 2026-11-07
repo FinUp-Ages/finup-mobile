@@ -26,6 +26,13 @@ import type { VoiceRecording, VoiceStatus } from '@/types/chatbot';
 interface UseVoiceDictationOptions {
   /** Gravacao concluida com fala: texto ja sem espacos nas pontas. */
   onRecorded: (text: string, recording: VoiceRecording) => void;
+  /**
+   * Gravacao do widget (`handsFree`) que o reconhecedor encerrou sozinho, sem o
+   * toque em enviar: no Android 12 ou anterior o modo continuo nao existe e a
+   * captura para no silencio. O texto nao e enviado; quem chama o deixa para a
+   * pessoa revisar e enviar.
+   */
+  onEndedWithoutSend?: (text: string) => void;
 }
 
 /** Barras da forma de onda guardadas para a animacao da mensagem. */
@@ -71,7 +78,7 @@ function toWaveform(samples: number[]): number[] {
   });
 }
 
-export function useVoiceDictationViewModel({ onRecorded }: UseVoiceDictationOptions) {
+export function useVoiceDictationViewModel({ onEndedWithoutSend, onRecorded }: UseVoiceDictationOptions) {
   const [status, setStatus] = useState<VoiceStatus>('idle');
   const [message, setMessage] = useState<string | null>(null);
   /** Inicio da gravacao (epoch ms), para o cronometro do composer. */
@@ -87,6 +94,9 @@ export function useVoiceDictationViewModel({ onRecorded }: UseVoiceDictationOpti
   const cancelledBeforeStart = useRef(false);
   const discarded = useRef(false);
   const failed = useRef(false);
+  /** Sessao aberta pelo widget: so envia com o toque em enviar (`stop`). */
+  const handsFreeSession = useRef(false);
+  const stopRequested = useRef(false);
   /** No modo continuo, cada trecho da fala chega como um resultado final. */
   const finalSegments = useRef<string[]>([]);
   const lastPartial = useRef('');
@@ -135,7 +145,10 @@ export function useVoiceDictationViewModel({ onRecorded }: UseVoiceDictationOpti
       // Soltar o microfone logo depois de falar pode encerrar sem o resultado
       // final do ultimo trecho: o parcial dele ainda vale.
       const text = [...finalSegments.current, lastPartial.current].filter(Boolean).join(' ').trim();
-      if (text) {
+      if (text && handsFreeSession.current && !stopRequested.current) {
+        // Parou sozinho (Android 12 ou anterior): sem o toque em enviar, nao envia.
+        onEndedWithoutSend?.(text);
+      } else if (text) {
         onRecorded(text, { levels: toWaveform(volumeSamples.current) });
       } else {
         setMessage(handsFree ? NO_SPEECH_HANDS_FREE_MESSAGE : NO_SPEECH_MESSAGE);
@@ -193,6 +206,8 @@ export function useVoiceDictationViewModel({ onRecorded }: UseVoiceDictationOpti
     ownsSession.current = true;
     discarded.current = false;
     failed.current = false;
+    handsFreeSession.current = options?.handsFree ?? false;
+    stopRequested.current = false;
     finalSegments.current = [];
     lastPartial.current = '';
     volumeSamples.current = [];
@@ -212,6 +227,7 @@ export function useVoiceDictationViewModel({ onRecorded }: UseVoiceDictationOpti
       cancelledBeforeStart.current = true;
       return;
     }
+    stopRequested.current = true;
     setStatus('processing');
     stopTranscription();
   }, []);

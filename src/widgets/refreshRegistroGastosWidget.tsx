@@ -1,18 +1,22 @@
 import { useEffect } from 'react';
-import { AppState, Platform } from 'react-native';
-import { requestWidgetUpdate } from 'react-native-android-widget';
+import { AppState } from 'react-native';
 import { transactionEvents } from '@/models/transactionEvents';
 import { widgetModel } from '@/models/widgetModel';
-import { REGISTRO_GASTOS_WIDGET_NAME, RegistroGastosWidget } from '@/widgets/RegistroGastosWidget';
+import { androidWidgetPackage } from '@/widgets/androidWidgetPackage';
 
 /**
  * Redesenha o widget da tela inicial com saudacao, gastos e dica atuais. Sem
  * widget na tela inicial o renderWidget nao e chamado e nada e buscado no back.
+ * Sem o modulo nativo (Expo Go, iOS) nao faz nada.
  */
 export async function refreshRegistroGastosWidget(): Promise<void> {
-  if (Platform.OS !== 'android') return;
+  if (!androidWidgetPackage) return;
   try {
-    await requestWidgetUpdate({
+    // O desenho importa o pacote do widget: so carrega com o modulo nativo presente.
+    const { REGISTRO_GASTOS_WIDGET_NAME, RegistroGastosWidget } =
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      require('@/widgets/RegistroGastosWidget') as typeof import('@/widgets/RegistroGastosWidget');
+    await androidWidgetPackage.requestWidgetUpdate({
       widgetName: REGISTRO_GASTOS_WIDGET_NAME,
       renderWidget: async ({ height }) => (
         <RegistroGastosWidget {...await widgetModel.loadContent()} height={height} />
