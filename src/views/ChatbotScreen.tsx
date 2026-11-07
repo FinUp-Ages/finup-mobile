@@ -10,6 +10,7 @@ import {
   ScrollView,
   StyleSheet,
   TouchableWithoutFeedback,
+  type ScrollViewInstance,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -41,7 +42,7 @@ const GRADIENT_COLORS = [
  */
 export default function ChatbotScreen() {
   const insets = useSafeAreaInsets();
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   const vm = useChatbotViewModel();
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const hasConversation = vm.hasConversation;
