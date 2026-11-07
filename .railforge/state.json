@@ -79,7 +79,7 @@
     "tests": "2026-11-07: npm test 24/24.",
     "device": "2026-11-07: development build do SDK 58 (EAS, variante FinUp Novo) no Galaxy A34: widget no layout C com saudacao e gastos do dia/mes; campo abre o chat com teclado; microfone abre gravando e so envia no enviar; logout com app aberto passa pelo login e segue para o chat; toque durante 'FinUp esta pensando...' abre a conversa nova so depois da resposta; cadastro apos tocar no widget nao abre o chat num login posterior. Tudo OK."
   },
-  "review": "PR #25 (feat/widget-registro-gastos -> develop): merge do SDK 58 e correcoes da revisao enviados em 2026-11-07; aguardando nova revisao do time.",
+  "review": "PR #25 (feat/widget-registro-gastos -> develop): merge do SDK 58, correcoes da revisao e merge da develop com #27/#29 enviados em 2026-11-07; aguardando nova revisao do time.",
   "updated_at": "2026-11-07",
   "next_steps": [
     "Revisao do PR #25 pelo time",
@@ -87,6 +87,6 @@
     "Combinar o projeto EAS da org (eas.json e extra.eas.projectId ficaram fora do PR)"
   ],
   "pending_decisions": [
-    "`eas.json`, `expo-dev-client` e `extra.eas.projectId` (conta pessoal marcolaimer) entram no repo ou vao para um projeto EAS da org do time?"
+    "Projeto EAS da org do time: quem cria e quando. Decidido em 2026-11-07 que o `eas.json`, o `app.config.js` e o `extra.eas.projectId` da conta pessoal (marcolaimer) nao entram no repo."
   ]
 }
