@@ -27,6 +27,7 @@ export default function HomeScreen() {
   const {
     status,
     userName,
+    score,
     balance,
     income,
     expense,
@@ -68,7 +69,7 @@ export default function HomeScreen() {
         <HomeHeader
           onPressProfile={() => router.navigate('/profile')}
           onPressScore={() => {}}
-          score="-"
+          score={score}
           userName={userName}
         />
 

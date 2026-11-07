@@ -6,7 +6,7 @@ import { BALANCE_FROM, transactionModel } from '@/models/transactionModel';
 import { userModel } from '@/models/userModel';
 import type { HomeStatus, TransactionTypeFilter } from '@/types/home';
 import type { Category, TransactionListResponse } from '@/types/transaction';
-import { firstName } from '@/utils/format';
+import { firstName, formatFinUpScore } from '@/utils/format';
 import { DEFAULT_HOME_PERIOD, homePeriodRange, type HomePeriodKey } from '@/utils/homePeriods';
 import { formatAmount } from '@/utils/masks';
 import {
@@ -19,7 +19,8 @@ type TransactionListItem = TransactionListResponse['transactions'][number];
 /**
  * VIEWMODEL - dados da Home.
  *
- *   GET /api/v1/users/me              -> nome da saudacao
+ *   GET /api/v1/users/me              -> nome da saudacao e FinUp Score (ultimo valor
+ *                                        calculado pelo back; "-" se ainda nao existe)
  *   GET /api/v1/transactions?from&to  -> entradas, saidas e movimentacoes do periodo; e
  *                                        de novo desde BALANCE_FROM para o saldo total
  *   GET /api/v1/categories            -> nome da categoria de cada transacao
@@ -35,6 +36,7 @@ const MAX_EXPENSES = 10;
 
 type HomeData = {
   userName: string;
+  finUpScore: number | null;
   balance: string;
   income: string;
   expense: string;
@@ -59,6 +61,7 @@ async function fetchHomeData(periodKey: HomePeriodKey): Promise<HomeData> {
 
   return {
     userName: firstName(user.name),
+    finUpScore: user.finUpScore ?? null,
     balance: formatAmount(total.balance),
     income: `+ ${formatAmount(sum('INCOME'))}`,
     expense: `- ${formatAmount(sum('EXPENSE'))}`,
@@ -123,6 +126,7 @@ export function useHomeViewModel() {
   return {
     status,
     userName: data?.userName ?? null,
+    score: formatFinUpScore(data?.finUpScore),
     balance: data?.balance ?? null,
     income: data?.income ?? null,
     expense: data?.expense ?? null,

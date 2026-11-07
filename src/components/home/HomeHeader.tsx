@@ -7,9 +7,9 @@ import { darkColors } from '@/theme/colors';
  * COMPONENT - cabecalho da Home: avatar + saudacao + badge de score.
  *
  * `userName` vem do GET /users/me (null enquanto carrega ou se falhar: a
- * saudacao fica so "Ola!"). `score` ainda e mockado - o GET /users/me nao
- * expoe o FinUp Score. `onPressScore` e ponto de integracao futuro (ex.: abrir
- * o detalhe do FinUp Score).
+ * saudacao fica so "Ola!"). `score` e o FinUp Score do GET /users/me ja
+ * formatado ("-" enquanto carrega, se falhar ou se ainda nao foi calculado).
+ * `onPressScore` e ponto de integracao futuro (ex.: abrir o detalhe do FinUp Score).
  */
 type HomeHeaderProps = {
   onPressProfile: () => void;
@@ -38,6 +38,8 @@ export function HomeHeader({ onPressProfile, userName, score, onPressScore }: Ho
       </View>
 
       <Pressable
+        accessibilityLabel={score === '-' ? 'FinUp Score indisponível' : `FinUp Score ${score}`}
+        accessibilityRole="button"
         onPress={onPressScore}
         style={({ pressed }) => [styles.scoreBadge, pressed ? styles.scoreBadgePressed : null]}
       >

@@ -1,56 +1,47 @@
 ﻿{
-    "stage":  "REVIEWING",
-    "task":  "Fix triage hook lint diagnostics",
-    "objective":  "Complete or retake the authenticated backend questionnaire after account creation.",
-    "requirements":  [
-                         "Render API question metadata and conditions",
-                         "Validate answers and server field errors",
-                         "Load assessment and prefill retakes",
-                         "No backend changes or answer logging"
-                     ],
-    "user_flow":  "Profile \u003e Perfil de investidor \u003e questionnaire \u003e assessment \u003e retake",
-    "states":  [
-                   "loading",
-                   "empty",
-                   "error with retry",
-                   "validation",
-                   "submitting",
-                   "version update",
-                   "assessment",
-                   "retake"
-               ],
-    "files_in_scope":  [
-                           "app/triage.tsx",
-                           "app/_layout.tsx",
-                           "src/types/triage.ts",
-                           "src/models/triageModel.ts",
-                           "src/utils/triage.ts",
-                           "src/utils/triage.test.ts",
-                           "src/viewmodels/useTriageViewModel.ts",
-                           "src/views/TriageScreen.tsx",
-                           "src/components/triage",
-                           "src/views/ProfileScreen.tsx",
-                           "src/viewmodels/useProfileViewModel.ts",
-                           "src/config/httpClient.ts",
-                           "docs/triage.md"
-                       ],
-    "plan":  [
-                 "Move request-only triage fetching outside the hook",
-                 "Apply results only from Promise callbacks with unmount and Strict Mode cleanup guards",
-                 "Run available checks and inspect the diff"
-             ],
-    "decisions":  [
-                      "Backend has 27 questions and recalculates score inside POST transaction",
-                      "Reuse cadastro components for the Figma white sheet and navy styling"
-                  ],
-    "validation":  {
-                       "questionnaire_tests":  "5 passed via Node native TypeScript stripping and temporary module resolver",
-                       "syntax":  "Changed useTriageViewModel.ts parsed successfully with Babel; five questionnaire tests passed via Node",
-                       "diff":  "git diff --check passed; reviewed request-only fetch, Promise callbacks, retry, and unmount guards",
-                       "lint_typecheck_suite":  "Retried npm run lint and npm run typecheck; eslint and tsc remain unavailable because dependencies are not installed. Five questionnaire tests passed via Node.",
-                       "device":  "Not verified: dependencies could not be installed, so Expo preview and authenticated end-to-end flow remain pending",
-                       "backend":  "Read controller, DTOs, questionnaire, validator and service; no backend changes"
-                   },
-    "updated_at":  "2026-11-06",
-    "review":  "Removed the effect call to a state-updating load function. Effect now starts a request-only function and applies state in Promise callbacks. ESLint execution remains unavailable locally (eslint not installed); CI confirmation pending."
+  "stage": "REVIEWING",
+  "task": "[Mobile] FinUp Score fixo em \"-\" na Home",
+  "objective": "O badge de score da Home era fixo (score=\"-\" no HomeScreen). Passa a exibir o finUpScore devolvido pelo GET /api/v1/users/me (backend: fix/finup-score-ausente-no-users-me).",
+  "requirements": [
+    "UserResponse ganha finUpScore opcional (o back omite o campo enquanto o score nunca foi calculado)",
+    "useHomeViewModel le o score do GET /users/me que a Home ja faz e expoe score formatado",
+    "Sem score, carregando, com erro ou valor fora de 0..1000: badge mostra \"-\"",
+    "Score atualiza ao voltar para a Home (foco), no pull-to-refresh e apos transacao no chat, como o resto da Home",
+    "Badge com accessibilityLabel"
+  ],
+  "user_flow": "Login > Home > badge 'Score' no cabecalho; Perfil > Perfil de investidor (triagem) recalcula no back > volta para a Home > badge mostra o novo valor",
+  "states": [
+    "loading: \"-\"",
+    "erro na carga inicial: \"-\" (card de saldo mostra o erro e o retry)",
+    "score ainda nao calculado: \"-\"",
+    "sucesso: valor de 0 a 1000"
+  ],
+  "files_in_scope": [
+    "src/models/userModel.ts",
+    "src/utils/format.ts",
+    "src/utils/format.test.ts",
+    "src/viewmodels/useHomeViewModel.ts",
+    "src/views/HomeScreen.tsx",
+    "src/components/home/HomeHeader.tsx"
+  ],
+  "decisions": [
+    "2026-11-06: ler o score do GET /users/me ja feito pela Home, sem chamar POST /finup-score/recalculate (que grava a cada abertura)"
+  ],
+  "non_goals": [
+    "Tela de detalhe do score (onPressScore segue sem acao)",
+    "Banner do score (ScoreBannerCard) e seu botao"
+  ],
+  "validation": {
+    "typecheck": "2026-11-06: tsc --noEmit com 1 erro preexistente na develop (ChatbotScreen.tsx: ScrollViewInstance), nenhum nos arquivos alterados",
+    "lint": "2026-11-06: eslint nos arquivos alterados sem erros",
+    "prettier": "2026-11-06: arquivos novos ok; useHomeViewModel.ts ja estava fora do prettier na develop (import de transactionFilters e chamada de processHomeTransactions), nao reformatado para nao sair do escopo",
+    "tests": "2026-11-06: npx tsx --test src/utils/*.test.ts 18/18 (inclui format.test.ts). npm test nao expande o glob no Windows (preexistente)",
+    "backend": "2026-11-06: contrato conferido contra o branch do back rodando localmente (finUpScore 696 apos recalculo; campo ausente sem score)",
+    "device": "Nao verificado no Expo Go: exige login real no Cognito"
+  },
+  "review": "pendente: revisao humana do diff e conferencia no Expo Go",
+  "updated_at": "2026-11-06",
+  "next_steps": [
+    "Fazer o merge do back (fix/finup-score-ausente-no-users-me) antes ou junto deste PR"
+  ]
 }
