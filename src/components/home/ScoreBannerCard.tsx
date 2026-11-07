@@ -9,17 +9,24 @@ import { colors, darkColors } from '@/theme/colors';
  *
  * Fundo em degrade radial (azul-claro no canto inferior esquerdo -> azul
  * profundo), medalha a direita (assets/home/score-medal.png, exportada do
- * Figma) e o botao "Adicionar agora". `onPressAdd` e ponto de integracao futuro.
+ * Figma) e o botao "Adicionar agora". O banner inteiro e a area de toque e chama
+ * `onPress` (a Home abre a triagem, base do calculo do FinUp Score).
  */
 type ScoreBannerCardProps = {
-  onPressAdd: () => void;
+  onPress: () => void;
 };
 
 const HEIGHT = 152;
 
-export function ScoreBannerCard({ onPressAdd }: ScoreBannerCardProps) {
+export function ScoreBannerCard({ onPress }: ScoreBannerCardProps) {
   return (
-    <View style={styles.card}>
+    <Pressable
+      accessibilityHint="Abre as perguntas usadas no cálculo do FinUp Score"
+      accessibilityLabel="Adicione suas informações e aumente seu score. Adicionar agora"
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [styles.card, pressed ? styles.cardPressed : null]}
+    >
       <Svg height="100%" style={StyleSheet.absoluteFill} width="100%">
         <Defs>
           <RadialGradient cx="0" cy="1" fx="0" fy="1" id="bannerGradient" rx="1" ry="1.4725">
@@ -45,16 +52,12 @@ export function ScoreBannerCard({ onPressAdd }: ScoreBannerCardProps) {
           <Text style={styles.title}>e aumente seu score</Text>
         </View>
 
-        <Pressable
-          accessibilityRole="button"
-          onPress={onPressAdd}
-          style={({ pressed }) => [styles.button, pressed ? styles.buttonPressed : null]}
-        >
+        <View style={styles.button}>
           <Text style={styles.buttonLabel}>Adicionar agora</Text>
           <Feather color={colors.navy} name="arrow-right" size={16} />
-        </Pressable>
+        </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -74,13 +77,13 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     letterSpacing: 0.32,
   },
-  buttonPressed: {
-    opacity: 0.7,
-  },
   card: {
     borderRadius: 10,
     height: HEIGHT,
     overflow: 'hidden',
+  },
+  cardPressed: {
+    opacity: 0.85,
   },
   content: {
     flex: 1,

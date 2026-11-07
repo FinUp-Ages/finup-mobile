@@ -1,20 +1,23 @@
 ﻿{
   "stage": "REVIEWING",
-  "task": "[Mobile] FinUp Score fixo em \"-\" na Home",
-  "objective": "O badge de score da Home era fixo (score=\"-\" no HomeScreen). Passa a exibir o finUpScore devolvido pelo GET /api/v1/users/me (backend: fix/finup-score-ausente-no-users-me).",
+  "task": "[Mobile] FinUp Score fixo em \"-\" na Home; banner do score abre a triagem",
+  "objective": "O badge de score da Home era fixo (score=\"-\" no HomeScreen). Passa a exibir o finUpScore (0 a 100) devolvido pelo GET /api/v1/users/me (backend: fix/finup-score-ausente-no-users-me). O banner 'Adicione suas informacoes e aumente seu score' passa a abrir a triagem, cujas respostas sao a base do calculo.",
   "requirements": [
     "UserResponse ganha finUpScore opcional (o back omite o campo enquanto o score nunca foi calculado)",
     "useHomeViewModel le o score do GET /users/me que a Home ja faz e expoe score formatado",
-    "Sem score, carregando, com erro ou valor fora de 0..1000: badge mostra \"-\"",
+    "Sem score, carregando, com erro ou valor fora de 0..100: badge mostra \"-\"",
     "Score atualiza ao voltar para a Home (foco), no pull-to-refresh e apos transacao no chat, como o resto da Home",
-    "Badge com accessibilityLabel"
+    "Badge com accessibilityLabel",
+    "Toque em qualquer ponto do banner do score (ScoreBannerCard) abre /triage, a mesma tela do Perfil > perfil de investidor"
   ],
-  "user_flow": "Login > Home > badge 'Score' no cabecalho; Perfil > Perfil de investidor (triagem) recalcula no back > volta para a Home > badge mostra o novo valor",
+  "user_flow": "Login > Home > banner 'Adicionar agora' > triagem > responder e enviar (o back recalcula o score) > voltar para a Home > badge 'Score' mostra o novo valor de 0 a 100",
   "states": [
     "loading: \"-\"",
     "erro na carga inicial: \"-\" (card de saldo mostra o erro e o retry)",
     "score ainda nao calculado: \"-\"",
-    "sucesso: valor de 0 a 1000"
+    "sucesso: valor de 0 a 100",
+    "valor fora da escala (ex.: score antigo 0 a 1000 nao convertido no banco): \"-\"",
+    "banner pressionado: opacidade reduzida"
   ],
   "files_in_scope": [
     "src/models/userModel.ts",
@@ -22,26 +25,29 @@
     "src/utils/format.test.ts",
     "src/viewmodels/useHomeViewModel.ts",
     "src/views/HomeScreen.tsx",
-    "src/components/home/HomeHeader.tsx"
+    "src/components/home/HomeHeader.tsx",
+    "src/components/home/ScoreBannerCard.tsx"
   ],
   "decisions": [
-    "2026-11-06: ler o score do GET /users/me ja feito pela Home, sem chamar POST /finup-score/recalculate (que grava a cada abertura)"
+    "2026-11-06: ler o score do GET /users/me ja feito pela Home, sem chamar POST /finup-score/recalculate (que grava a cada abertura)",
+    "2026-11-07: escala 0 a 100 (FIN_UP_SCORE_MAX), alinhada ao back",
+    "2026-11-07: o banner inteiro vira a area de toque (um unico botao acessivel); 'Adicionar agora' continua so como visual. Navegacao com router.push('/triage'), como no Perfil"
   ],
   "non_goals": [
-    "Tela de detalhe do score (onPressScore segue sem acao)",
-    "Banner do score (ScoreBannerCard) e seu botao"
+    "Tela de detalhe do score (onPressScore segue sem acao)"
   ],
   "validation": {
-    "typecheck": "2026-11-06: tsc --noEmit com 1 erro preexistente na develop (ChatbotScreen.tsx: ScrollViewInstance), nenhum nos arquivos alterados",
-    "lint": "2026-11-06: eslint nos arquivos alterados sem erros",
-    "prettier": "2026-11-06: arquivos novos ok; useHomeViewModel.ts ja estava fora do prettier na develop (import de transactionFilters e chamada de processHomeTransactions), nao reformatado para nao sair do escopo",
-    "tests": "2026-11-06: npx tsx --test src/utils/*.test.ts 18/18 (inclui format.test.ts). npm test nao expande o glob no Windows (preexistente)",
-    "backend": "2026-11-06: contrato conferido contra o branch do back rodando localmente (finUpScore 696 apos recalculo; campo ausente sem score)",
-    "device": "Nao verificado no Expo Go: exige login real no Cognito"
+    "typecheck": "2026-11-07: tsc --noEmit sem erros",
+    "lint": "2026-11-07: eslint nos arquivos alterados sem erros",
+    "prettier": "2026-11-07: arquivos alterados ok com --end-of-line auto (o checkout Windows usa CRLF por core.autocrlf; os arquivos ja commitados tambem acusam so isso)",
+    "tests": "2026-11-07: npx tsx --test src/utils/*.test.ts 18/18 (inclui format.test.ts com a escala 0 a 100). npm test nao expande o glob no Windows (preexistente)",
+    "backend": "2026-11-06: contrato conferido contra o branch do back rodando localmente (campo ausente sem score)",
+    "device": "2026-11-07: badge exibindo o score do back conferido no Expo Go pelo usuario (658, ainda na escala antiga). Navegacao do banner e escala 0 a 100 ainda nao verificadas no Expo Go"
   },
   "review": "pendente: revisao humana do diff e conferencia no Expo Go",
-  "updated_at": "2026-11-06",
+  "updated_at": "2026-11-07",
   "next_steps": [
-    "Fazer o merge do back (fix/finup-score-ausente-no-users-me) antes ou junto deste PR"
+    "Fazer o merge do back (fix/finup-score-ausente-no-users-me) antes ou junto deste PR",
+    "No banco local ja existente, aplicar database/migrations/08-finup-score-escala-0-100.sql do back"
   ]
 }
