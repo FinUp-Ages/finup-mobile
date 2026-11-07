@@ -1,7 +1,7 @@
 import type { TransactionType } from '@/types/transaction';
 
 export type AnaliseStatus = 'loading' | 'error' | 'sessionExpired' | 'success';
-export type AnalisePeriodKey = '7d' | '10d' | '20d';
+export type AnalisePeriodKey = '7d' | '15d' | '30d' | '3m' | '6m' | '12m';
 export type AnaliseTypeFilter = 'ALL' | TransactionType;
 export type AnaliseSortOrder = 'NEWEST' | 'HIGHEST_AMOUNT' | 'LOWEST_AMOUNT';
 

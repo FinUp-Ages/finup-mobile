@@ -96,6 +96,7 @@ export default function HomeScreen() {
             emptyMessage={emptyMessage}
             expenses={expenses}
             onPressIntegrate={() => {}}
+            onPressViewMore={() => router.navigate({ pathname: '/analise', params: { view: 'movements' } })}
             status={status}
           />
         </View>

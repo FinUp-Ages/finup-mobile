@@ -42,9 +42,10 @@
     "prettier": "2026-11-07: arquivos alterados ok com --end-of-line auto (o checkout Windows usa CRLF por core.autocrlf; os arquivos ja commitados tambem acusam so isso)",
     "tests": "2026-11-07: npx tsx --test src/utils/*.test.ts 18/18 (inclui format.test.ts com a escala 0 a 100). npm test nao expande o glob no Windows (preexistente)",
     "backend": "2026-11-06: contrato conferido contra o branch do back rodando localmente (campo ausente sem score)",
-    "device": "2026-11-07: badge exibindo o score do back conferido no Expo Go pelo usuario (658, ainda na escala antiga). Navegacao do banner e escala 0 a 100 ainda nao verificadas no Expo Go"
+    "device": "2026-11-07: conferido pelo usuario no Expo Go (iPhone): o banner abre a triagem e, com o back atualizado, o badge mostra o score de 0 a 100 (95). Android nao verificado",
+    "merge develop": "2026-11-07: origin/develop (#27) mesclada na branch; so o state.json conflitou e ficou com esta tarefa. tsc, eslint e 18/18 testes passam no resultado"
   },
-  "review": "pendente: revisao humana do diff e conferencia no Expo Go",
+  "review": "pendente: revisao humana do diff no PR",
   "updated_at": "2026-11-07",
   "next_steps": [
     "Fazer o merge do back (fix/finup-score-ausente-no-users-me) antes ou junto deste PR",
