@@ -1,4 +1,5 @@
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { IntegrateCardsCard } from '@/components/home/IntegrateCardsCard';
 import { Text } from '@/components/ui/AppText';
 import { darkColors } from '@/theme/colors';
@@ -8,6 +9,7 @@ type ExpenseListProps = {
   status: HomeStatus;
   expenses: HomeExpense[];
   onPressIntegrate: () => void;
+  onPressViewMore: () => void;
   emptyMessage?: string;
 };
 
@@ -15,6 +17,7 @@ export function ExpenseList({
   status,
   expenses,
   onPressIntegrate,
+  onPressViewMore,
   emptyMessage,
 }: ExpenseListProps) {
   if (status === 'loading') {
@@ -70,6 +73,16 @@ export function ExpenseList({
           </View>
         );
       })}
+      <Pressable
+        accessibilityLabel="Ver todas as transações"
+        accessibilityRole="button"
+        hitSlop={8}
+        onPress={onPressViewMore}
+        style={({ pressed }) => [styles.moreButton, pressed ? styles.moreButtonPressed : null]}
+      >
+        <Text style={styles.moreLabel}>Ver mais</Text>
+        <Feather color={darkColors.textPrimary} name="arrow-right" size={18} />
+      </Pressable>
     </View>
   );
 }
@@ -105,6 +118,15 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     textAlign: 'center',
   },
+  moreButton: {
+    alignItems: 'center',
+    alignSelf: 'flex-end',
+    flexDirection: 'row',
+    gap: 4,
+    paddingVertical: 12,
+  },
+  moreButtonPressed: { opacity: 0.7 },
+  moreLabel: { color: darkColors.textPrimary, fontSize: 14, fontWeight: '600' },
   row: {
     alignItems: 'center',
     flexDirection: 'row',

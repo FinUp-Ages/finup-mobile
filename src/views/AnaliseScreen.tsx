@@ -1,6 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   ActivityIndicator,
   Pressable,
@@ -21,9 +22,17 @@ import { useSpendingAlertsViewModel } from '@/viewmodels/useSpendingAlertsViewMo
 
 /** VIEW - aba Análise: Transações, gastos por categoria e alerta. */
 export default function AnaliseScreen() {
+  const { view } = useLocalSearchParams<{ view?: string }>();
+  const router = useRouter();
   const viewModel = useAnaliseViewModel();
   const spendingAlerts = useSpendingAlertsViewModel();
   const [movementsModalOpen, setMovementsModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (view !== 'movements') return;
+    setMovementsModalOpen(true);
+    router.setParams({ view: undefined });
+  }, [router, view]);
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.screen}>
@@ -129,7 +138,7 @@ function SessionExpiredState() {
 }
 
 const styles = StyleSheet.create({
-  content: { gap: 28, paddingBottom: 24, paddingHorizontal: 16, paddingTop: 16 },
+  content: { gap: 22, paddingBottom: 24, paddingHorizontal: 16, paddingTop: 16 },
   eyebrow: { color: darkColors.textMuted, fontSize: 12 },
   feedback: {
     alignItems: 'center',
