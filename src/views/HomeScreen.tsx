@@ -18,15 +18,16 @@ import { useSpendingAlertPopupViewModel } from '@/viewmodels/useSpendingAlertPop
  * Nome, saldo total e entradas, saidas e movimentacoes do periodo escolhido vem do back
  * (useHomeViewModel). O filtro de tipo ('Todos' | 'Entrada' | 'Saida') filtra a listagem
  * de movimentacoes da Home de forma puramente reativa sem alterar o saldo ou totais.
- * Nome, saldo total e entradas, saidas e movimentacoes do periodo escolhido vem do back
- * (useHomeViewModel). O filtro de tipo ('Todos' | 'Entrada' | 'Saida') filtra a listagem
- * de movimentacoes da Home de forma puramente reativa sem alterar o saldo ou totais.
+ *
+ * O banner do score abre a triagem (/triage): as respostas alimentam o calculo do FinUp
+ * Score no back, e a Home recarrega o score ao voltar ao foco.
  */
 export default function HomeScreen() {
   const router = useRouter();
   const {
     status,
     userName,
+    score,
     balance,
     income,
     expense,
@@ -68,11 +69,11 @@ export default function HomeScreen() {
         <HomeHeader
           onPressProfile={() => router.navigate('/profile')}
           onPressScore={() => {}}
-          score="-"
+          score={score}
           userName={userName}
         />
 
-        <ScoreBannerCard onPressAdd={() => {}} />
+        <ScoreBannerCard onPress={() => router.push('/triage')} />
 
         <BalanceCard
           balance={balance}
@@ -95,6 +96,7 @@ export default function HomeScreen() {
             emptyMessage={emptyMessage}
             expenses={expenses}
             onPressIntegrate={() => {}}
+            onPressViewMore={() => router.navigate({ pathname: '/analise', params: { view: 'movements' } })}
             status={status}
           />
         </View>

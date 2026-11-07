@@ -1,6 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   ActivityIndicator,
   Pressable,
@@ -21,9 +22,16 @@ import { useSpendingAlertsViewModel } from '@/viewmodels/useSpendingAlertsViewMo
 
 /** VIEW - aba Análise: Transações, gastos por categoria e alerta. */
 export default function AnaliseScreen() {
+  const { view } = useLocalSearchParams<{ view?: string }>();
+  const router = useRouter();
   const viewModel = useAnaliseViewModel();
   const spendingAlerts = useSpendingAlertsViewModel();
   const [movementsModalOpen, setMovementsModalOpen] = useState(false);
+  const movementsModalVisible = movementsModalOpen || view === 'movements';
+  const closeMovementsModal = () => {
+    setMovementsModalOpen(false);
+    router.setParams({ view: undefined });
+  };
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.screen}>
@@ -67,13 +75,13 @@ export default function AnaliseScreen() {
       </ScrollView>
       <AnaliseMovimentacoesModal
         movements={viewModel.movements}
-        onClose={() => setMovementsModalOpen(false)}
+        onClose={closeMovementsModal}
         onSelectPeriod={viewModel.setPeriodKey}
         onSelectSortOrder={viewModel.setSortOrder}
         periodKey={viewModel.periodKey}
         periodLabel={viewModel.periodLabel}
         sortOrder={viewModel.sortOrder}
-        visible={movementsModalOpen}
+        visible={movementsModalVisible}
       />
     </SafeAreaView>
   );
@@ -129,7 +137,7 @@ function SessionExpiredState() {
 }
 
 const styles = StyleSheet.create({
-  content: { gap: 28, paddingBottom: 24, paddingHorizontal: 16, paddingTop: 16 },
+  content: { gap: 22, paddingBottom: 24, paddingHorizontal: 16, paddingTop: 16 },
   eyebrow: { color: darkColors.textMuted, fontSize: 12 },
   feedback: {
     alignItems: 'center',
