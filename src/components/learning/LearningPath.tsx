@@ -6,11 +6,11 @@ import { Text } from '@/components/ui/AppText';
 import { LearningButton } from '@/components/learning/LearningButton';
 import { colors, learningColors } from '@/theme/colors';
 import type { StudyLevel } from '@/types/studyTrack';
+import { nextUnreachedLevelIndex } from '@/utils/studyTrack';
 
 const levelUri = Asset.fromModule(require('../../../assets/learning/level.svg')).uri;
 const starsUri = Asset.fromModule(require('../../../assets/learning/stars.svg')).uri;
-const cloudLeft = Asset.fromModule(require('../../../assets/learning/cloud-left.svg')).uri;
-const cloudRight = Asset.fromModule(require('../../../assets/learning/cloud-right.svg')).uri;
+const cloudUri = Asset.fromModule(require('../../../assets/learning/cloud.svg')).uri;
 const positions = [60, 236, 112, 248, 93];
 const xFor = (index: number) => positions[index % positions.length];
 
@@ -23,6 +23,7 @@ export function LearningPath({
   onOpen: (level: StudyLevel) => void;
 }) {
   const { width } = useWindowDimensions();
+  const nextIndex = nextUnreachedLevelIndex(levels);
   const scale = Math.min((width - 32) / 370, 1.25);
   const height = Math.max(130, (levels.length - 1) * 99 + 130);
   return (
@@ -57,7 +58,13 @@ export function LearningPath({
           >
             <LearningButton
               accessibilityLabel={`Nível ${level.number}, ${level.stars} de 3 estrelas${level.reached ? '' : ', ainda não alcançado'}`}
-              accessibilityHint="Abre o conteúdo deste nível"
+              accessibilityHint={
+                level.reached
+                  ? 'Abre o conteúdo deste nível'
+                  : 'Avance na trilha para alcançar este nível'
+              }
+              accessibilityState={{ disabled: !level.reached }}
+              disabled={!level.reached}
               onPress={() => onOpen(level)}
               style={styles.level}
             >
@@ -71,12 +78,9 @@ export function LearningPath({
                 <SvgCssUri uri={starsUri} />
               </View>
             )}
-            {!level.reached && index === levels.length - 1 && (
+            {index === nextIndex && (
               <View pointerEvents="none" style={styles.cloud}>
-                <View style={StyleSheet.absoluteFill}>
-                  <SvgCssUri uri={cloudRight} />
-                </View>
-                <SvgCssUri uri={cloudLeft} />
+                <SvgCssUri uri={cloudUri} />
               </View>
             )}
           </View>
@@ -93,5 +97,5 @@ const styles = StyleSheet.create({
   art: { position: 'absolute', width: 78, height: 81 },
   number: { color: colors.white, fontSize: 24, fontWeight: '700', letterSpacing: 0.48 },
   stars: { position: 'absolute', top: 77, left: 1, width: 80.64, height: 32 },
-  cloud: { position: 'absolute', top: 15, left: -20, width: 97, height: 72.095 },
+  cloud: { position: 'absolute', top: 15, left: -9.5, width: 97, height: 72.095 },
 });

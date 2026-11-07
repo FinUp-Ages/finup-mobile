@@ -16,7 +16,7 @@ Contrato consultado no backend: `origin/feat/leitura-da-trilha`, `contracts/stud
 
 Cada categoria é um curso; cada item publicado é um nível, na ordem retornada. O C6 não define agrupamentos de tópicos nem ordem pedagógica. O seletor mostra o tópico único da categoria: seu nome no modo real, CDB na primeira categoria de demonstração. Uma futura hierarquia deve substituir esse mapeamento sem mudar o contrato de leitura.
 
-Progresso e estrelas não existem no C6. O mock demonstra 81%, três níveis com três estrelas e um trecho cinza; isso é identificado na tela. No modo real, o círculo indica indisponibilidade e todos os itens publicados podem ser abertos, sem inventar conclusão nem bloquear conteúdo. Nenhum progresso é persistido.
+O contrato C6 de leitura usado nesta tela não fornece progresso e estrelas. O mock demonstra 81% e nível atual 2: o nível 1 tem três estrelas, a nuvem cobre o nível 3 e o caminho de 2 para 3 fica cinza; isso é identificado como demonstração na tela. No modo real, o círculo indica indisponibilidade e todos os itens publicados podem ser abertos, sem inventar conclusão nem bloquear conteúdo. Nenhum progresso é persistido. A API de progresso adicionada posteriormente ao backend ainda não está integrada nesta tela.
 
 Abrir um nível apresenta o conteúdo LEARNING ou o enunciado das questões, ocultando respostas. Responder perguntas e registrar conclusão pertencem à task separada de exercícios.
 

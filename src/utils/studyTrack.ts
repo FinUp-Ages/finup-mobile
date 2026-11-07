@@ -1,13 +1,22 @@
 import type { StudyLevel, StudyQuestion } from '../types/studyTrack';
 
 /** C6 nao oferece progresso; nunca inferir conclusao apenas por existir uma pergunta. */
-export function buildStudyLevels(questions: StudyQuestion[], demo: boolean): StudyLevel[] {
+export function buildStudyLevels(
+  questions: StudyQuestion[],
+  demo: boolean,
+  currentLevel = 4,
+): StudyLevel[] {
+  const current = Math.max(1, Math.min(Math.trunc(currentLevel), questions.length));
   return questions.map((question, index) => ({
     question,
     number: index + 1,
-    stars: demo && index < 3 ? 3 : 0,
-    reached: demo ? index < 4 : true,
+    stars: demo && index < current - 1 ? 3 : 0,
+    reached: demo ? index < current : true,
   }));
+}
+
+export function nextUnreachedLevelIndex(levels: StudyLevel[]): number {
+  return levels.findIndex((level) => !level.reached);
 }
 
 export function questionHeading(question: StudyQuestion): string {

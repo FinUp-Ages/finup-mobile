@@ -5,6 +5,8 @@ import { buildStudyLevels } from '@/utils/studyTrack';
 
 type Status = 'loading' | 'success' | 'error';
 
+const DEMO_CURRENT_LEVEL = 2;
+
 export function useStudyTrackViewModel() {
   const [categories, setCategories] = useState<StudyCategory[]>([]);
   const [categoryId, setCategoryId] = useState<string | null>(null);
@@ -64,7 +66,7 @@ export function useStudyTrackViewModel() {
   }, [categoryId, loadQuestions]);
 
   const selectedCategory = categories.find((item) => item.id === categoryId);
-  const levels = buildStudyLevels(questions, studyTrackUsesMocks);
+  const levels = buildStudyLevels(questions, studyTrackUsesMocks, DEMO_CURRENT_LEVEL);
   return {
     categories,
     categoryId,

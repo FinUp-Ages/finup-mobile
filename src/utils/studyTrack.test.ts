@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { buildStudyLevels, learningContent, questionHeading } from './studyTrack';
+import {
+  buildStudyLevels,
+  learningContent,
+  nextUnreachedLevelIndex,
+  questionHeading,
+} from './studyTrack';
 import type { StudyQuestion } from '../types/studyTrack';
 
 const questions: StudyQuestion[] = [
@@ -35,6 +40,19 @@ test('demonstracao separa estrelas e trecho nao alcancado', () => {
 });
 test('abrir lacunas nao revela respostas embutidas no contrato', () => {
   assert.equal(questionHeading(questions[0]), 'Prefira alta _____ e baixo _____.');
+});
+
+test('nuvem acompanha o proximo nivel mesmo quando nao e o ultimo da lista', () => {
+  const list = Array(5).fill(questions[0]);
+  const atTwo = buildStudyLevels(list, true, 2);
+  assert.equal(nextUnreachedLevelIndex(atTwo), 2);
+  assert.equal(atTwo[1].reached, true);
+  assert.equal(atTwo[2].reached, false); // O caminho 2 -> 3 usa a cor apagada.
+  assert.equal(atTwo[2].stars, 0);
+  assert.equal(nextUnreachedLevelIndex(buildStudyLevels(list, true, 3)), 3);
+  assert.equal(nextUnreachedLevelIndex(buildStudyLevels(list, true, 5)), -1);
+  assert.equal(nextUnreachedLevelIndex(buildStudyLevels(list, false, 2)), -1);
+  assert.equal(nextUnreachedLevelIndex([]), -1);
 });
 
 test('C6 atual abre lacunas e conteudo sem depender de campos legados', () => {
