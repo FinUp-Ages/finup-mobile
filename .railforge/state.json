@@ -1,47 +1,31 @@
-{
-  "stage": "REVIEWING",
-  "task": "Implementar tela da Trilha de aprendizado",
-  "objective": "Aba Educacional com selecao de cursos, trilha C6 e abertura dos niveis conforme Figma 204:1350.",
-  "decisions": [
-    "C6 conferido em origin/feat/leitura-da-trilha do backend: contracts/study-track-c6.md e DTOs de leitura.",
-    "Categoria = curso; item publicado = nivel, na ordem da API. C6 nao define topicos nem ordem pedagogica.",
-    "Topico unico usa nome da categoria no real; CDB e demonstracao no mock.",
-    "Progresso/estrelas sao demonstrativos e identificados na interface; no real nao inventar conclusao.",
-    "Inter e Educacional ativa conforme task; Figma usa DM Sans e Analise ativa.",
-    "Abertura apresenta conteudo/enunciado; respostas e conclusao pertencem a outra task.",
-    "Revisao 2026-11-05: suporta leitura dos formatos publicados atual (body/statement) e legado (content/textWithBlanks), conforme contrato de escrita C6."
-  ],
-  "files_in_scope": [
-    "app/(tabs)/educacional.tsx",
-    "assets/learning/",
-    "src/components/learning/",
-    "src/views/StudyTrackScreen.tsx",
-    "src/types/studyTrack.ts",
-    "src/models/studyTrackModel.ts",
-    "src/models/studyTrackMock.ts",
-    "src/viewmodels/useStudyTrackViewModel.ts",
-    "src/utils/studyTrack.ts",
-    "src/utils/studyTrack.test.ts",
-    "src/theme/colors.ts",
-    ".env.example",
-    "docs/study-track-mobile.md",
-    ".railforge/state.json"
-  ],
-  "validation": {
-    "lint": "2026-11-05: npm run lint passou sem erros ou avisos.",
-    "typecheck": "2026-11-05: npm run typecheck passou.",
-    "tests": "2026-11-05: npm test passou com 15 testes, incluindo compatibilidade dos formatos C6 atual e legado.",
-    "android_bundle": "Bundle Android com Hermes validado em 2026-10-30; nao repetido apos ajuste de leitura C6 de 2026-11-05.",
-    "diff": "git diff --check passou; alteracoes revisadas e restritas a task.",
-    "device": "Expo Go SDK 57 abriu, mas login/acesso ao backend pelo celular bloqueou a validacao da trilha.",
-    "real_api": "Contrato e DTOs consultados na branch de leitura; chamadas autenticadas contra servidor real ainda nao verificadas.",
-    "rebase": "git fetch origin e git rebase origin/develop executados; base ja atualizada em 9e93d80, sem conflitos. Mudancas locais preservadas; stash de seguranca mantido."
-  },
-  "review": "Revisao para preparacao do commit: implementacao parcial dos criterios. Seletor tem um topico por curso; hierarquia curso/topico/nivel ainda e premissa. Progresso e estrelas existem somente no mock. Sem validacao visual/funcional em aparelho nem API real. Indicado PR em rascunho. Usuario autorizou criar o commit com essas limitacoes em 2026-11-05; manter REVIEWING.",
-  "updated_at": "2026-11-05",
-  "next_steps": [
-    "Confirmar mapeamento curso/topico/nivel e se topico unico atende ao aceite.",
-    "Validar a tela em aparelho e a API real por outro ambiente ou revisor.",
-    "Commit autorizado pelo usuario; push e PR ainda pendentes."
-  ]
+﻿{
+    "stage":  "VALIDATING",
+    "task":  "Align the analysis movement-period selector with Home",
+    "objective":  "Allow the complete movements selector to use the same periods as Home, through the last 12 months.",
+    "requirements":  [
+                         "Offer the same period options as Home",
+                         "Allow selecting the last 12 months",
+                         "Preserve the analysis filtering behavior"
+                     ],
+    "user_flow":  "Home ou Análise \u003e lista completa de transações \u003e seletor de período \u003e até últimos 12 meses",
+    "states":  [
+                   "analysis movement selector",
+                   "periods from 7 days through 12 months"
+               ],
+    "files_in_scope":  [
+                           "src/types/analise.ts",
+                           "src/utils/analisePeriods.ts"
+                       ],
+    "plan":  [
+                 "Make the analysis period-key type match Home",
+                 "Reuse Home period definitions for the analysis selector"
+             ],
+    "decisions":  [
+                      "Use Home's period definitions as the single source of truth"
+                  ],
+    "validation":  {
+                       "status":  "Pending manual validation at the user's request"
+                   },
+    "updated_at":  "2026-11-06",
+    "review":  "Pending manual review of the analysis selector with the Home period options."
 }

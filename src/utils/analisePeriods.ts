@@ -1,26 +1,17 @@
 import type { AnalisePeriodKey } from '@/types/analise';
-import { addDays, todayIsoDate } from '@/utils/dates';
+import { HOME_PERIODS, homePeriodRange, type HomePeriodOption } from '@/utils/homePeriods';
 
-export type AnalisePeriodOption = {
-  key: AnalisePeriodKey;
-  label: string;
-  from: (today: Date) => Date;
-};
+export type AnalisePeriodOption = HomePeriodOption;
 
-export const ANALISE_PERIODS: AnalisePeriodOption[] = [
-  { key: '7d', label: 'Últimos 7 dias', from: (today) => addDays(today, -6) },
-  { key: '10d', label: 'Últimos 10 dias', from: (today) => addDays(today, -9) },
-  { key: '20d', label: 'Últimos 20 dias', from: (today) => addDays(today, -19) },
-];
+export const ANALISE_PERIODS: AnalisePeriodOption[] = HOME_PERIODS;
 
 export const DEFAULT_ANALISE_PERIOD: AnalisePeriodKey = '7d';
-// Recebe um periodo '7d' , '10d' ou '20d' e retorna from, to, e a label que aparece no botão de seleção de período.
+// Recebe um período da Home e retorna from, to e a etiqueta exibida no seletor.
 export function analisePeriodRange(key: AnalisePeriodKey, today: Date = new Date()) {
-  const period = ANALISE_PERIODS.find((item) => item.key === key) ?? ANALISE_PERIODS[0];
-  return { from: todayIsoDate(period.from(today)), label: period.label, to: todayIsoDate(today) };
+  return homePeriodRange(key, today);
 }
 
-//Define como 30 dias o perído analisado para gerar os alertas.
+// Define como 30 dias o período analisado para gerar os alertas.
 export function analiseAlertRange(today: Date = new Date()) {
-  return { from: todayIsoDate(addDays(today, -29)), to: todayIsoDate(today) };
+  return homePeriodRange('30d', today);
 }

@@ -1,5 +1,5 @@
 import { httpClient } from '@/config/httpClient';
-import type { Category } from '@/types/transaction';
+import type { Category, TransactionType } from '@/types/transaction';
 
 /**
  * MODEL - categorias disponiveis (do usuario + padrao do sistema).
@@ -9,5 +9,8 @@ import type { Category } from '@/types/transaction';
  * trata isso igual a qualquer outro erro de rede.
  */
 export const categoriesModel = {
+  create: (payload: { name: string; type: TransactionType }) =>
+    httpClient.post<Category>('/api/v1/categories', payload),
+
   listAvailable: () => httpClient.get<Category[]>('/api/v1/categories'),
 };

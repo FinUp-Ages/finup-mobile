@@ -65,7 +65,12 @@ export default function HomeScreen() {
         }
         showsVerticalScrollIndicator={false}
       >
-        <HomeHeader onPressScore={() => {}} score="-" userName={userName} />
+        <HomeHeader
+          onPressProfile={() => router.navigate('/profile')}
+          onPressScore={() => {}}
+          score="-"
+          userName={userName}
+        />
 
         <ScoreBannerCard onPressAdd={() => {}} />
 
@@ -90,6 +95,7 @@ export default function HomeScreen() {
             emptyMessage={emptyMessage}
             expenses={expenses}
             onPressIntegrate={() => {}}
+            onPressViewMore={() => router.navigate({ pathname: '/analise', params: { view: 'movements' } })}
             status={status}
           />
         </View>
