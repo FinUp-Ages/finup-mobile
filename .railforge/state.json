@@ -76,14 +76,13 @@
     "lint": "2026-11-06: eslint em src e index.ts sem erros nem avisos.",
     "prettier": "2026-11-06: arquivos novos e os que ja estavam formatados seguem o prettier; ChatbotComposer, useCadastro, useChatbot e useVoiceDictation ja vinham fora do padrao na develop e nao foram reformatados.",
     "tests": "2026-11-06: npm test 22/22.",
-    "device": "2026-11-06: Expo Go 58.0.5 no Galaxy A34 (cabo USB, adb reverse): o app abre sem erro com o widget no codigo. Widget, voz e os fluxos corrigidos pendentes de APK novo (SDK 58)."
+    "device": "2026-11-07: development build do SDK 58 (EAS, variante FinUp Novo) no Galaxy A34: widget no layout C com saudacao e gastos do dia/mes; campo abre o chat com teclado; microfone abre gravando e so envia no enviar; logout com app aberto passa pelo login e segue para o chat; toque durante 'FinUp esta pensando...' abre a conversa nova so depois da resposta; cadastro apos tocar no widget nao abre o chat num login posterior. Tudo OK."
   },
-  "review": "PR #25 (feat/widget-registro-gastos -> develop) aberto em 2026-11-06 com video do widget no Android; aguardando revisao do time.",
-  "updated_at": "2026-11-06",
+  "review": "PR #25 (feat/widget-registro-gastos -> develop): merge do SDK 58 e correcoes da revisao enviados em 2026-11-07; aguardando nova revisao do time.",
+  "updated_at": "2026-11-07",
   "next_steps": [
-    "Gerar APK de desenvolvimento do SDK 58 (EAS) e conferir no aparelho: widget, modo voz, toque no widget deslogado e durante envio",
-    "Enviar merge e correcoes para o PR #25 (push so com ok do usuario)",
     "Revisao do PR #25 pelo time",
+    "Time gerar APK de desenvolvimento novo (SDK 58)",
     "Combinar o projeto EAS da org (eas.json e extra.eas.projectId ficaram fora do PR)"
   ],
   "pending_decisions": [
