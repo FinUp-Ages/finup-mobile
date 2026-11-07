@@ -6,7 +6,7 @@ import {
   PanResponder,
   Pressable,
   StyleSheet,
-  TextInput as RNTextInput,
+  type TextInputInstance,
   View,
 } from 'react-native';
 import { Text, TextInput } from '@/components/ui/AppText';
@@ -167,7 +167,7 @@ export function ChatbotComposer({
   voiceStatus,
 }: ChatbotComposerProps) {
   const [showHoldHint, setShowHoldHint] = useState(false);
-  const inputRef = useRef<RNTextInput>(null);
+  const inputRef = useRef<TextInputInstance>(null);
   const isRecording = voiceStatus === 'recording' && voiceStartedAt !== null;
   const isProcessing = voiceStatus === 'processing';
   const isVoiceActive = voiceStatus !== 'idle';

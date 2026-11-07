@@ -5,6 +5,7 @@ import {
   Text as RNText,
   TextInput as RNTextInput,
   type StyleProp,
+  type TextInputInstance,
   type TextInputProps,
   type TextProps,
   type TextStyle,
@@ -33,6 +34,6 @@ export function Text(props: TextProps) {
 }
 
 // `ref` chega como prop (React 19) e e repassado no spread, para quem precisa dar foco.
-export function TextInput(props: TextInputProps & { ref?: Ref<RNTextInput> }) {
+export function TextInput(props: TextInputProps & { ref?: Ref<TextInputInstance> }) {
   return <RNTextInput {...props} style={withInter(props.style)} />;
 }
