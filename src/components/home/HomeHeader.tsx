@@ -7,7 +7,7 @@ import { darkColors } from '@/theme/colors';
  * COMPONENT - cabecalho da Home: avatar + saudacao + badge de score.
  *
  * `userName` vem do GET /users/me (null enquanto carrega ou se falhar: a
- * saudacao fica so "Ola!"). `score` e o FinUp Score do GET /users/me ja
+ * saudacao fica so "Ola!"). `score` e o FinUp Score (0 a 100) do GET /users/me ja
  * formatado ("-" enquanto carrega, se falhar ou se ainda nao foi calculado).
  * `onPressScore` e ponto de integracao futuro (ex.: abrir o detalhe do FinUp Score).
  */

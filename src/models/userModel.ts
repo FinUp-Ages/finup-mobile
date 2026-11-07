@@ -15,7 +15,7 @@ export type UserResponse = {
   birthDate: string | null;
   monthlyIncome: number | null;
   financialProfile: string | null;
-  /** 0 a 1000. O back omite o campo enquanto o score nunca foi calculado. */
+  /** 0 a 100. O back omite o campo enquanto o score nunca foi calculado. */
   finUpScore?: number | null;
   createdAt: string;
   updatedAt: string;
