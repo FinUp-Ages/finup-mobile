@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   ActivityIndicator,
@@ -27,12 +27,11 @@ export default function AnaliseScreen() {
   const viewModel = useAnaliseViewModel();
   const spendingAlerts = useSpendingAlertsViewModel();
   const [movementsModalOpen, setMovementsModalOpen] = useState(false);
-
-  useEffect(() => {
-    if (view !== 'movements') return;
-    setMovementsModalOpen(true);
+  const movementsModalVisible = movementsModalOpen || view === 'movements';
+  const closeMovementsModal = () => {
+    setMovementsModalOpen(false);
     router.setParams({ view: undefined });
-  }, [router, view]);
+  };
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.screen}>
@@ -76,13 +75,13 @@ export default function AnaliseScreen() {
       </ScrollView>
       <AnaliseMovimentacoesModal
         movements={viewModel.movements}
-        onClose={() => setMovementsModalOpen(false)}
+        onClose={closeMovementsModal}
         onSelectPeriod={viewModel.setPeriodKey}
         onSelectSortOrder={viewModel.setSortOrder}
         periodKey={viewModel.periodKey}
         periodLabel={viewModel.periodLabel}
         sortOrder={viewModel.sortOrder}
-        visible={movementsModalOpen}
+        visible={movementsModalVisible}
       />
     </SafeAreaView>
   );
