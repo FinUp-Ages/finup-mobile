@@ -1,31 +1,54 @@
 ﻿{
-    "stage":  "VALIDATING",
-    "task":  "Align the analysis movement-period selector with Home",
-    "objective":  "Allow the complete movements selector to use the same periods as Home, through the last 12 months.",
-    "requirements":  [
-                         "Offer the same period options as Home",
-                         "Allow selecting the last 12 months",
-                         "Preserve the analysis filtering behavior"
-                     ],
-    "user_flow":  "Home ou Análise \u003e lista completa de transações \u003e seletor de período \u003e até últimos 12 meses",
-    "states":  [
-                   "analysis movement selector",
-                   "periods from 7 days through 12 months"
-               ],
-    "files_in_scope":  [
-                           "src/types/analise.ts",
-                           "src/utils/analisePeriods.ts"
-                       ],
-    "plan":  [
-                 "Make the analysis period-key type match Home",
-                 "Reuse Home period definitions for the analysis selector"
-             ],
-    "decisions":  [
-                      "Use Home's period definitions as the single source of truth"
-                  ],
-    "validation":  {
-                       "status":  "Pending manual validation at the user's request"
-                   },
-    "updated_at":  "2026-11-06",
-    "review":  "Pending manual review of the analysis selector with the Home period options."
+  "stage": "REVIEWING",
+  "task": "[Mobile] FinUp Score fixo em \"-\" na Home; banner do score abre a triagem",
+  "objective": "O badge de score da Home era fixo (score=\"-\" no HomeScreen). Passa a exibir o finUpScore (0 a 100) devolvido pelo GET /api/v1/users/me (backend: fix/finup-score-ausente-no-users-me). O banner 'Adicione suas informacoes e aumente seu score' passa a abrir a triagem, cujas respostas sao a base do calculo.",
+  "requirements": [
+    "UserResponse ganha finUpScore opcional (o back omite o campo enquanto o score nunca foi calculado)",
+    "useHomeViewModel le o score do GET /users/me que a Home ja faz e expoe score formatado",
+    "Sem score, carregando, com erro ou valor fora de 0..100: badge mostra \"-\"",
+    "Score atualiza ao voltar para a Home (foco), no pull-to-refresh e apos transacao no chat, como o resto da Home",
+    "Badge com accessibilityLabel",
+    "Toque em qualquer ponto do banner do score (ScoreBannerCard) abre /triage, a mesma tela do Perfil > perfil de investidor"
+  ],
+  "user_flow": "Login > Home > banner 'Adicionar agora' > triagem > responder e enviar (o back recalcula o score) > voltar para a Home > badge 'Score' mostra o novo valor de 0 a 100",
+  "states": [
+    "loading: \"-\"",
+    "erro na carga inicial: \"-\" (card de saldo mostra o erro e o retry)",
+    "score ainda nao calculado: \"-\"",
+    "sucesso: valor de 0 a 100",
+    "valor fora da escala (ex.: score antigo 0 a 1000 nao convertido no banco): \"-\"",
+    "banner pressionado: opacidade reduzida"
+  ],
+  "files_in_scope": [
+    "src/models/userModel.ts",
+    "src/utils/format.ts",
+    "src/utils/format.test.ts",
+    "src/viewmodels/useHomeViewModel.ts",
+    "src/views/HomeScreen.tsx",
+    "src/components/home/HomeHeader.tsx",
+    "src/components/home/ScoreBannerCard.tsx"
+  ],
+  "decisions": [
+    "2026-11-06: ler o score do GET /users/me ja feito pela Home, sem chamar POST /finup-score/recalculate (que grava a cada abertura)",
+    "2026-11-07: escala 0 a 100 (FIN_UP_SCORE_MAX), alinhada ao back",
+    "2026-11-07: o banner inteiro vira a area de toque (um unico botao acessivel); 'Adicionar agora' continua so como visual. Navegacao com router.push('/triage'), como no Perfil"
+  ],
+  "non_goals": [
+    "Tela de detalhe do score (onPressScore segue sem acao)"
+  ],
+  "validation": {
+    "typecheck": "2026-11-07: tsc --noEmit sem erros",
+    "lint": "2026-11-07: eslint nos arquivos alterados sem erros",
+    "prettier": "2026-11-07: arquivos alterados ok com --end-of-line auto (o checkout Windows usa CRLF por core.autocrlf; os arquivos ja commitados tambem acusam so isso)",
+    "tests": "2026-11-07: npx tsx --test src/utils/*.test.ts 18/18 (inclui format.test.ts com a escala 0 a 100). npm test nao expande o glob no Windows (preexistente)",
+    "backend": "2026-11-06: contrato conferido contra o branch do back rodando localmente (campo ausente sem score)",
+    "device": "2026-11-07: conferido pelo usuario no Expo Go (iPhone): o banner abre a triagem e, com o back atualizado, o badge mostra o score de 0 a 100 (95). Android nao verificado",
+    "merge develop": "2026-11-07: origin/develop (#27) mesclada na branch; so o state.json conflitou e ficou com esta tarefa. tsc, eslint e 18/18 testes passam no resultado"
+  },
+  "review": "pendente: revisao humana do diff no PR",
+  "updated_at": "2026-11-07",
+  "next_steps": [
+    "Fazer o merge do back (fix/finup-score-ausente-no-users-me) antes ou junto deste PR",
+    "No banco local ja existente, aplicar database/migrations/08-finup-score-escala-0-100.sql do back"
+  ]
 }
