@@ -37,7 +37,8 @@
     "typecheck": "2026-11-11: tsc --noEmit sem erros",
     "lint": "2026-11-11: eslint . sem erros; prettier ok nos arquivos alterados",
     "tests": "2026-11-11: npx tsx --test src/utils/*.test.ts 23/23, incluindo payload no formato do back",
-    "device": "pendente: conferir no Expo Go com EXPO_PUBLIC_USE_MOCKS=false e o back local"
+    "device": "pendente: conferir no Expo Go com EXPO_PUBLIC_USE_MOCKS=false e o back local",
+    "merge develop": "2026-11-11: origin/develop (#29) mesclada na branch; so o state.json conflitou e ficou com esta tarefa. tsc, eslint e 25/25 testes passam no resultado"
   },
   "review": "pendente: revisao humana do diff",
   "updated_at": "2026-11-11"
