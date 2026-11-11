@@ -6,7 +6,6 @@ import { Text } from '@/components/ui/AppText';
 import { LearningButton } from '@/components/learning/LearningButton';
 import { colors, learningColors } from '@/theme/colors';
 import type { StudyLevel } from '@/types/studyTrack';
-import { nextUnreachedLevelIndex } from '@/utils/studyTrack';
 
 const levelUri = Asset.fromModule(require('../../../assets/learning/level.svg')).uri;
 const starsUri = Asset.fromModule(require('../../../assets/learning/stars.svg')).uri;
@@ -23,7 +22,6 @@ export function LearningPath({
   onOpen: (level: StudyLevel) => void;
 }) {
   const { width } = useWindowDimensions();
-  const nextIndex = nextUnreachedLevelIndex(levels);
   const scale = Math.min((width - 32) / 370, 1.25);
   const height = Math.max(130, (levels.length - 1) * 99 + 130);
   return (
@@ -78,7 +76,7 @@ export function LearningPath({
                 <SvgCssUri uri={starsUri} />
               </View>
             )}
-            {index === nextIndex && (
+            {!level.reached && (
               <View pointerEvents="none" style={styles.cloud}>
                 <SvgCssUri uri={cloudUri} />
               </View>

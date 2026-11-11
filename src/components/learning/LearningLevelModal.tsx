@@ -17,6 +17,7 @@ export function LearningLevelModal({
 }) {
   if (!level) return null;
   const question = level.question;
+  const content = question.published;
   return (
     <Modal visible animationType="slide" onRequestClose={onClose}>
       <SafeAreaView style={styles.screen}>
@@ -30,23 +31,21 @@ export function LearningLevelModal({
         </View>
         <ScrollView contentContainerStyle={styles.content}>
           <Text style={styles.caption}>
-            {question.type === 'LEARNING' ? 'Aprendizado' : 'Questão'}
+            {content.type === 'LEARNING' ? 'Aprendizado' : 'Questão'}
           </Text>
           <Text accessibilityRole="header" style={styles.title}>
             {questionHeading(question)}
           </Text>
-          {question.type === 'LEARNING' ? (
+          {content.type === 'LEARNING' ? (
             <>
-              <Text style={styles.body}>{learningContent(question)}</Text>
-              {'keyTakeaways' in question.published &&
-                question.published.keyTakeaways?.map((item, index) => (
+              <Text style={styles.body}>{learningContent(content)}</Text>
+              {'keyTakeaways' in content &&
+                content.keyTakeaways?.map((item, index) => (
                   <Text key={index} style={styles.takeaway}>
                     • {item}
                   </Text>
                 ))}
-              {'tips' in question.published && question.published.tips && (
-                <Text style={styles.body}>{question.published.tips}</Text>
-              )}
+              {'tips' in content && content.tips && <Text style={styles.body}>{content.tips}</Text>}
             </>
           ) : (
             <Text style={styles.body}>

@@ -6,19 +6,16 @@ export type StudyCategory = {
   publishedCount: number;
 };
 
-type PublishedQuestion<T, P> = { id: string; type: T; published: P; publishedAt: string };
-export type StudyQuestion =
-  | PublishedQuestion<
-      'MULTIPLE_CHOICE',
-      {
-        statement: string;
-        options: { id?: string; text: string; correct?: boolean }[];
-        correctOptionId?: string;
-        explanation?: string;
-      }
-    >
-  | PublishedQuestion<
-      'FILL_BLANK',
+/** Conteudo publicado (C6, secao 4): o `type` vem dentro do JSON, nao no envelope. */
+export type StudyPublishedContent =
+  | {
+      type: 'MULTIPLE_CHOICE';
+      statement: string;
+      options: { id?: string; text: string; correct?: boolean }[];
+      correctOptionId?: string;
+      explanation?: string;
+    }
+  | ({ type: 'FILL_BLANK' } & (
       | {
           title: string;
           statement: string;
@@ -30,9 +27,8 @@ export type StudyQuestion =
           blanks: { index: number; expectedAnswer: string; acceptableAnswers: string[] }[];
           explanation: string;
         }
-    >
-  | PublishedQuestion<
-      'LEARNING',
+    ))
+  | ({ type: 'LEARNING' } & (
       | { title: string; body: string }
       | {
           title: string;
@@ -40,7 +36,12 @@ export type StudyQuestion =
           keyTakeaways: string[];
           tips?: string;
         }
-    >;
+    ));
+
+export type StudyLearningContent = Extract<StudyPublishedContent, { type: 'LEARNING' }>;
+
+/** Item de GET /categories/{id}/questions: o back devolve somente `{ id, published }`. */
+export type StudyQuestion = { id: string; published: StudyPublishedContent };
 
 export type StudyLevel = {
   question: StudyQuestion;

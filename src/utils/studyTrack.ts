@@ -1,4 +1,4 @@
-import type { StudyLevel, StudyQuestion } from '../types/studyTrack';
+import type { StudyLearningContent, StudyLevel, StudyQuestion } from '../types/studyTrack';
 
 /** C6 nao oferece progresso; nunca inferir conclusao apenas por existir uma pergunta. */
 export function buildStudyLevels(
@@ -15,23 +15,23 @@ export function buildStudyLevels(
   }));
 }
 
-export function nextUnreachedLevelIndex(levels: StudyLevel[]): number {
-  return levels.findIndex((level) => !level.reached);
-}
-
 export function questionHeading(question: StudyQuestion): string {
-  switch (question.type) {
+  const content = question.published;
+  switch (content.type) {
     case 'LEARNING':
-      return question.published.title;
+      return content.title;
     case 'MULTIPLE_CHOICE':
-      return question.published.statement;
+      return content.statement;
     case 'FILL_BLANK':
-      return 'statement' in question.published
-        ? question.published.statement
-        : question.published.textWithBlanks.replace(/\{[^}]*\}/g, '_____');
+      return 'statement' in content
+        ? content.statement
+        : content.textWithBlanks.replace(/\{[^}]*\}/g, '_____');
+    default:
+      // Tipo fora do C6: a tela mostra o nivel sem titulo em vez de quebrar.
+      return '';
   }
 }
 
-export function learningContent(question: Extract<StudyQuestion, { type: 'LEARNING' }>): string {
-  return 'body' in question.published ? question.published.body : question.published.content;
+export function learningContent(content: StudyLearningContent): string {
+  return 'body' in content ? content.body : content.content;
 }

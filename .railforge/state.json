@@ -1,31 +1,44 @@
-﻿{
-    "stage":  "VALIDATING",
-    "task":  "Align the analysis movement-period selector with Home",
-    "objective":  "Allow the complete movements selector to use the same periods as Home, through the last 12 months.",
-    "requirements":  [
-                         "Offer the same period options as Home",
-                         "Allow selecting the last 12 months",
-                         "Preserve the analysis filtering behavior"
-                     ],
-    "user_flow":  "Home ou Análise \u003e lista completa de transações \u003e seletor de período \u003e até últimos 12 meses",
-    "states":  [
-                   "analysis movement selector",
-                   "periods from 7 days through 12 months"
-               ],
-    "files_in_scope":  [
-                           "src/types/analise.ts",
-                           "src/utils/analisePeriods.ts"
-                       ],
-    "plan":  [
-                 "Make the analysis period-key type match Home",
-                 "Reuse Home period definitions for the analysis selector"
-             ],
-    "decisions":  [
-                      "Use Home's period definitions as the single source of truth"
-                  ],
-    "validation":  {
-                       "status":  "Pending manual validation at the user's request"
-                   },
-    "updated_at":  "2026-11-06",
-    "review":  "Pending manual review of the analysis selector with the Home period options."
+{
+  "stage": "REVIEWING",
+  "task": "[Mobile] Trilha de aprendizado: corrigir leitura do C6 (PR #28)",
+  "objective": "Abrir um nivel no modo real mostra o conteudo. O back devolve cada pergunta como { id, published }, com o type dentro de published; o mobile esperava type e publishedAt no envelope e abria o modal vazio.",
+  "requirements": [
+    "StudyQuestion segue StudyTrackQuestionResponse: { id, published }, com published.type",
+    "Titulo, conteudo LEARNING e legenda do modal leem published.type",
+    "Mock no mesmo envelope e no formato atual da secao 4 do C6 (body, statement/answers, options[].correct)",
+    "Formatos legados (content, textWithBlanks) continuam aceitos",
+    "Tipo fora do C6 nao quebra a abertura do nivel",
+    "Todo nivel nao alcancado (bloqueado) recebe a nuvem, nao so o primeiro"
+  ],
+  "user_flow": "Login > Educacional > escolher curso > tocar num nivel alcancado > modal com titulo e conteudo",
+  "states": [
+    "sucesso: modal com titulo e corpo (LEARNING) ou enunciado (questoes)",
+    "tipo desconhecido: modal sem titulo, sem quebrar",
+    "nivel nao alcancado: nuvem por cima e toque desabilitado (so ocorre no mock; o modo real ainda nao le progresso)"
+  ],
+  "files_in_scope": [
+    "src/types/studyTrack.ts",
+    "src/utils/studyTrack.ts",
+    "src/utils/studyTrack.test.ts",
+    "src/models/studyTrackMock.ts",
+    "src/components/learning/LearningLevelModal.tsx",
+    "src/components/learning/LearningPath.tsx",
+    "docs/study-track-mobile.md"
+  ],
+  "decisions": [
+    "2026-11-11: contrato conferido em origin/develop do back (StudyTrackQuestionResponse e contracts/study-track-c6.md, secao 4)",
+    "2026-11-11: nuvem em todos os niveis bloqueados, a pedido do usuario na revisao (antes so o primeiro nao alcancado tinha nuvem)",
+    "2026-11-11: progresso do back nao integrado, por decisao do usuario. O back so registra respostas do conjunto completo da categoria e devolve estrelas e percentual (de acertos) por categoria; nao ha progresso por nivel"
+  ],
+  "open_questions": [
+    "Back e design: a trilha precisa de progresso por pergunta/nivel, ou o mapeamento 'pergunta = nivel' muda? Ate la, nuvens e bloqueio so no mock"
+  ],
+  "validation": {
+    "typecheck": "2026-11-11: tsc --noEmit sem erros",
+    "lint": "2026-11-11: eslint . sem erros; prettier ok nos arquivos alterados",
+    "tests": "2026-11-11: npx tsx --test src/utils/*.test.ts 23/23, incluindo payload no formato do back",
+    "device": "pendente: conferir no Expo Go com EXPO_PUBLIC_USE_MOCKS=false e o back local"
+  },
+  "review": "pendente: revisao humana do diff",
+  "updated_at": "2026-11-11"
 }
