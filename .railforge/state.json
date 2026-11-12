@@ -5,7 +5,8 @@
   "plan": [
     "Partir da develop atualizada e transportar somente o fluxo de perguntas, preservando a branch anterior e seu backup.",
     "Isolar tipos, validação, rodada e envio das respostas; conectar a abertura do nível e o retorno à trilha com alterações mínimas.",
-    "Verificar testes, tipos, lint, bundle Android e diff contra develop; conferir os três tipos no Expo com a API real."
+    "Verificar testes, tipos, lint, bundle Android e diff contra develop; conferir os três tipos no Expo com a API real.",
+    "Revisar o diff, registrar a pendência do contrato de progresso/estrelas e publicar a branch conforme autorização do usuário; MR será aberto pelo usuário."
   ],
   "files_in_scope": [
     "src/components/learning/StudyQuestionModal.tsx",
@@ -22,7 +23,7 @@
   ],
   "non_goals": [
     "Implementar ou substituir tela, progresso, estrelas, bloqueios, assets ou mocks da trilha do colega.",
-    "Alterar backend, autenticação, funcionalidades de outras tasks ou fazer push/MR."
+    "Alterar backend, autenticação, funcionalidades de outras tasks ou abrir MR."
   ],
   "validation": {
     "tests": "47/47 passaram, incluindo os 31 testes da develop.",
@@ -31,8 +32,10 @@
     "android_bundle": "Export Android passou: 1850 módulos e 69 assets.",
     "device": "Android/Expo Go com API real: usuário confirmou a rodada com os três tipos e resultado de 2/2; banco confirmou objetiva e lacuna corretas, leitura com answer/correct null e 3 estrelas. Usuário confirmou retorno à trilha, abertura no Lv. 2, feedback de erro, confirmação de saída e reabertura com campo vazio/Responder desabilitado.",
     "diff": "16 arquivos da trilha idênticos à develop; ViewModel expõe perguntas e View conecta abertura/fechamento/callback.",
-    "limits": "Validação manual realizada no Android. iOS, fonte ampliada e leitor de tela não foram verificados nesta integração. Falha/retry coberta pelos testes automatizados; teste manual com API parada foi feito na implementação anterior."
+    "limits": "Validação manual realizada no Android. iOS, fonte ampliada e leitor de tela não foram verificados nesta integração. Falha/retry coberta pelos testes automatizados; teste manual com API parada foi feito na implementação anterior.",
+    "release_review": "Diff final restrito a 16 arquivos no escopo. Revisão de entrega alterou somente documentação/estado; código funcional permanece igual ao validado em 47 testes. Sem protótipos, configurações locais ou dependências adicionais no diff."
   },
-  "review": "Escopo aprovado atendido. Os 202 arquivos versionados fora do state e dos dois pontos de integração estão iguais à develop; componentes, regras, estilo, assets, mocks e testes da trilha preservados. Branch anterior e seus 18 arquivos intactos, com backup verificado. Commit local autorizado pelo usuário em 12/11/2026; push e MR fora do escopo.",
-  "updated_at": "2026-11-12"
+  "review": "Escopo aprovado atendido e diff revisado para publicação. Componentes, layout, regras, assets, mocks e testes da trilha preservados. Pendência do contrato de estrelas/progresso documentada e mantida fora da task. Push autorizado pelo usuário; MR será aberto pelo usuário.",
+  "updated_at": "2026-11-12",
+  "pending_integration": "Alinhar estrelas por categoria do backend com estrelas por nível da tela e distinguir percentual de acertos de conclusão antes de integrar o progresso real da trilha."
 }

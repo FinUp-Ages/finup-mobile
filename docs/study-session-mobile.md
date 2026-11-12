@@ -42,13 +42,31 @@ Fechar ou usar Voltar do Android confirma o descarte quando há respostas não s
 Durante o envio, a saída fica bloqueada. Falhas preservam as respostas em memória
 para tentar salvar novamente. Depois do POST bem-sucedido, `onSaved(result)` recebe
 o resultado da API; o modal apresenta a conclusão. A conexão atual recarrega as
-perguntas ao salvar/fechar. Progresso e estrelas na tela da trilha continuam sob
-responsabilidade da implementação do colega.
+perguntas ao salvar/fechar. A integração dos dados reais de progresso e estrelas
+na tela da trilha permanece como pendência separada, descrita abaixo.
 
 `studyAnswersModel` usa o cliente HTTP autenticado e a mesma flag
 `EXPO_PUBLIC_USE_MOCKS` da trilha. No modo real, erros nunca viram sucesso fictício.
 No modo de demonstração, avalia as próprias perguntas de exemplo da trilha sem
 persistência no backend. Não cria outro catálogo de mocks.
+
+## Pendência de integração da trilha
+
+Na `develop`, progresso e estrelas da tela da trilha usam valores de demonstração;
+no modo real, o progresso aparece indisponível e os níveis ficam sem estrelas.
+Esse comportamento foi confirmado no código e no Android com a `develop` sem as
+alterações desta task.
+
+O backend retorna estrelas para a rodada/categoria inteira. O Figma e a trilha
+atual apresentam estrelas por nível, com cada pergunta publicada mapeada para um
+nível. Além disso, `percentage` em `GET /api/v1/study-tracks/progress` representa
+percentual de acertos, não de perguntas concluídas. Responder todas as questões
+incorretamente representa uma rodada concluída com 0% de acertos.
+
+Exibir esses dados nos níveis exige alinhar o contrato do backend ou o mapeamento
+dos níveis da trilha. Essa definição e implementação ficam fora deste MR.
+O modal de conclusão já apresenta a avaliação da rodada retornada pelo POST, e
+`onSaved(result)` disponibiliza esse resultado para uma futura integração.
 
 ## Design e validação
 
