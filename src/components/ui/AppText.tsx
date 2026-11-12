@@ -1,9 +1,11 @@
 import { isLoaded } from 'expo-font';
+import type { Ref } from 'react';
 import {
   StyleSheet,
   Text as RNText,
   TextInput as RNTextInput,
   type StyleProp,
+  type TextInputInstance,
   type TextInputProps,
   type TextProps,
   type TextStyle,
@@ -31,6 +33,7 @@ export function Text(props: TextProps) {
   return <RNText {...props} style={withInter(props.style)} />;
 }
 
-export function TextInput(props: TextInputProps) {
+// `ref` chega como prop (React 19) e e repassado no spread, para quem precisa dar foco.
+export function TextInput(props: TextInputProps & { ref?: Ref<TextInputInstance> }) {
   return <RNTextInput {...props} style={withInter(props.style)} />;
 }

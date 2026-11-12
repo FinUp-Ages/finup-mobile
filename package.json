@@ -1,7 +1,7 @@
 {
   "name": "finup-mobile",
   "version": "1.0.0",
-  "main": "expo-router/entry",
+  "main": "index.ts",
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
     "@expo/vector-icons": "^15.0.2",
@@ -10,6 +10,7 @@
     "expo": "^58.0.23",
     "expo-constants": "~58.0.15",
     "expo-crypto": "~58.0.7",
+    "expo-dev-client": "~58.0.18",
     "expo-font": "~58.0.11",
     "expo-linear-gradient": "~58.0.3",
     "expo-linking": "~58.0.16",
@@ -20,9 +21,12 @@
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-native": "0.88.1",
+    "react-native-android-widget": "^0.26.0",
+    "react-native-reanimated": "4.7.1",
     "react-native-safe-area-context": "~5.11.1",
     "react-native-screens": "~4.30.1",
-    "react-native-svg": "15.16.0"
+    "react-native-svg": "15.16.0",
+    "react-native-worklets": "0.13.0"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
@@ -35,6 +39,7 @@
   },
   "scripts": {
     "start": "expo start",
+    "start:go": "expo start --go",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",

@@ -21,10 +21,18 @@ Arquitetura **MVVM** — ver [ADR-0007](../wiki/ADR-0007-mvvm-nos-fronts).
 ```bash
 cp .env.example .env      # confira a URL da API — veja o aviso abaixo
 npm install
-npm start
+npm run start:go          # Expo Go
 ```
 
 Depois: escaneie o QR code com o Expo Go, ou pressione `a` (Android) / `i` (iOS) no terminal.
+
+### Expo Go ou development build
+
+O projeto tem o `expo-dev-client`, então o `npm start` (sem `--go`) procura um **development build** e, no Expo Go, dá "No development build installed". Para o dia a dia use o `npm run start:go`.
+
+No Expo Go o app abre normalmente, mas sem o **widget da tela inicial** (Android), que é código nativo. Para testar o widget é preciso um development build (APK) gerado com o mesmo SDK do projeto; um APK de SDK anterior, ou anterior à entrada de um módulo nativo novo, não serve. Com o APK instalado, rode `npm start` e abra o app nele.
+
+Com o celular no cabo USB (depuração USB ativa), dá para dispensar o Wi-Fi: `adb reverse tcp:8081 tcp:8081` e `adb reverse tcp:8080 tcp:8080`, e `EXPO_PUBLIC_API_BASE_URL=http://localhost:8080`.
 
 ### O ponto que trava todo mundo na primeira vez
 
@@ -42,7 +50,8 @@ Para o celular físico, o computador e o celular precisam estar na mesma rede Wi
 
 | Comando | O que faz |
 |---|---|
-| `npm start` | inicia o servidor de desenvolvimento do Expo |
+| `npm run start:go` | inicia o servidor de desenvolvimento para o Expo Go |
+| `npm start` | inicia o servidor para o development build (APK com o widget) |
 | `npm run android` / `npm run ios` | abre direto no emulador/simulador |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | TypeScript sem emitir arquivos |

@@ -1,6 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Animated, PanResponder, Pressable, StyleSheet, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Animated,
+  PanResponder,
+  Pressable,
+  StyleSheet,
+  type TextInputInstance,
+  View,
+} from 'react-native';
 import { Text, TextInput } from '@/components/ui/AppText';
 import { colors } from '@/theme/colors';
 import type { VoiceStatus } from '@/types/chatbot';
@@ -8,6 +16,8 @@ import { formatDuration } from '@/utils/format';
 
 interface ChatbotComposerProps {
   draft: string;
+  /** Cada incremento da foco no campo (chat aberto pelo widget para escrever). */
+  focusRequest: number;
   isSending: boolean;
   onCancelVoice: () => void;
   onChangeDraft: (value: string) => void;
@@ -15,10 +25,15 @@ interface ChatbotComposerProps {
   onStartVoice: () => void;
   onStopVoice: () => void;
   voiceDisabled: boolean;
+  /** Gravacao aberta pelo widget: sem o dedo no microfone, envia pelo botao. */
+  voiceHandsFree: boolean;
   voiceMessage: string | null;
   voiceStartedAt: number | null;
   voiceStatus: VoiceStatus;
 }
+
+/** Espera a troca de aba/tela assentar antes do foco, ou o teclado nao abre. */
+const FOCUS_DELAY_MS = 350;
 
 /** Segurar o microfone por este tempo comeca a gravar; antes disso e um toque. */
 const HOLD_TO_RECORD_DELAY_MS = 200;
@@ -89,8 +104,11 @@ function useHoldToRecord({ onCancel, onStart, onStop, onTap }: HoldHandlers) {
   return useMemo(() => createHoldToRecord({ onCancel, onStart, onStop, onTap }), [onCancel, onStart, onStop, onTap]);
 }
 
-/** Ponto vermelho piscando e tempo de gravacao, no lugar do campo de texto. */
-function RecordingIndicator({ startedAt }: { startedAt: number }) {
+/**
+ * Ponto vermelho piscando e tempo de gravacao, no lugar do campo de texto. Sem o
+ * dedo no microfone (`handsFree`), a dica aponta para o botao de enviar.
+ */
+function RecordingIndicator({ handsFree, startedAt }: { handsFree: boolean; startedAt: number }) {
   const [elapsedMs, setElapsedMs] = useState(0);
   const [blink] = useState(() => new Animated.Value(1));
 
@@ -114,10 +132,14 @@ function RecordingIndicator({ startedAt }: { startedAt: number }) {
     <View accessibilityLabel={`Gravando áudio, ${formatDuration(elapsedMs)}`} accessible style={styles.recording}>
       <Animated.View style={[styles.recordingDot, { opacity: blink }]} />
       <Text style={styles.recordingTime}>{formatDuration(elapsedMs)}</Text>
-      <View style={styles.slideHint}>
-        <Ionicons color={colors.placeholderOnDark} name="chevron-back" size={14} />
-        <Text style={styles.slideHintText}>Deslize para cancelar</Text>
-      </View>
+      {handsFree ? (
+        <Text style={[styles.slideHint, styles.slideHintText]}>Toque em enviar ao terminar</Text>
+      ) : (
+        <View style={styles.slideHint}>
+          <Ionicons color={colors.placeholderOnDark} name="chevron-back" size={14} />
+          <Text style={styles.slideHintText}>Deslize para cancelar</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -131,6 +153,7 @@ function RecordingIndicator({ startedAt }: { startedAt: number }) {
  */
 export function ChatbotComposer({
   draft,
+  focusRequest,
   isSending,
   onCancelVoice,
   onChangeDraft,
@@ -138,14 +161,24 @@ export function ChatbotComposer({
   onStartVoice,
   onStopVoice,
   voiceDisabled,
+  voiceHandsFree,
   voiceMessage,
   voiceStartedAt,
   voiceStatus,
 }: ChatbotComposerProps) {
   const [showHoldHint, setShowHoldHint] = useState(false);
+  const inputRef = useRef<TextInputInstance>(null);
   const isRecording = voiceStatus === 'recording' && voiceStartedAt !== null;
   const isProcessing = voiceStatus === 'processing';
   const isVoiceActive = voiceStatus !== 'idle';
+  // Sem o dedo no microfone, o botao de enviar encerra a gravacao e envia.
+  const sendStopsVoice = voiceHandsFree && isRecording;
+
+  useEffect(() => {
+    if (focusRequest === 0) return;
+    const timer = setTimeout(() => inputRef.current?.focus(), FOCUS_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [focusRequest]);
 
   useEffect(() => {
     if (!showHoldHint) return;
@@ -174,7 +207,7 @@ export function ChatbotComposer({
       ) : null}
       <View style={styles.composer}>
         {isRecording ? (
-          <RecordingIndicator startedAt={voiceStartedAt} />
+          <RecordingIndicator handsFree={voiceHandsFree} startedAt={voiceStartedAt} />
         ) : isProcessing ? (
           <View accessibilityLiveRegion="polite" style={styles.recording}>
             <ActivityIndicator color={colors.white} size="small" />
@@ -189,6 +222,7 @@ export function ChatbotComposer({
             onSubmitEditing={onSend}
             placeholder="Digite sua mensagem"
             placeholderTextColor={colors.placeholderOnDark}
+            ref={inputRef}
             returnKeyType="send"
             style={styles.input}
             submitBehavior="submit"
@@ -198,29 +232,41 @@ export function ChatbotComposer({
           />
         )}
         <View style={styles.actions}>
-          <View
-            {...micHandlers}
-            accessibilityHint="Segure para gravar, solte para enviar e deslize para a esquerda para cancelar"
-            accessibilityLabel="Gravar mensagem de voz"
-            accessibilityRole="button"
-            accessibilityState={{ busy: isVoiceActive, disabled: voiceDisabled }}
-            hitSlop={10}
-            // Desabilitado: o microfone nao recebe o toque (envio em andamento).
-            pointerEvents={voiceDisabled ? 'none' : 'auto'}
-            style={[
-              styles.micAction,
-              isVoiceActive ? styles.micActionActive : undefined,
-              voiceDisabled ? styles.disabled : undefined,
-            ]}
-          >
-            <Ionicons color={colors.white} name={isVoiceActive ? 'mic' : 'mic-outline'} size={19} />
-          </View>
+          {voiceHandsFree ? (
+            <Pressable
+              accessibilityLabel="Cancelar gravação"
+              accessibilityRole="button"
+              hitSlop={10}
+              onPress={onCancelVoice}
+              style={styles.micAction}
+            >
+              <Ionicons color={colors.white} name="close" size={19} />
+            </Pressable>
+          ) : (
+            <View
+              {...micHandlers}
+              accessibilityHint="Segure para gravar, solte para enviar e deslize para a esquerda para cancelar"
+              accessibilityLabel="Gravar mensagem de voz"
+              accessibilityRole="button"
+              accessibilityState={{ busy: isVoiceActive, disabled: voiceDisabled }}
+              hitSlop={10}
+              // Desabilitado: o microfone nao recebe o toque (envio em andamento).
+              pointerEvents={voiceDisabled ? 'none' : 'auto'}
+              style={[
+                styles.micAction,
+                isVoiceActive ? styles.micActionActive : undefined,
+                voiceDisabled ? styles.disabled : undefined,
+              ]}
+            >
+              <Ionicons color={colors.white} name={isVoiceActive ? 'mic' : 'mic-outline'} size={19} />
+            </View>
+          )}
           <Pressable
-            accessibilityLabel="Enviar mensagem"
+            accessibilityLabel={sendStopsVoice ? 'Enviar áudio' : 'Enviar mensagem'}
             accessibilityRole="button"
-            disabled={!draft.trim() || isSending || isVoiceActive}
+            disabled={!sendStopsVoice && (!draft.trim() || isSending || isVoiceActive)}
             hitSlop={10}
-            onPress={onSend}
+            onPress={sendStopsVoice ? onStopVoice : onSend}
             style={styles.sendAction}
           >
             {isSending ? (

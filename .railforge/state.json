@@ -1,45 +1,93 @@
 {
-  "stage": "REVIEWING",
-  "task": "[Mobile] Trilha de aprendizado: corrigir leitura do C6 (PR #28)",
-  "objective": "Abrir um nivel no modo real mostra o conteudo. O back devolve cada pergunta como { id, published }, com o type dentro de published; o mobile esperava type e publishedAt no envelope e abria o modal vazio.",
+  "stage": "COMPLETED",
+  "task": "[ Mobile ] - Widget (ClickUp 1dfcuabc1av)",
+  "objective": "Widget do FinUp na tela inicial do Android para registrar gastos por texto ou voz, no estilo da barra de pesquisa do Google: o widget nao recebe digitacao, cada area abre o Chatbot ja pronto para escrever ou falar.",
   "requirements": [
-    "StudyQuestion segue StudyTrackQuestionResponse: { id, published }, com published.type",
-    "Titulo, conteudo LEARNING e legenda do modal leem published.type",
-    "Mock no mesmo envelope e no formato atual da secao 4 do C6 (body, statement/answers, options[].correct)",
-    "Formatos legados (content, textWithBlanks) continuam aceitos",
-    "Tipo fora do C6 nao quebra a abertura do nivel",
-    "Todo nivel nao alcancado (bloqueado) recebe a nuvem, nao so o primeiro"
+    "Widget disponivel no seletor de widgets do Android, partindo do Figma (no 223-13475, mockup da direita): fundo em degrade marinho -> azul, logo FinUp, campo de texto e microfone",
+    "Toque no campo abre `finup://chatbot?modo=texto`: Chatbot com o campo em foco e teclado aberto",
+    "Toque no microfone abre `finup://chatbot?modo=voz`: Chatbot ja gravando; envia ao tocar em enviar, o X cancela",
+    "Com o app fechado, o link passa pela tela de carregamento; sem sessao, pelo login, e depois segue para o chat",
+    "O registro do gasto e o do assistente (acao REGISTER_TRANSACTION), sem mudanca no back",
+    "2026-11-05: conteudo dinamico no widget (widget do Android nao anima): saudacao pelo horario com o primeiro nome, gastos do dia e do mes (GET /users/me e GET /transactions do mes) e um exemplo de frase no campo que muda a cada atualizacao; sem sessao ou sem rede, so saudacao e dica",
+    "O widget e redesenhado quando o app abre, quando o chat registra transacao e quando o app vai para segundo plano (cobre login, logout e lancamentos em outras telas)",
+    "2026-11-05: o toque no widget (campo ou microfone) sempre abre uma conversa nova no Chatbot, como o Nova conversa do menu; a conversa anterior continua no historico"
   ],
-  "user_flow": "Login > Educacional > escolher curso > tocar num nivel alcancado > modal com titulo e conteudo",
+  "user_flow": "Tela inicial do Android > widget FinUp > toque no campo (chat com teclado) ou no microfone (chat gravando) > enviar > resposta do assistente registra o gasto",
   "states": [
-    "sucesso: modal com titulo e corpo (LEARNING) ou enunciado (questoes)",
-    "tipo desconhecido: modal sem titulo, sem quebrar",
-    "nivel nao alcancado: nuvem por cima e toque desabilitado (so ocorre no mock; o modo real ainda nao le progresso)"
+    "app fechado com sessao: carregamento -> chat no modo pedido",
+    "app fechado sem sessao: tela inicial de autenticacao -> login -> chat no modo pedido",
+    "app aberto: vai direto para a aba Chatbot no modo pedido",
+    "voz: permissao no primeiro uso; negada mostra a orientacao ja existente; gravando mostra tempo e 'Toque em enviar ao terminar'; X cancela sem enviar",
+    "texto: campo em foco com teclado aberto",
+    "widget sem sessao: 'Boa noite' + 'Registre gastos por texto ou voz' + dica",
+    "widget com sessao: 'Boa noite, Marco' + 'Hoje R$ X · Mês R$ Y' + dica",
+    "widget com falha de rede: igual ao sem sessao, sem erro na tela"
   ],
   "files_in_scope": [
-    "src/types/studyTrack.ts",
-    "src/utils/studyTrack.ts",
-    "src/utils/studyTrack.test.ts",
-    "src/models/studyTrackMock.ts",
-    "src/components/learning/LearningLevelModal.tsx",
-    "src/components/learning/LearningPath.tsx",
-    "docs/study-track-mobile.md"
+    "app.json",
+    "package.json",
+    "package-lock.json",
+    "index.ts",
+    "app/+native-intent.tsx",
+    "src/widgets/widgetSvgs.ts",
+    "src/widgets/RegistroGastosWidget.tsx",
+    "src/widgets/widgetTaskHandler.tsx",
+    "src/models/widgetLaunchModel.ts",
+    "src/viewmodels/useLoadingScreenViewModel.ts",
+    "src/viewmodels/useLoginViewModel.ts",
+    "src/viewmodels/useChatbotViewModel.ts",
+    "src/viewmodels/useVoiceDictationViewModel.ts",
+    "src/components/chatbot/ChatbotComposer.tsx",
+    "src/components/ui/AppText.tsx",
+    "src/theme/colors.ts",
+    "src/views/ChatbotScreen.tsx",
+    "app/_layout.tsx",
+    "src/models/widgetModel.ts",
+    "src/utils/widgetContent.ts",
+    "src/utils/widgetContent.test.ts",
+    "src/widgets/refreshRegistroGastosWidget.tsx",
+    "src/widgets/androidWidgetPackage.ts",
+    "src/viewmodels/useCadastroViewModel.ts",
+    "README.md"
   ],
   "decisions": [
-    "2026-11-11: contrato conferido em origin/develop do back (StudyTrackQuestionResponse e contracts/study-track-c6.md, secao 4)",
-    "2026-11-11: nuvem em todos os niveis bloqueados, a pedido do usuario na revisao (antes so o primeiro nao alcancado tinha nuvem)",
-    "2026-11-11: progresso do back nao integrado, por decisao do usuario. O back so registra respostas do conjunto completo da categoria e devolve estrelas e percentual (de acertos) por categoria; nao ha progresso por nivel"
+    "2026-11-02: o widget e para escrever e mandar audio 'igual ao Google'. Widget nao aceita digitacao no Android, entao cada area abre o app por deep link (esquema `finup`, ja no app.json).",
+    "Destino: Chatbot, porque o assistente ja registra gasto por texto livre (REGISTER_TRANSACTION) e o chat ja tem ditado por voz.",
+    "2026-11-02: pelo microfone do widget o chat abre ja gravando e so envia ao tocar em enviar (escolha do usuario entre parar no silencio, tocar enviar ou so abrir o chat).",
+    "Android apenas, com `react-native-android-widget` (config plugin do Expo). iOS fica como ponto a confirmar na task (WidgetKit em Swift e conta Apple Developer).",
+    "Desfoques do Figma (brilho atras do logo) nao existem em widgets do Android (RemoteViews): o brilho e aproximado com degrade radial no SVG do logo.",
+    "Teste so com development build (APK via EAS): widget e codigo nativo e nao roda no Expo Go.",
+    "2026-11-05: react-native-reanimated 4.5.1 e react-native-worklets 0.10.1 declarados no package.json (versoes do SDK 57). Vinham so pelo expo-router e o npm resolvia o reanimated 4.2.2, que derruba o build Android com o React Native 0.86.3.",
+    "2026-11-05: escolha do usuario para deixar o widget mais vivo: saudacao + dica rotativa e gastos do dia/mes. Os valores de gasto ficam visiveis na tela inicial.",
+    "2026-11-05: layout escolhido pelo usuario entre 4 variacoes desenhadas no Figma (arquivo \"FinUp - Widget (variacoes)\", fyPlN81lyizviYxgHl35e0, opcao C): logo ao centro, saudacao e resumo centralizados, campo branco de 48dp com lapis e o microfone dentro (circulo marinho). Difere do mockup original so no campo (branco em vez de translucido).",
+    "2026-11-05: com altura real menor que 170dp (WidgetInfo.height) a logo some, para o widget caber no minHeight de 140dp sem gerar outro APK. Textos em Inter Regular (a unica fonte registrada no widget); Medium exigiria mudar o app.json e gerar APK.",
+    "2026-11-06: develop mergeada na branch (#23 alerta de gastos, #26 triagem). O #26 subiu o Expo para o SDK 58 e o React Native para 0.88.1; as dependencias nativas do widget foram alinhadas com `npx expo install`: expo-dev-client ~58.0.18, react-native-reanimated 4.7.1, react-native-worklets 0.13.0. O ref do TextInput passou a `TextInputInstance` (tipos do RN 0.88). O APK de SDK 57 deixou de servir.",
+    "2026-11-06, correcoes da revisao do PR #25: (1) o pacote do widget e carregado com require + try (src/widgets/androidWidgetPackage.ts) e o desenho so e importado depois, para o app abrir no Expo Go; (2) README e script `start:go` explicam Expo Go x development build; (4) a rota guardada pelo widget e descartada ao entrar no cadastro; (5) gravacao do widget que para sozinha (Android 12 ou anterior) vai para o campo do chat em vez de ser enviada; (6a) com o app aberto e sem sessao, o toque no widget passa pelo login; (6b) toque durante um envio espera a resposta antes de abrir a conversa nova.",
+    "2026-11-07: develop mergeada de novo (#29 FinUp Score 0-100 e triagem pelo banner, e correcao das transacoes na Home); so o state.json conflitou e ficou o estado desta task.",
+    "2026-11-11: develop mergeada de novo (#28 trilha proximo nivel); so o state.json conflitou e ficou o estado desta task. PR #25 mergeado como admin a pedido do usuario, sem aguardar aprovacao do time."
   ],
-  "open_questions": [
-    "Back e design: a trilha precisa de progresso por pergunta/nivel, ou o mapeamento 'pergunta = nivel' muda? Ate la, nuvens e bloqueio so no mock"
+  "non_goals": [
+    "Widget no iOS",
+    "Notificacao push 'Alerta de gastos' (mockup da esquerda do mesmo no)",
+    "Digitar ou gravar dentro do proprio widget",
+    "Mudancas no back ou no assistente",
+    "Animacao no widget (RemoteViews nao suporta GIF, Lottie ou animacao em JS)"
   ],
   "validation": {
-    "typecheck": "2026-11-11: tsc --noEmit sem erros",
-    "lint": "2026-11-11: eslint . sem erros; prettier ok nos arquivos alterados",
-    "tests": "2026-11-11: npx tsx --test src/utils/*.test.ts 23/23, incluindo payload no formato do back",
-    "device": "pendente: conferir no Expo Go com EXPO_PUBLIC_USE_MOCKS=false e o back local",
-    "merge develop": "2026-11-11: origin/develop (#29) mesclada na branch; so o state.json conflitou e ficou com esta tarefa. tsc, eslint e 25/25 testes passam no resultado"
+    "typecheck": "2026-11-07 (pos-merge do #29): tsc --noEmit sem erros.",
+    "lint": "2026-11-07: npm run lint sem erros.",
+    "prettier": "2026-11-06: arquivos novos e os que ja estavam formatados seguem o prettier; ChatbotComposer, useCadastro, useChatbot e useVoiceDictation ja vinham fora do padrao na develop e nao foram reformatados.",
+    "tests": "2026-11-07: npm test 24/24.",
+    "device": "2026-11-07: development build do SDK 58 (EAS, variante FinUp Novo) no Galaxy A34: widget no layout C com saudacao e gastos do dia/mes; campo abre o chat com teclado; microfone abre gravando e so envia no enviar; logout com app aberto passa pelo login e segue para o chat; toque durante 'FinUp esta pensando...' abre a conversa nova so depois da resposta; cadastro apos tocar no widget nao abre o chat num login posterior. Tudo OK.",
+    "merge develop": "2026-11-11 (pos-merge do #28): tsc --noEmit sem erros, eslint . sem erros, npm test 31/31."
   },
-  "review": "pendente: revisao humana do diff",
-  "updated_at": "2026-11-11"
+  "review": "PR #25 (feat/widget-registro-gastos -> develop) mergeado em 2026-11-11 como admin, a pedido do usuario, sem aprovacao do time.",
+  "updated_at": "2026-11-11",
+  "next_steps": [
+    "Time gerar APK de desenvolvimento novo (SDK 58)",
+    "Combinar o projeto EAS da org (eas.json e extra.eas.projectId ficaram fora do PR)"
+  ],
+  "pending_decisions": [
+    "Projeto EAS da org do time: quem cria e quando. Decidido em 2026-11-07 que o `eas.json`, o `app.config.js` e o `extra.eas.projectId` da conta pessoal (marcolaimer) nao entram no repo."
+  ]
 }

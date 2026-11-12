@@ -1,7 +1,10 @@
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { HttpError } from '@/config/httpClient';
+import { authModel } from '@/models/authModel';
 import { chatbotModel } from '@/models/chatbotModel';
 import { transactionEvents } from '@/models/transactionEvents';
+import { isChatbotLaunchMode, widgetLaunchModel } from '@/models/widgetLaunchModel';
 import type { ChatMessage, ConversationMessage, ConversationSummary, VoiceRecording } from '@/types/chatbot';
 import { userModel } from '@/models/userModel';
 import { useVoiceDictationViewModel } from '@/viewmodels/useVoiceDictationViewModel';
@@ -77,7 +80,18 @@ export function useChatbotViewModel() {
   // como texto e a forma de onda so anima a mensagem virando texto.
   const voice = useVoiceDictationViewModel({
     onRecorded: (text, recording) => sendVoiceMessage(text, recording),
+    // Gravacao do widget que parou sozinha (Android 12 ou anterior): o texto fica
+    // no campo para a pessoa revisar e tocar em enviar.
+    onEndedWithoutSend: (text) => {
+      setDraft(text.slice(0, MAX_MESSAGE_LENGTH));
+      setInputFocusRequest((current) => current + 1);
+    },
   });
+
+  const router = useRouter();
+  const { modo } = useLocalSearchParams<{ modo?: string }>();
+  const [inputFocusRequest, setInputFocusRequest] = useState(0);
+  const startVoice = voice.start;
 
   useEffect(() => {
     let active = true;
@@ -169,6 +183,35 @@ export function useChatbotViewModel() {
     setMessagesError(null);
     setIsLoadingMessages(false);
   }, [isSending]);
+
+  // Aberto pelo widget (`/chatbot?modo=...`): sempre numa conversa nova, como o
+  // "Nova conversa" do menu; "texto" pede foco no campo e "voz" ja comeca a
+  // gravar. O parametro e limpo em seguida, para o proximo toque no widget (mesmo
+  // modo) ser percebido de novo.
+  useEffect(() => {
+    if (!isChatbotLaunchMode(modo)) return;
+    // Toque durante um envio: a conversa nova so abre quando a resposta chegar,
+    // senao a gravacao cairia na conversa atual. O efeito roda de novo quando
+    // isSending volta a false (newConversation depende dele).
+    if (isSending) return;
+    router.setParams({ modo: undefined });
+    const launchMode = modo;
+
+    async function openFromWidget() {
+      // Com o app aberto o link chega direto aqui, sem a tela de carregamento:
+      // sem sessao, passa pelo login e volta ao chat depois dele.
+      if (!(await authModel.hasSession())) {
+        widgetLaunchModel.setPending(`/chatbot?modo=${launchMode}`);
+        router.replace('/(auth)');
+        return;
+      }
+      newConversation();
+      if (launchMode === 'voz') void startVoice({ handsFree: true });
+      else setInputFocusRequest((current) => current + 1);
+    }
+
+    void openFromWidget();
+  }, [isSending, modo, newConversation, router, startVoice]);
 
   // Envia uma mensagem do usuario que ja esta na lista, na conversa aberta.
   const deliver = useCallback(
@@ -264,6 +307,7 @@ export function useChatbotViewModel() {
     draft,
     errorMessage,
     hasConversation: conversationId !== null || messages.length > 0,
+    inputFocusRequest,
     isLoadingConversations,
     isLoadingMessages,
     isMenuOpen,
