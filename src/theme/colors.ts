@@ -69,6 +69,22 @@ export const colors = {
   widgetSubtitle: 'rgba(255, 255, 255, 0.75)',
 } as const;
 
+/** Trilha: valores extraidos do quadro Aprendizado (204:1350). */
+export const learningColors = {
+  background: '#021736',
+  chip: '#0446a8',
+  chipMiddle: '#032f6f',
+  chipLow: '#022353',
+  level: '#2d69f6',
+  levelShadow: '#2445c2',
+  connector: '#cde9f6',
+  unreached: '#606060',
+  progress: '#00982d',
+  progressTrack: '#003b41',
+  star: '#ffeb00',
+  focus: '#8fc9f0',
+} as const;
+
 /**
  * Paleta escura da Home (aba Carteira): fundo, cartoes e textos sobre o marinho,
  * mais as cores proprias do card de saldo e do banner do score (Figma).

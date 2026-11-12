@@ -1,5 +1,5 @@
 {
-  "stage": "REVIEWING",
+  "stage": "COMPLETED",
   "task": "[ Mobile ] - Widget (ClickUp 1dfcuabc1av)",
   "objective": "Widget do FinUp na tela inicial do Android para registrar gastos por texto ou voz, no estilo da barra de pesquisa do Google: o widget nao recebe digitacao, cada area abre o Chatbot ja pronto para escrever ou falar.",
   "requirements": [
@@ -63,7 +63,8 @@
     "2026-11-05: com altura real menor que 170dp (WidgetInfo.height) a logo some, para o widget caber no minHeight de 140dp sem gerar outro APK. Textos em Inter Regular (a unica fonte registrada no widget); Medium exigiria mudar o app.json e gerar APK.",
     "2026-11-06: develop mergeada na branch (#23 alerta de gastos, #26 triagem). O #26 subiu o Expo para o SDK 58 e o React Native para 0.88.1; as dependencias nativas do widget foram alinhadas com `npx expo install`: expo-dev-client ~58.0.18, react-native-reanimated 4.7.1, react-native-worklets 0.13.0. O ref do TextInput passou a `TextInputInstance` (tipos do RN 0.88). O APK de SDK 57 deixou de servir.",
     "2026-11-06, correcoes da revisao do PR #25: (1) o pacote do widget e carregado com require + try (src/widgets/androidWidgetPackage.ts) e o desenho so e importado depois, para o app abrir no Expo Go; (2) README e script `start:go` explicam Expo Go x development build; (4) a rota guardada pelo widget e descartada ao entrar no cadastro; (5) gravacao do widget que para sozinha (Android 12 ou anterior) vai para o campo do chat em vez de ser enviada; (6a) com o app aberto e sem sessao, o toque no widget passa pelo login; (6b) toque durante um envio espera a resposta antes de abrir a conversa nova.",
-    "2026-11-07: develop mergeada de novo (#29 FinUp Score 0-100 e triagem pelo banner, e correcao das transacoes na Home); so o state.json conflitou e ficou o estado desta task."
+    "2026-11-07: develop mergeada de novo (#29 FinUp Score 0-100 e triagem pelo banner, e correcao das transacoes na Home); so o state.json conflitou e ficou o estado desta task.",
+    "2026-11-11: develop mergeada de novo (#28 trilha proximo nivel); so o state.json conflitou e ficou o estado desta task. PR #25 mergeado como admin a pedido do usuario, sem aguardar aprovacao do time."
   ],
   "non_goals": [
     "Widget no iOS",
@@ -77,12 +78,12 @@
     "lint": "2026-11-07: npm run lint sem erros.",
     "prettier": "2026-11-06: arquivos novos e os que ja estavam formatados seguem o prettier; ChatbotComposer, useCadastro, useChatbot e useVoiceDictation ja vinham fora do padrao na develop e nao foram reformatados.",
     "tests": "2026-11-07: npm test 24/24.",
-    "device": "2026-11-07: development build do SDK 58 (EAS, variante FinUp Novo) no Galaxy A34: widget no layout C com saudacao e gastos do dia/mes; campo abre o chat com teclado; microfone abre gravando e so envia no enviar; logout com app aberto passa pelo login e segue para o chat; toque durante 'FinUp esta pensando...' abre a conversa nova so depois da resposta; cadastro apos tocar no widget nao abre o chat num login posterior. Tudo OK."
+    "device": "2026-11-07: development build do SDK 58 (EAS, variante FinUp Novo) no Galaxy A34: widget no layout C com saudacao e gastos do dia/mes; campo abre o chat com teclado; microfone abre gravando e so envia no enviar; logout com app aberto passa pelo login e segue para o chat; toque durante 'FinUp esta pensando...' abre a conversa nova so depois da resposta; cadastro apos tocar no widget nao abre o chat num login posterior. Tudo OK.",
+    "merge develop": "2026-11-11 (pos-merge do #28): tsc --noEmit sem erros, eslint . sem erros, npm test 31/31."
   },
-  "review": "PR #25 (feat/widget-registro-gastos -> develop): merge do SDK 58, correcoes da revisao e merge da develop com #27/#29 enviados em 2026-11-07; aguardando nova revisao do time.",
-  "updated_at": "2026-11-07",
+  "review": "PR #25 (feat/widget-registro-gastos -> develop) mergeado em 2026-11-11 como admin, a pedido do usuario, sem aprovacao do time.",
+  "updated_at": "2026-11-11",
   "next_steps": [
-    "Revisao do PR #25 pelo time",
     "Time gerar APK de desenvolvimento novo (SDK 58)",
     "Combinar o projeto EAS da org (eas.json e extra.eas.projectId ficaram fora do PR)"
   ],
