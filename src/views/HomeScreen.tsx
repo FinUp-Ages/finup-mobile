@@ -3,6 +3,7 @@ import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BalanceCard } from '@/components/home/BalanceCard';
 import { ExpenseList } from '@/components/home/ExpenseList';
+import { useTabBarClearance } from '@/components/navigation/TabBarClearance';
 import { HomeBanners } from '@/components/home/HomeBanners';
 import { HomeHeader } from '@/components/home/HomeHeader';
 import { SpendingAlertPopup } from '@/components/home/SpendingAlertPopup';
@@ -44,6 +45,7 @@ export default function HomeScreen() {
     refresh,
   } = useHomeViewModel();
   const { triage } = useHomeBannerViewModel();
+  const tabBarClearance = useTabBarClearance();
   const spendingAlertPopup = useSpendingAlertPopupViewModel();
 
   const sectionTitle =
@@ -57,9 +59,9 @@ export default function HomeScreen() {
         : undefined;
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={styles.screen}>
+    <SafeAreaView edges={['top']} style={styles.screen}>
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: 12 + tabBarClearance }]}
         refreshControl={
           <RefreshControl
             onRefresh={refresh}

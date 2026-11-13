@@ -15,6 +15,7 @@ import { AnaliseAlerta } from '@/components/analise/AnaliseAlerta';
 import { AnaliseGastoCategorias } from '@/components/analise/AnaliseGastoCategorias';
 import { AnaliseMovimentacoes } from '@/components/analise/AnaliseMovimentacoes';
 import { AnaliseMovimentacoesModal } from '@/components/analise/AnaliseMovimentacoesModal';
+import { useTabBarClearance } from '@/components/navigation/TabBarClearance';
 import { Text } from '@/components/ui/AppText';
 import { colors, darkColors } from '@/theme/colors';
 import { useAnaliseViewModel } from '@/viewmodels/useAnaliseViewModel';
@@ -25,6 +26,7 @@ export default function AnaliseScreen() {
   const { view } = useLocalSearchParams<{ view?: string }>();
   const router = useRouter();
   const viewModel = useAnaliseViewModel();
+  const tabBarClearance = useTabBarClearance();
   const spendingAlerts = useSpendingAlertsViewModel();
   const [movementsModalOpen, setMovementsModalOpen] = useState(false);
   const movementsModalVisible = movementsModalOpen || view === 'movements';
@@ -34,10 +36,10 @@ export default function AnaliseScreen() {
   };
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={styles.screen}>
+    <SafeAreaView edges={['top']} style={styles.screen}>
       <StatusBar style="light" />
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: 24 + tabBarClearance }]}
         refreshControl={
           <RefreshControl
             onRefresh={() => {

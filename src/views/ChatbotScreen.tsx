@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeAreaView } from 'react-native-screens/experimental';
+import { useTabBarClearance } from '@/components/navigation/TabBarClearance';
 import { ChatbotComposer } from '@/components/chatbot/ChatbotComposer';
 import { ChatbotHeader } from '@/components/chatbot/ChatbotHeader';
 import { ChatbotMark } from '@/components/chatbot/ChatbotMark';
@@ -42,6 +43,7 @@ const GRADIENT_COLORS = [
  */
 export default function ChatbotScreen() {
   const insets = useSafeAreaInsets();
+  const tabBarClearance = useTabBarClearance();
   const scrollRef = useRef<ScrollViewInstance>(null);
   const vm = useChatbotViewModel();
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
@@ -66,16 +68,14 @@ export default function ChatbotScreen() {
   return (
     <LinearGradient colors={GRADIENT_COLORS} locations={[0, 0.48, 0.77, 1]} style={styles.screen}>
       <StatusBar style="light" />
-      {/* No Android a barra de abas nativa ja fica fora da area da tela, entao o
-          inset de baixo somaria a altura dela de novo (vao entre composer e barra).
-          Como na aba Transacao: o SafeAreaView do react-native-screens deixa o
-          composer acima da barra de abas nativa (que flutua no iOS 26). */}
-      <SafeAreaView edges={{ bottom: Platform.OS === 'ios' }} style={styles.safeArea}>
+      {/* A barra de abas flutua por cima da tela: o composer sobe a altura dela
+          (useTabBarClearance) e desce de volta quando o teclado abre e a barra some. */}
+      <SafeAreaView edges={{ bottom: false }} style={styles.safeArea}>
         {/* `padding` tambem no Android: com o edge-to-edge a janela nao encolhe
             quando o teclado abre e o composer ficava atras dele. Se a janela
             encolher mesmo assim, o KAV recalcula pelo layout e a sobra vira 0. */}
         <KeyboardAvoidingView behavior="padding" style={styles.keyboard}>
-          <View style={[styles.content, { paddingTop: insets.top + 16, paddingBottom: isKeyboardOpen ? 8 : 16 }]}>
+          <View style={[styles.content, { paddingTop: insets.top + 16, paddingBottom: isKeyboardOpen ? 8 : 16 + tabBarClearance }]}>
             <ChatbotHeader onOpenMenu={() => vm.setIsMenuOpen(true)} showAssistantStatus={hasConversation} />
 
             {vm.isLoadingMessages ? (

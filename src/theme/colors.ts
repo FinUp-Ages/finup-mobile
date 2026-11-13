@@ -69,6 +69,38 @@ export const colors = {
   widgetSubtitle: 'rgba(255, 255, 255, 0.75)',
 } as const;
 
+/**
+ * Barra de abas flutuante do FinUp no estilo "liquid glass" da Apple: capsula de vidro
+ * translucido (a cor da tela aparece por baixo, escurecida pela tinta marinha), borda de luz em
+ * degrade, brilho especular no topo e uma lente de vidro na aba ativa. A acao central
+ * (Transacao) e um orbe azul fixo no centro que sai um pouco da barra.
+ */
+export const tabBarColors = {
+  // Tinta marinha translucida: mantem o contraste dos icones sobre fundos claros.
+  tint: 'rgba(10, 22, 48, 0.84)',
+  specularTop: 'rgba(255, 255, 255, 0.2)',
+  specularBottom: 'rgba(255, 255, 255, 0)',
+  // Reflexo azul suave na base, como a luz que atravessa o vidro.
+  glowBottom: 'rgba(70, 150, 255, 0.14)',
+  // Borda de luz: forte no canto superior esquerdo, some no meio, volta no canto inferior direito.
+  rimStart: 'rgba(255, 255, 255, 0.55)',
+  rimMiddle: 'rgba(255, 255, 255, 0.1)',
+  rimEnd: 'rgba(255, 255, 255, 0.28)',
+  icon: 'rgba(235, 235, 245, 0.62)',
+  label: 'rgba(235, 235, 245, 0.62)',
+  active: '#4DA3FF',
+  onAccent: '#ffffff',
+  // Lente (bolha de vidro) da aba ativa.
+  lensFill: 'rgba(255, 255, 255, 0.13)',
+  lensBorder: 'rgba(255, 255, 255, 0.3)',
+  lensShine: 'rgba(255, 255, 255, 0.24)',
+  orbTop: '#3B97FF',
+  orbBottom: '#0B63E6',
+  // O aro do orbe tem a cor da barra, como um recorte: ele "encaixa" nela.
+  orbRing: '#0C1B3C',
+  orbGlow: '#0A84FF',
+} as const;
+
 /** Trilha: valores extraidos do quadro Aprendizado (204:1350). */
 export const learningColors = {
   background: '#021736',
