@@ -1,6 +1,7 @@
 import { useFocusEffect } from 'expo-router';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { spendingAlertsModel } from '@/models/spendingAlertsModel';
+import { transactionEvents } from '@/models/transactionEvents';
 import type { SpendingAlert, SpendingAlertsResponse } from '@/types/spendingAlert';
 
 const ALERT_PERIOD_DAYS = 30;
@@ -41,6 +42,14 @@ export function useSpendingAlertsViewModel() {
     useCallback(() => {
       load('initial');
     }, [load]),
+  );
+
+  useEffect(
+    () =>
+      transactionEvents.subscribe(() => {
+        void load('silent');
+      }),
+    [load],
   );
 
   return {

@@ -20,6 +20,8 @@ type AnaliseMovimentacoesModalProps = {
   periodLabel: string;
   sortOrder: AnaliseSortOrder;
   visible: boolean;
+  editingExpense: boolean;
+  onEditExpense: (movement: AnaliseMovement) => void;
 };
 
 /** Lista completa das transações ativas, sobreposta somente à área da aba. */
@@ -32,24 +34,31 @@ export function AnaliseMovimentacoesModal({
   periodLabel,
   sortOrder,
   visible,
+  editingExpense,
+  onEditExpense,
 }: AnaliseMovimentacoesModalProps) {
   const insets = useSafeAreaInsets();
   const [periodOpen, setPeriodOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
 
   useEffect(() => {
-    if (!visible) return;
+    if (!visible || editingExpense) return;
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
       onClose();
       return true;
     });
     return () => subscription.remove();
-  }, [onClose, visible]);
+  }, [onClose, visible, editingExpense]);
 
   if (!visible) return null;
 
   return (
-    <View accessibilityViewIsModal style={StyleSheet.absoluteFill}>
+    <View
+      accessibilityViewIsModal
+      accessibilityElementsHidden={editingExpense}
+      importantForAccessibility={editingExpense ? 'no-hide-descendants' : 'auto'}
+      style={StyleSheet.absoluteFill}
+    >
       <BrandGradient />
       <View
         style={[styles.content, { paddingBottom: insets.bottom + 20, paddingTop: insets.top + 20 }]}
@@ -98,7 +107,9 @@ export function AnaliseMovimentacoesModal({
               initialNumToRender={12}
               keyExtractor={(movement) => movement.id}
               removeClippedSubviews
-              renderItem={({ item }) => <MovementRow movement={item} />}
+              renderItem={({ item }) => (
+                <MovementRow movement={item} onEditExpense={onEditExpense} />
+              )}
               showsVerticalScrollIndicator={false}
               windowSize={7}
             />
@@ -128,10 +139,22 @@ export function AnaliseMovimentacoesModal({
   );
 }
 
-function MovementRow({ movement }: { movement: AnaliseMovement }) {
+function MovementRow({
+  movement,
+  onEditExpense,
+}: {
+  movement: AnaliseMovement;
+  onEditExpense: (movement: AnaliseMovement) => void;
+}) {
   const income = movement.type === 'INCOME';
   return (
-    <View style={styles.row}>
+    <Pressable
+      accessibilityLabel={`${movement.title}, ${movement.categoryName}, ${movement.amount}, ${movement.date}${income ? '' : '. Editar categoria'}`}
+      accessibilityRole={income ? undefined : 'button'}
+      disabled={income}
+      onPress={() => onEditExpense(movement)}
+      style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+    >
       <View style={styles.rowDetails}>
         <View
           style={[
@@ -139,17 +162,25 @@ function MovementRow({ movement }: { movement: AnaliseMovement }) {
             { backgroundColor: income ? darkColors.incomeDot : darkColors.expenseDot },
           ]}
         />
-        <View>
+        <View style={styles.rowText}>
           <Text style={styles.category}>{movement.title}</Text>
-          <Text style={styles.date}>{movement.date}</Text>
+          <Text style={styles.date}>
+            {movement.categoryName} • {movement.date}
+          </Text>
         </View>
       </View>
-      <Text
-        style={[styles.amount, { color: income ? darkColors.incomeText : darkColors.expenseText }]}
-      >
-        {movement.amount}
-      </Text>
-    </View>
+      <View style={styles.rowActions}>
+        <Text
+          style={[
+            styles.amount,
+            { color: income ? darkColors.incomeText : darkColors.expenseText },
+          ]}
+        >
+          {movement.amount}
+        </Text>
+        {!income ? <Feather name="edit-2" size={17} color={darkColors.textMuted} /> : null}
+      </View>
+    </Pressable>
   );
 }
 
@@ -201,6 +232,8 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   rowDetails: { alignItems: 'center', flexDirection: 'row', gap: 10, flex: 1 },
+  rowText: { flex: 1 },
+  rowActions: { alignItems: 'center', flexDirection: 'row', gap: 12, marginLeft: 12 },
   sortButton: {
     alignItems: 'center',
     backgroundColor: colors.glass,
