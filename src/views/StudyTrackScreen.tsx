@@ -107,7 +107,10 @@ export default function StudyTrackScreen() {
                   {vm.topic}
                 </Text>
               </LearningButton>
-              <LearningProgress value={vm.questionStatus === 'success' ? vm.progress : null} />
+              <LearningProgress
+                value={vm.questionStatus === 'success' ? vm.progress : null}
+                demo={vm.isDemo}
+              />
             </View>
             {vm.questionStatus === 'loading' && <Feedback loading title="Carregando sua trilha…" />}
             {vm.questionStatus === 'error' && (
@@ -117,11 +120,16 @@ export default function StudyTrackScreen() {
               (vm.levels.length ? (
                 <>
                   <LearningPath levels={vm.levels} onOpen={vm.openLevel} />
-                  <Text style={styles.notice}>
-                    {vm.isDemo
-                      ? 'Progresso e estrelas de demonstração.'
-                      : 'Seu progresso e suas estrelas estarão disponíveis em breve.'}
-                  </Text>
+                  {vm.progressUnavailable ? (
+                    <Feedback
+                      title="Não foi possível carregar seu progresso. Os níveis ficam abertos."
+                      onRetry={vm.refresh}
+                    />
+                  ) : (
+                    vm.isDemo && (
+                      <Text style={styles.notice}>Progresso e estrelas de demonstração.</Text>
+                    )
+                  )}
                 </>
               ) : (
                 <Feedback title="Este curso ainda não tem níveis publicados." />
@@ -167,10 +175,10 @@ export default function StudyTrackScreen() {
           topic={vm.topic}
           questions={vm.questions}
           startQuestionId={vm.openedLevel.question.id}
-          onSaved={vm.retryQuestions}
+          onSaved={vm.refresh}
           onClose={() => {
             vm.closeLevel();
-            vm.retryQuestions();
+            vm.refresh();
           }}
         />
       )}

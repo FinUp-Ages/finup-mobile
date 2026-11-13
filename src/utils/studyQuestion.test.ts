@@ -94,13 +94,15 @@ test('estrelas respeitam limites de 50 e 80 por cento e excluem conteúdo sem no
   assert.equal(studyStars(4, 5), 3);
 });
 
-test('lote inclui leituras sem nota e rejeita itens ausentes, extras ou repetidos', () => {
+test('lote aceita subconjunto (C6), inclui leituras sem nota e rejeita vazio, extras ou repetidos', () => {
   const answers = questions.map((question) => ({ questionId: question.id, answer: null }));
   const result = gradeStudyAnswers(questions, { categoryId, answers });
   assert.equal(result.gradableCount, 2);
   assert.equal(result.answers[1].correct, null);
+  const partial = gradeStudyAnswers(questions, { categoryId, answers: answers.slice(1) });
+  assert.equal(partial.answers.length, answers.length - 1);
   for (const invalid of [
-    answers.slice(1),
+    [],
     [...answers, answers[0]],
     [...answers.slice(1), { questionId: 'extra', answer: null }],
   ]) {

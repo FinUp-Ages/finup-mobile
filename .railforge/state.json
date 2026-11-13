@@ -1,52 +1,56 @@
 {
   "stage": "REVIEWING",
-  "task": "[ BUG ] - Permitir editar a categoria dos gastos (ClickUp 1dfcuabck3w)",
-  "objective": "Editar a categoria de despesas manuais e da IA entre quaisquer categorias de despesa disponiveis ao usuario, sem categorias fixas nem dependencia de migration.",
+  "task": "[BUG] Trilha: progresso por nível com o back real (ClickUp 1dfcuabd1ja)",
+  "scope": "Consumir o GET /study-tracks/progress do C6 (progresso por nível) na trilha: níveis alcançados, nuvem e bloqueio, estrelas por nível e círculo de avanço sem depender do mock; salvar cada resposta assim que é dada; mock com estado e as mesmas regras do back.",
   "decisions": [
-    "Ausencia da edicao reproduzida pelo usuario no Expo com uma saida de R$ 1,23.",
-    "Worktree isolado na branch fix/editar-categoria-gastos a partir da develop; branches anteriores da trilha preservadas.",
-    "Entrada pela lista completa de movimentacoes (Home ou Analise > Ver mais); receitas permanecem somente de leitura neste fluxo.",
-    "Editor separado do cadastro: envia somente categoryId via PATCH /transactions/{id}/category; nao depende dos meios de pagamento.",
-    "Cancelar descarta a selecao; falha preserva a escolha para retry; impedir envio e fechamento duplicados durante o salvamento.",
-    "Notificar transactionEvents apos persistir para atualizar Home, Analise e alertas; mostrar categoria separadamente da descricao.",
-    "Preparacao do PR: base atualizada para origin/develop 005e00e (PRs #30 e #31), preservando o novo header. Conflito apenas no estado do Railforge, resolvido mantendo a task atual.",
-    "Correcao de escopo: Educacao nao e categoria padrao obrigatoria. O editor usa as categorias retornadas pela API, incluindo as cadastradas pelo usuario, e nao depende de migration."
+    "Opção A aprovada pelo usuário em 2026-11-12: progresso por pergunta no back (PR fix/trilha-progresso-por-nivel no finup-backend).",
+    "Nível alcançado: até o primeiro nível não concluído; concluído é ter resposta, certa ou errada. Sem respostas, só o Lv. 1 abre.",
+    "Estrelas por nível: 3 no acerto, 1 no erro, nenhuma em leitura ou nível não respondido. Artes de 1 e 2 estrelas derivadas de stars.svg, provisórias até o design confirmar.",
+    "Círculo mostra completionPercentage (avanço), não percentage (acertos).",
+    "Sem progresso (erro ou formato inesperado), todos os níveis abrem: nunca travar conteúdo.",
+    "Rodada vai do nível aberto até o último, sem voltar ao início; cada resposta é salva ao responder (leitura ao avançar) e o fim da rodada reenvia o conjunto. Responder de novo substitui a resposta (vale a última)."
   ],
   "files_in_scope": [
-    "src/types/transaction.ts",
-    "src/types/analise.ts",
-    "src/models/transactionModel.ts",
-    "src/utils/analiseMovimentacoes.ts",
-    "src/utils/analiseMovimentacoes.test.ts",
-    "src/viewmodels/useEditExpenseCategoryViewModel.ts",
-    "src/components/analise/EditExpenseCategoryModal.tsx",
-    "src/components/analise/AnaliseMovimentacoesModal.tsx",
-    "src/views/AnaliseScreen.tsx",
-    "src/viewmodels/useSpendingAlertsViewModel.ts",
-    "docs/transaction-category-edit.md",
+    "src/types/studyTrack.ts",
+    "src/utils/studyProgress*",
+    "src/utils/studyTrack*",
+    "src/utils/studyQuestion*",
+    "src/utils/studySession*",
+    "src/models/studyProgressMock*",
+    "src/models/studyAnswersApi*",
+    "src/models/studyTrackModel.ts",
+    "src/viewmodels/useStudyTrackViewModel.ts",
+    "src/viewmodels/useStudySessionViewModel.ts",
+    "src/views/StudyTrackScreen.tsx",
+    "src/components/learning/LearningPath.tsx",
+    "src/components/learning/LearningProgress.tsx",
+    "src/components/learning/StudyQuestionModal.tsx",
+    "assets/learning/stars-1.svg",
+    "assets/learning/stars-2.svg",
+    "docs/study-track-mobile.md",
+    "docs/study-session-mobile.md",
     ".railforge/state.json"
   ],
-  "plan": [
-    "Conectar PATCH e preservar ID da categoria nas movimentacoes.",
-    "Implementar editor e acao explicita na lista de despesas, com estados de carga, vazio, falha, selecao e envio.",
-    "Atualizar dados apos salvar e validar tipos, lint, testes e bundle Android.",
-    "Repetir no Expo o caso de R$ 1,23, conferir persistencia e preservacao dos dados.",
-    "Remover a dependencia documental da migration e validar o mapeamento com categoria pessoal de nome arbitrario; interface e fluxo existentes preservados."
+  "non_goals": [
+    "Mudar o layout da trilha, a hierarquia curso/tópico ou o fluxo visual das perguntas.",
+    "Alterar backend (feito no finup-backend), autenticação ou outras telas."
   ],
   "validation": {
-    "baseline": "Ausencia da acao de editar confirmada pelo usuario no Expo.",
-    "tests": "50/50 testes aprovados apos corrigir o escopo, com categoria pessoal de nome livre (isDefault false) nos casos de recarga, agrupamento e titulo.",
-    "typecheck": "npm run typecheck passou apos corrigir o escopo.",
-    "lint": "npm run lint passou apos corrigir o escopo, sem erros/avisos.",
-    "android_bundle": "Expo export Android apos atualizar a develop passou: bundle Hermes e assets exportados para diretorio temporario, sem artefatos no diff.",
-    "review": "Diff revisado e restrito a edicao de categoria. Sem credenciais, dependencias novas ou alteracoes nas branches anteriores. Usuario autorizou commit e push; abertura dos PRs sera manual pelo usuario.",
-    "device": "Android/Expo Go: usuario confirmou salvamento da troca de categoria e persistencia apos recarregar o app na despesa de R$ 1,23. Captura do editor fornecida; espacamento corrigido depois. iOS e falha de rede/cancelamento no aparelho nao executados.",
-    "category_picker_spacing": "Gap local de 12 dp entre seletor e opcoes; ESLint do componente, Prettier e diff check passaram.",
-    "clean_install": "Copia isolada dos arquivos preparados para commit, npm ci e Node 22.22.2: 50 testes, tipos, lint e Expo Doctor (19/19, com a mesma configuracao do CI) passaram.",
-    "ci_runtime": "Workflow atual usa Node 20.20.2: lint, tipos e Expo Doctor passaram, mas npm ci emitiu EBADENGINE porque React Native/Metro exigem ^22.13.0 || ^24.3.0 || >=26.0.0; npm test falhou na expansao de src/**/*.test.ts no Node 20. Configuracao preexistente, sem mudancas de dependencias/CI nesta task.",
-    "expo_versions": "expo install --check apontou patches pendentes em 10 pacotes Expo. Aviso nao bloqueante pelo workflow atual (continue-on-error); nenhuma dependencia foi atualizada nesta task.",
-    "generic_categories": "Documentacao descreve Categoria A <-> Categoria B e remove dependencia de migration. Editor ja usa GET /categories com filtro EXPENSE, sem nomes fixos; nenhuma alteracao de interface foi necessaria."
+    "tests": "64/64 passaram (47 da develop ajustados ao novo contrato + 17 novos de progresso, mock e rodada).",
+    "typecheck": "Passou.",
+    "lint": "Passou.",
+    "prettier": "Arquivos alterados formatados (--end-of-line auto); sem mudança em código fora do escopo.",
+    "paridade_back_real": "Script com as funções do app contra o back da branch (Postgres temporário): progresso real igual (deepEqual) ao calculado pelo mock sem respostas, com 1 acerto e com 1 erro; buildStudyLevels abre só o Lv. 1 e depois o Lv. 2, com 3 e 1 estrelas.",
+    "device_ios": "2026-11-13, iPhone com Expo Go e back real da branch (Docker local): usuário conferiu níveis liberados até o primeiro pendente, nuvem e caminho cinza, estrelas 3 e 1 (artes com estrelas cinza renderizadas), círculo em 50% e 67%, feedback de acerto e avanço ao fechar no meio.",
+    "circulo_100": "Corrigido depois do teste no iPhone (100% vazava do anel): fonte menor para 100% e texto limitado ao miolo. Typecheck, lint e prettier ok; não conferido no aparelho.",
+    "limits": "Android, leitor de tela e fonte ampliada não verificados."
   },
-  "review": "Escopo generico confirmado: categorias retornadas pela API, incluindo as cadastradas pelo usuario; sem categoria padrao adicional nem dependencia de migration. Testes (50/50), tipos e lint aprovados. Android ja confirmou salvamento/reload anteriormente; iOS e falha de rede/cancelamento no aparelho continuam nao executados. Commit/push na mesma branch dentro da publicacao autorizada.",
-  "updated_at": "2026-11-13"
+  "review": "Diff revisado. Depende do PR do back (fix/trilha-progresso-por-nivel) estar na develop do finup-backend antes do merge. Pendente: confirmação do design para estrelas por nível e decisões de produto abaixo.",
+  "updated_at": "2026-11-13",
+  "open_questions": [
+    "Design (Figma 185-20958, sem acesso pelo MCP): regra de estrelas por nível e artes de 1 e 2 estrelas.",
+    "Produto: refazer um nível substitui a resposta (vale a última); confirmar se deveria valer a melhor.",
+    "Produto (levantado no teste, implementação interrompida): nível como série de perguntas (estilo Duolingo, X perguntas por nível) em vez de uma pergunta por nível.",
+    "Produto (levantado no teste, implementação interrompida): conteúdo LEARNING hoje é um nível próprio que conta avanço sem nota; proposta de juntá-lo ao nível da pergunta seguinte. Exige decidir como o painel web associa leitura e pergunta."
+  ]
 }

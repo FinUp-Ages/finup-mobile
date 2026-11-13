@@ -46,18 +46,23 @@ export function StudyQuestionModal({
 
   function requestClose() {
     if (busy) return;
+    // Cada resposta é salva ao responder: só pede confirmação se algo ainda puder se perder.
     const hasDraft =
-      Object.keys(session.answers).length > 0 ||
-      session.selected !== null ||
-      !!session.input.trim();
-    if (session.phase === 'complete' || !hasDraft) {
+      session.phase === 'answering' && (session.selected !== null || !!session.input.trim());
+    if (session.phase === 'complete' || (!hasDraft && vm.unsavedCount === 0)) {
       onClose();
       return;
     }
-    Alert.alert('Sair da atividade?', 'Suas respostas desta rodada ainda não foram salvas.', [
-      { text: 'Continuar', style: 'cancel' },
-      { text: 'Sair', style: 'destructive', onPress: onClose },
-    ]);
+    Alert.alert(
+      'Sair da atividade?',
+      vm.unsavedCount > 0
+        ? 'Algumas respostas ainda não foram salvas por falta de conexão e podem se perder.'
+        : 'A resposta que você está preenchendo ainda não foi enviada.',
+      [
+        { text: 'Continuar', style: 'cancel' },
+        { text: 'Sair', style: 'destructive', onPress: onClose },
+      ],
+    );
   }
 
   function respond() {
@@ -114,12 +119,12 @@ export function StudyQuestionModal({
               </Text>
               <Text style={styles.body}>
                 {session.result.gradableCount
-                  ? `Você acertou ${session.result.correctCount} de ${session.result.gradableCount} questões.`
-                  : 'Você concluiu a leitura de todos os conteúdos deste curso.'}
+                  ? `Você acertou ${session.result.correctCount} de ${session.result.gradableCount} questões deste curso.`
+                  : 'Você concluiu a leitura dos conteúdos desta rodada.'}
               </Text>
               {session.result.stars !== null && (
                 <Text
-                  accessibilityLabel={`${session.result.stars} de 3 estrelas na rodada`}
+                  accessibilityLabel={`${session.result.stars} de 3 estrelas no curso`}
                   style={styles.stars}
                 >
                   {'★'.repeat(session.result.stars)}

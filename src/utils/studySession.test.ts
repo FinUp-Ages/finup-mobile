@@ -4,6 +4,7 @@ import { getStudyQuestionsMock, studyCategoriesMock } from '../models/studyTrack
 import {
   canRespond,
   createStudySession,
+  roundSize,
   studySessionPayload,
   studySessionReducer as reduce,
   type StudySession,
@@ -12,7 +13,7 @@ import { gradeStudyAnswers, parseStudySessionQuestions } from './studyQuestion';
 
 const categoryId = studyCategoriesMock[0].id;
 const published = parseStudySessionQuestions(getStudyQuestionsMock(categoryId));
-// Começar pela objetiva permite testar seleção; a leitura continua no mesmo lote.
+// Começar pela objetiva permite testar seleção; a leitura vem logo depois na mesma rodada.
 const questions = [published[1], published[0], ...published.slice(2)];
 
 function answerCurrent(session: StudySession): StudySession {
@@ -58,7 +59,7 @@ test('resposta errada recebe feedback e permite seguir; lacuna vazia não pode s
   assert.equal(reduce(blank, { type: 'respond' }), blank);
 });
 
-test('abrir no meio percorre todos os itens em ordem circular antes de enviar', () => {
+test('abrir no meio vai até o último nível, sem voltar ao início, e envia só o que foi feito', () => {
   let session = createStudySession(questions, questions[2].id);
   assert.throws(() => studySessionPayload(session, categoryId));
   const visited: number[] = [];
@@ -66,17 +67,29 @@ test('abrir no meio percorre todos os itens em ordem circular antes de enviar', 
     visited.push(session.index);
     session = answerCurrent(session);
   }
-  assert.deepEqual(visited, [2, 3, 4, 0, 1]);
+  assert.deepEqual(visited, [2, 3, 4]);
+  assert.equal(roundSize(session), 3);
   const payload = studySessionPayload(session, categoryId);
-  assert.equal(payload.answers.length, questions.length);
   assert.deepEqual(
     payload.answers.map((item) => item.questionId),
-    questions.map((item) => item.id),
+    questions.slice(2).map((item) => item.id),
   );
   assert.equal(payload.answers[1].answer, null);
   assert.deepEqual(Object.keys(payload.answers[0]).sort(), ['answer', 'questionId']);
   assert.equal(reduce(session, { type: 'next' }), session);
   assert.equal(reduce(session, { type: 'respond' }), session);
+});
+
+test('envio de uma resposta só leva aquela questão; último nível encerra a rodada', () => {
+  let session = createStudySession(questions, questions[0].id);
+  session = reduce(reduce(session, { type: 'select', index: 1 }), { type: 'respond' });
+  const single = studySessionPayload(session, categoryId, questions[0].id);
+  assert.deepEqual(single.answers, [
+    { questionId: questions[0].id, answer: session.answers[questions[0].id].answer },
+  ]);
+  assert.throws(() => studySessionPayload(session, categoryId, questions[1].id));
+  const last = createStudySession(questions, questions[4].id);
+  assert.equal(answerCurrent(last).phase, 'submitting');
 });
 
 test('falha e retry preservam exatamente o lote, e resultado definitivo vem do servidor', () => {

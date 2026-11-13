@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { buildCategoryProgress } from './studyProgress';
 import { buildStudyLevels, learningContent, questionHeading } from './studyTrack';
 import type { StudyQuestion } from '../types/studyTrack';
 
@@ -15,37 +16,90 @@ const questions: StudyQuestion[] = [
   },
 ];
 
-test('dados reais nao inventam estrelas nem bloqueiam perguntas publicadas', () => {
-  const levels = buildStudyLevels(Array(5).fill(questions[0]), false);
+test('abrir lacunas nao revela respostas embutidas no contrato', () => {
+  assert.equal(questionHeading(questions[0]), 'Prefira alta _____ e baixo _____.');
+});
+
+const list: StudyQuestion[] = ['q1', 'q2', 'q3', 'q4', 'q5'].map((id) => ({
+  ...questions[0],
+  id,
+}));
+
+/** Progresso no formato do C6 a partir das mesmas regras do back (usadas pelo mock). */
+function progressFor(answers: Record<string, boolean | null>, ids = list.map((q) => q.id)) {
+  return buildCategoryProgress(
+    'categoria',
+    ids,
+    new Map(Object.entries(answers).map(([id, correct]) => [id, { correct }])),
+  );
+}
+
+test('sem progresso (erro ou carregando), nada é bloqueado nem ganha estrela', () => {
+  const levels = buildStudyLevels(list, null);
   assert.ok(levels.every((level) => level.stars === 0 && level.reached));
   assert.deepEqual(
     levels.map((level) => level.number),
     [1, 2, 3, 4, 5],
   );
-});
-test('demonstracao separa estrelas e trecho nao alcancado', () => {
-  const levels = buildStudyLevels(Array(5).fill(questions[0]), true);
-  assert.deepEqual(
-    levels.map((level) => level.stars),
-    [3, 3, 3, 0, 0],
-  );
-  assert.equal(levels[4].reached, false);
-  assert.deepEqual(buildStudyLevels([], true), []);
-});
-test('abrir lacunas nao revela respostas embutidas no contrato', () => {
-  assert.equal(questionHeading(questions[0]), 'Prefira alta _____ e baixo _____.');
+  assert.deepEqual(buildStudyLevels([], null), []);
 });
 
-test('todos os niveis depois do atual ficam nao alcancados (com nuvem), mesmo no meio da lista', () => {
-  const list = Array(5).fill(questions[0]);
-  const reached = (current: number, demo = true) =>
-    buildStudyLevels(list, demo, current).map((level) => level.reached);
-  // O caminho 2 -> 3 usa a cor apagada e os niveis 3, 4 e 5 recebem nuvem.
-  assert.deepEqual(reached(2), [true, true, false, false, false]);
-  assert.equal(buildStudyLevels(list, true, 2)[2].stars, 0);
-  assert.deepEqual(reached(3), [true, true, true, false, false]);
-  assert.deepEqual(reached(5), [true, true, true, true, true]);
-  assert.deepEqual(reached(2, false), [true, true, true, true, true]);
+test('usuário sem respostas tem só o nível 1 alcançado', () => {
+  const levels = buildStudyLevels(list, progressFor({}));
+  assert.deepEqual(
+    levels.map((level) => level.reached),
+    [true, false, false, false, false],
+  );
+  assert.ok(levels.every((level) => level.stars === 0));
+});
+
+test('resposta parcial: alcança até o primeiro nível pendente, com estrelas por nível', () => {
+  // Nível 1 lido (sem nota), nível 2 certo, nível 3 errado: o atual é o 4, com nuvem no 5.
+  const levels = buildStudyLevels(list, progressFor({ q1: null, q2: true, q3: false }));
+  assert.deepEqual(
+    levels.map((level) => level.reached),
+    [true, true, true, true, false],
+  );
+  assert.deepEqual(
+    levels.map((level) => level.stars),
+    [0, 3, 1, 0, 0],
+  );
+});
+
+test('nível respondido fora de ordem não pula o primeiro pendente', () => {
+  const levels = buildStudyLevels(list, progressFor({ q3: true }));
+  assert.deepEqual(
+    levels.map((level) => level.reached),
+    [true, false, false, false, false],
+  );
+  assert.equal(levels[2].stars, 3);
+});
+
+test('categoria completa e categoria com uma pergunta ficam inteiras alcançadas', () => {
+  const all = { q1: true, q2: true, q3: false, q4: null, q5: true };
+  assert.ok(buildStudyLevels(list, progressFor(all)).every((level) => level.reached));
+  const single = [list[0]];
+  assert.deepEqual(
+    buildStudyLevels(single, progressFor({}, ['q1'])).map((level) => level.reached),
+    [true],
+  );
+  assert.deepEqual(
+    buildStudyLevels(single, progressFor({ q1: false }, ['q1'])).map((level) => level.stars),
+    [1],
+  );
+});
+
+test('pergunta que o progresso ainda não conhece conta como pendente', () => {
+  // Publicada entre o GET de perguntas e o de progresso.
+  const progress = progressFor({ q1: true, q2: true }, ['q1', 'q2']);
+  const levels = buildStudyLevels(list.slice(0, 3), progress);
+  assert.deepEqual(
+    levels.map((level) => level.reached),
+    [true, true, true],
+  );
+  assert.equal(levels[2].stars, 0);
+  // E pergunta do progresso que saiu da lista (despublicada) é ignorada.
+  assert.equal(buildStudyLevels([list[1]], progress)[0].stars, 3);
 });
 
 test('C6 atual abre lacunas e conteudo sem depender de campos legados', () => {
