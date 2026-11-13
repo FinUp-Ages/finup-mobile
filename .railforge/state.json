@@ -1,56 +1,33 @@
 {
-  "stage": "REVIEWING",
-  "task": "[BUG] Trilha: progresso por nível com o back real (ClickUp 1dfcuabd1ja)",
-  "scope": "Consumir o GET /study-tracks/progress do C6 (progresso por nível) na trilha: níveis alcançados, nuvem e bloqueio, estrelas por nível e círculo de avanço sem depender do mock; salvar cada resposta assim que é dada; mock com estado e as mesmas regras do back.",
+  "stage": "COMPLETED",
+  "task": "[BUG] Trilha sem círculo dos níveis, estrelas e nuvem no APK release do Android",
+  "scope": "Desenhar as artes da trilha a partir de SVG em texto (SvgCss xml), em vez de SvgCssUri com Asset.fromModule(...).uri, que no APK release vira nome de recurso do Android e não carrega.",
   "decisions": [
-    "Opção A aprovada pelo usuário em 2026-11-12: progresso por pergunta no back (PR fix/trilha-progresso-por-nivel no finup-backend).",
-    "Nível alcançado: até o primeiro nível não concluído; concluído é ter resposta, certa ou errada. Sem respostas, só o Lv. 1 abre.",
-    "Estrelas por nível: 3 no acerto, 1 no erro, nenhuma em leitura ou nível não respondido. Artes de 1 e 2 estrelas derivadas de stars.svg, provisórias até o design confirmar.",
-    "Círculo mostra completionPercentage (avanço), não percentage (acertos).",
-    "Sem progresso (erro ou formato inesperado), todos os níveis abrem: nunca travar conteúdo.",
-    "Rodada vai do nível aberto até o último, sem voltar ao início; cada resposta é salva ao responder (leitura ao avançar) e o fim da rodada reenvia o conjunto. Responder de novo substitui a resposta (vale a última)."
+    "SVGs do nível, das estrelas e da nuvem passam a ser texto em src/components/learning/learningSvgs.ts, no padrão de src/widgets/widgetSvgs.ts; saem os .svg de assets/learning usados só pela trilha.",
+    "Marcação dos SVGs igual à dos arquivos do Figma, sem redesenho."
   ],
   "files_in_scope": [
-    "src/types/studyTrack.ts",
-    "src/utils/studyProgress*",
-    "src/utils/studyTrack*",
-    "src/utils/studyQuestion*",
-    "src/utils/studySession*",
-    "src/models/studyProgressMock*",
-    "src/models/studyAnswersApi*",
-    "src/models/studyTrackModel.ts",
-    "src/viewmodels/useStudyTrackViewModel.ts",
-    "src/viewmodels/useStudySessionViewModel.ts",
-    "src/views/StudyTrackScreen.tsx",
     "src/components/learning/LearningPath.tsx",
-    "src/components/learning/LearningProgress.tsx",
-    "src/components/learning/StudyQuestionModal.tsx",
+    "src/components/learning/learningSvgs.ts",
+    "assets/learning/level.svg",
+    "assets/learning/stars.svg",
     "assets/learning/stars-1.svg",
     "assets/learning/stars-2.svg",
+    "assets/learning/cloud.svg",
     "docs/study-track-mobile.md",
-    "docs/study-session-mobile.md",
     ".railforge/state.json"
   ],
   "non_goals": [
-    "Mudar o layout da trilha, a hierarquia curso/tópico ou o fluxo visual das perguntas.",
-    "Alterar backend (feito no finup-backend), autenticação ou outras telas."
+    "Mudar layout, regra de estrelas ou arte da trilha.",
+    "Remover cloud-left.svg e cloud-right.svg, que a trilha atual não usa."
   ],
   "validation": {
-    "tests": "64/64 passaram (47 da develop ajustados ao novo contrato + 17 novos de progresso, mock e rodada).",
     "typecheck": "Passou.",
     "lint": "Passou.",
-    "prettier": "Arquivos alterados formatados (--end-of-line auto); sem mudança em código fora do escopo.",
-    "paridade_back_real": "Script com as funções do app contra o back da branch (Postgres temporário): progresso real igual (deepEqual) ao calculado pelo mock sem respostas, com 1 acerto e com 1 erro; buildStudyLevels abre só o Lv. 1 e depois o Lv. 2, com 3 e 1 estrelas.",
-    "device_ios": "2026-11-13, iPhone com Expo Go e back real da branch (Docker local): usuário conferiu níveis liberados até o primeiro pendente, nuvem e caminho cinza, estrelas 3 e 1 (artes com estrelas cinza renderizadas), círculo em 50% e 67%, feedback de acerto e avanço ao fechar no meio.",
-    "circulo_100": "Corrigido depois do teste no iPhone (100% vazava do anel): fonte menor para 100% e texto limitado ao miolo. Typecheck, lint e prettier ok; não conferido no aparelho.",
-    "limits": "Android, leitor de tela e fonte ampliada não verificados."
+    "prettier": "Arquivos alterados formatados (--end-of-line auto).",
+    "device_android": "2026-11-13, APK release (EAS) em Android físico contra a API da AWS: usuário confirmou que a arte da trilha voltou a aparecer.",
+    "limits": "iOS/Expo Go não retestado depois da troca; o SvgCssUri já repassava o texto baixado para o SvgCss, então o render é o mesmo."
   },
-  "review": "Diff revisado. Depende do PR do back (fix/trilha-progresso-por-nivel) estar na develop do finup-backend antes do merge. Pendente: confirmação do design para estrelas por nível e decisões de produto abaixo.",
-  "updated_at": "2026-11-13",
-  "open_questions": [
-    "Design (Figma 185-20958, sem acesso pelo MCP): regra de estrelas por nível e artes de 1 e 2 estrelas.",
-    "Produto: refazer um nível substitui a resposta (vale a última); confirmar se deveria valer a melhor.",
-    "Produto (levantado no teste, implementação interrompida): nível como série de perguntas (estilo Duolingo, X perguntas por nível) em vez de uma pergunta por nível.",
-    "Produto (levantado no teste, implementação interrompida): conteúdo LEARNING hoje é um nível próprio que conta avanço sem nota; proposta de juntá-lo ao nível da pergunta seguinte. Exige decidir como o painel web associa leitura e pergunta."
-  ]
+  "review": "Diff revisado. PR para a develop.",
+  "updated_at": "2026-11-13"
 }

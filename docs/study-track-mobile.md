@@ -21,7 +21,7 @@ Cada categoria é um curso; cada item publicado é um nível, na ordem retornada
 Fonte: `GET /api/v1/study-tracks/progress` (`contracts/study-track-answers-c6.md` do back). Cada categoria traz `levels` (um item por pergunta publicada, com `completed` e `stars`), `currentLevel` e `completionPercentage`. `buildStudyLevels` cruza esses itens com as perguntas por `questionId`:
 
 - **Alcançado:** até o primeiro nível não concluído, na ordem das perguntas. Sem respostas, só o Lv. 1 abre; os demais ficam com nuvem e caminho cinza e não abrem.
-- **Estrelas por nível:** 3 no acerto, 1 no erro, nenhuma em leitura (`LEARNING`) ou nível não respondido. A regra e as artes de 1 e 2 estrelas (`assets/learning/stars-1.svg` e `stars-2.svg`, derivadas de `stars.svg`) são provisórias até o design confirmar no Figma.
+- **Estrelas por nível:** 3 no acerto, 1 no erro, nenhuma em leitura (`LEARNING`) ou nível não respondido. A regra e as artes de 1 e 2 estrelas (`stars1Svg` e `stars2Svg` em `src/components/learning/learningSvgs.ts`, derivadas da arte de 3 estrelas) são provisórias até o design confirmar no Figma.
 - **Círculo:** `completionPercentage` arredondado, ou seja, avanço (níveis concluídos), não acertos. O `percentage` do C6 é de acertos e não é usado aqui.
 - **Sem progresso** (erro ou formato inesperado): todos os níveis abrem, sem estrelas, com aviso e "Tentar novamente". O app nunca trava conteúdo sem saber o que o usuário fez.
 - Pergunta que o progresso ainda não conhece (publicada entre as duas chamadas) conta como pendente.
@@ -42,7 +42,7 @@ Abrir um nível apresenta o conteúdo LEARNING ou a questão. O fluxo de respost
 - Trocar cursos rapidamente: resposta atrasada não deve substituir o curso atual.
 - Conferir leitor de tela, foco por teclado, fonte ampliada e áreas seguras no Android/iOS.
 
-SVGs dos níveis, estrelas e nuvens foram baixados do Figma para `assets/learning`; não há URLs temporárias em runtime.
+Os SVGs do nível, das estrelas e da nuvem vieram do Figma e ficam como texto em `src/components/learning/learningSvgs.ts`, desenhados com `SvgCss`; não há URLs temporárias em runtime. Não use `SvgCssUri` com `Asset.fromModule(...).uri`: no Expo Go funciona, porque o uri é do Metro, mas no APK release o uri vira nome de recurso do Android e a arte não aparece.
 
 ## Validacao executada
 
