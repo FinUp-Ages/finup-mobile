@@ -46,6 +46,45 @@ export type StudyQuestion = { id: string; published: StudyPublishedContent };
 export type StudyLevel = {
   question: StudyQuestion;
   number: number;
+  /** 0 quando o nível não tem nota (não respondido ou leitura). */
   stars: number;
   reached: boolean;
+};
+
+/** Item de `levels` em GET /study-tracks/progress (C6): uma pergunta publicada = um nível. */
+export type StudyLevelProgress = {
+  level: number;
+  questionId: string;
+  completed: boolean;
+  correct: boolean | null;
+  stars: number | null;
+};
+
+/** Progresso de uma categoria. `percentage` é de acertos; `completionPercentage`, de avanço. */
+export type StudyCategoryProgress = {
+  categoryId: string;
+  totalQuestions: number;
+  answeredQuestions: number;
+  correctAnswers: number;
+  gradableQuestions: number;
+  stars: number | null;
+  percentage: number;
+  completionPercentage: number;
+  /** Primeiro nível não concluído (1 sem respostas; o total com tudo concluído; 0 sem níveis). */
+  currentLevel: number;
+  levels: StudyLevelProgress[];
+};
+
+/** GET /api/v1/study-tracks/progress. */
+export type StudyTrackProgress = {
+  categories: StudyCategoryProgress[];
+  total: {
+    totalQuestions: number;
+    answeredQuestions: number;
+    correctAnswers: number;
+    gradableQuestions: number;
+    stars: number | null;
+    percentage: number;
+    completionPercentage: number;
+  };
 };

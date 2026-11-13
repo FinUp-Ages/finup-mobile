@@ -3,14 +3,25 @@ import Svg, { Circle } from 'react-native-svg';
 import { Text } from '@/components/ui/AppText';
 import { colors, learningColors } from '@/theme/colors';
 
-export function LearningProgress({ value }: { value: number | null }) {
+/** Avanço no curso (níveis concluídos), não percentual de acertos. */
+export function LearningProgress({
+  value,
+  demo = false,
+}: {
+  value: number | null;
+  demo?: boolean;
+}) {
   const circumference = 2 * Math.PI * 31.5;
   return (
     <View
       accessible
       accessibilityRole="progressbar"
       accessibilityLabel={
-        value === null ? 'Progresso ainda não disponível' : 'Progresso de demonstração'
+        value === null
+          ? 'Progresso ainda não disponível'
+          : demo
+            ? 'Progresso de demonstração no curso'
+            : 'Progresso no curso'
       }
       accessibilityValue={
         value === null ? { text: 'Indisponível' } : { min: 0, max: 100, now: value }

@@ -9,7 +9,7 @@ const record = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 const text = (value: unknown): value is string => typeof value === 'string' && !!value.trim();
 
-/** Rejeita o lote inteiro: descartar itens impediria o POST completo exigido pelo C6. */
+/** Rejeita o conjunto inteiro: descartar itens mudaria a numeração dos níveis da trilha. */
 export function parseStudySessionQuestions(value: unknown): StudySessionQuestion[] {
   const invalid = () =>
     new Error('Não foi possível ler as questões deste curso. Tente novamente mais tarde.');
@@ -85,26 +85,30 @@ export function studyStars(correct: number, gradable: number): number | null {
   return percentage < 50 ? 1 : percentage < 80 ? 2 : 3;
 }
 
-/** Usado pelo mock do POST; o feedback local nunca é enviado como nota. */
+/**
+ * Usado pelo mock do POST, com a validação do back (C6): uma ou mais perguntas publicadas da
+ * categoria, sem repetição. Corrige só o lote enviado; o feedback local nunca é enviado como nota.
+ */
 export function gradeStudyAnswers(
   questions: StudySessionQuestion[],
   payload: StudyAnswersRequest,
 ): StudyAnswersResponse {
   const supplied = new Map(payload.answers.map((answer) => [answer.questionId, answer.answer]));
-  if (
-    !questions.length ||
-    supplied.size !== payload.answers.length ||
-    supplied.size !== questions.length ||
-    questions.some((question) => !supplied.has(question.id))
-  ) {
-    throw new Error('O lote deve conter exatamente todas as perguntas publicadas da categoria.');
+  if (!supplied.size || supplied.size !== payload.answers.length) {
+    throw new Error('O lote deve ter perguntas, sem repetição.');
   }
-  const answers = questions.map((question) => ({
-    questionId: question.id,
-    answer: supplied.get(question.id) ?? null,
-    correct: gradeStudySessionQuestion(question, supplied.get(question.id) ?? null),
-    submittedAt: new Date().toISOString(),
-  }));
+  const known = new Set(questions.map((question) => question.id));
+  if ([...supplied.keys()].some((id) => !known.has(id))) {
+    throw new Error('O lote só pode conter perguntas publicadas da categoria.');
+  }
+  const answers = questions
+    .filter((question) => supplied.has(question.id))
+    .map((question) => ({
+      questionId: question.id,
+      answer: supplied.get(question.id) ?? null,
+      correct: gradeStudySessionQuestion(question, supplied.get(question.id) ?? null),
+      submittedAt: new Date().toISOString(),
+    }));
   const correctCount = answers.filter((item) => item.correct === true).length;
   const gradableCount = answers.filter((item) => item.correct !== null).length;
   return {

@@ -8,7 +8,14 @@ import { colors, learningColors } from '@/theme/colors';
 import type { StudyLevel } from '@/types/studyTrack';
 
 const levelUri = Asset.fromModule(require('../../../assets/learning/level.svg')).uri;
-const starsUri = Asset.fromModule(require('../../../assets/learning/stars.svg')).uri;
+// Índice = estrelas do nível. 1 e 2 são variantes provisórias da arte de 3 (a confirmar no Figma).
+const starsUris = [
+  null,
+  Asset.fromModule(require('../../../assets/learning/stars-1.svg')).uri,
+  Asset.fromModule(require('../../../assets/learning/stars-2.svg')).uri,
+  Asset.fromModule(require('../../../assets/learning/stars.svg')).uri,
+];
+const starsUriFor = (stars: number) => starsUris[Math.max(0, Math.min(3, Math.trunc(stars)))];
 const cloudUri = Asset.fromModule(require('../../../assets/learning/cloud.svg')).uri;
 const positions = [60, 236, 112, 248, 93];
 const xFor = (index: number) => positions[index % positions.length];
@@ -71,9 +78,9 @@ export function LearningPath({
               </View>
               <Text style={styles.number}>Lv. {level.number}</Text>
             </LearningButton>
-            {level.stars > 0 && (
+            {starsUriFor(level.stars) && (
               <View pointerEvents="none" accessible={false} style={styles.stars}>
-                <SvgCssUri uri={starsUri} />
+                <SvgCssUri uri={starsUriFor(level.stars)!} />
               </View>
             )}
             {!level.reached && (

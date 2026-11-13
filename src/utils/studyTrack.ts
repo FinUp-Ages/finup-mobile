@@ -1,17 +1,37 @@
-import type { StudyLearningContent, StudyLevel, StudyQuestion } from '../types/studyTrack';
+import type {
+  StudyCategoryProgress,
+  StudyLearningContent,
+  StudyLevel,
+  StudyQuestion,
+} from '../types/studyTrack';
 
-/** C6 nao oferece progresso; nunca inferir conclusao apenas por existir uma pergunta. */
+/**
+ * Níveis da trilha a partir do progresso do C6 (GET /study-tracks/progress), cruzado por
+ * `questionId`. Alcançados: até o primeiro nível não concluído, na ordem das perguntas.
+ * Pergunta sem item no progresso (publicada entre as duas chamadas) conta como não concluída.
+ * Sem progresso (erro ou carregando), todos os níveis ficam abertos e sem estrelas: nunca travar
+ * conteúdo sem saber o que o usuário já fez.
+ */
 export function buildStudyLevels(
   questions: StudyQuestion[],
-  demo: boolean,
-  currentLevel = 4,
+  progress: StudyCategoryProgress | null,
 ): StudyLevel[] {
-  const current = Math.max(1, Math.min(Math.trunc(currentLevel), questions.length));
+  if (!progress) {
+    return questions.map((question, index) => ({
+      question,
+      number: index + 1,
+      stars: 0,
+      reached: true,
+    }));
+  }
+  const byQuestion = new Map(progress.levels.map((level) => [level.questionId, level]));
+  const pending = questions.findIndex((question) => !byQuestion.get(question.id)?.completed);
+  const current = pending === -1 ? questions.length - 1 : pending;
   return questions.map((question, index) => ({
     question,
     number: index + 1,
-    stars: demo && index < current - 1 ? 3 : 0,
-    reached: demo ? index < current : true,
+    stars: byQuestion.get(question.id)?.stars ?? 0,
+    reached: index <= current,
   }));
 }
 

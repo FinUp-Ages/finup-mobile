@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { studyTrackModel, studyTrackUsesMocks } from '@/models/studyTrackModel';
-import type { StudyCategory, StudyLevel, StudyQuestion } from '@/types/studyTrack';
+import type {
+  StudyCategory,
+  StudyLevel,
+  StudyQuestion,
+  StudyTrackProgress,
+} from '@/types/studyTrack';
 import { buildStudyLevels } from '@/utils/studyTrack';
 
 type Status = 'loading' | 'success' | 'error';
-
-const DEMO_CURRENT_LEVEL = 2;
 
 export function useStudyTrackViewModel() {
   const [categories, setCategories] = useState<StudyCategory[]>([]);
@@ -13,9 +16,11 @@ export function useStudyTrackViewModel() {
   const [questions, setQuestions] = useState<StudyQuestion[]>([]);
   const [status, setStatus] = useState<Status>('loading');
   const [questionStatus, setQuestionStatus] = useState<Status>('loading');
+  const [progress, setProgress] = useState<StudyTrackProgress | null>(null);
+  const [progressStatus, setProgressStatus] = useState<Status>('loading');
   const [openedLevel, setOpenedLevel] = useState<StudyLevel | null>(null);
   const [topicOpen, setTopicOpen] = useState(false);
-  const requests = useRef({ categories: 0, questions: 0 });
+  const requests = useRef({ categories: 0, questions: 0, progress: 0 });
 
   const loadCategories = useCallback(() => {
     const id = ++requests.current.categories;
@@ -48,14 +53,34 @@ export function useStudyTrackViewModel() {
     );
   }, []);
 
+  // Falha no progresso não bloqueia a trilha: sem progresso, todos os níveis ficam abertos.
+  // Ao recarregar, o progresso anterior continua na tela até chegar o novo.
+  const loadProgress = useCallback(() => {
+    const id = ++requests.current.progress;
+    return studyTrackModel.progress().then(
+      (data) => {
+        if (id !== requests.current.progress) return;
+        setProgress(data);
+        setProgressStatus('success');
+      },
+      () => {
+        if (id !== requests.current.progress) return;
+        setProgress(null);
+        setProgressStatus('error');
+      },
+    );
+  }, []);
+
   useEffect(() => {
     const pending = requests.current;
     void loadCategories();
+    void loadProgress();
     return () => {
       pending.categories++;
       pending.questions++;
+      pending.progress++;
     };
-  }, [loadCategories]);
+  }, [loadCategories, loadProgress]);
 
   useEffect(() => {
     const pending = requests.current;
@@ -66,7 +91,16 @@ export function useStudyTrackViewModel() {
   }, [categoryId, loadQuestions]);
 
   const selectedCategory = categories.find((item) => item.id === categoryId);
-  const levels = buildStudyLevels(questions, studyTrackUsesMocks, DEMO_CURRENT_LEVEL);
+  const categoryProgress =
+    progress?.categories.find((item) => item.categoryId === categoryId) ?? null;
+  const levels = buildStudyLevels(questions, categoryProgress);
+  const refresh = () => {
+    if (categoryId) {
+      setQuestionStatus((current) => (current === 'error' ? 'loading' : current));
+      void loadQuestions(categoryId);
+    }
+    void loadProgress();
+  };
   return {
     categories,
     categoryId,
@@ -74,12 +108,19 @@ export function useStudyTrackViewModel() {
     levels,
     questions,
     status,
-    questionStatus,
+    // Só no primeiro carregamento o progresso segura a trilha: evita mostrar níveis abertos e
+    // travá-los logo depois.
+    questionStatus:
+      questionStatus === 'success' && progressStatus === 'loading' && !progress
+        ? ('loading' as const)
+        : questionStatus,
+    progressUnavailable: progressStatus === 'error',
     openedLevel,
     topicOpen,
     setTopicOpen,
     isDemo: studyTrackUsesMocks,
-    progress: studyTrackUsesMocks && levels.length ? 81 : null,
+    progress:
+      categoryProgress && levels.length ? Math.round(categoryProgress.completionPercentage) : null,
     topic:
       studyTrackUsesMocks && categoryId === categories[0]?.id
         ? 'CDB'
@@ -96,13 +137,17 @@ export function useStudyTrackViewModel() {
     retry: () => {
       setStatus('loading');
       void loadCategories();
+      void loadProgress();
     },
     retryQuestions: () => {
       if (categoryId) {
         setQuestionStatus('loading');
         void loadQuestions(categoryId);
       }
+      void loadProgress();
     },
+    /** Depois de responder ou fechar a atividade: atualiza níveis e progresso sem piscar. */
+    refresh,
     openLevel: setOpenedLevel,
     closeLevel: () => setOpenedLevel(null),
   };

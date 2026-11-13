@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createStudyAnswersApi } from './studyAnswersApi';
+import { resetStudyProgressMock } from './studyProgressMock';
 import { getStudyQuestionsMock, studyCategoriesMock } from './studyTrackMock';
 import { parseStudySessionQuestions } from '../utils/studyQuestion';
 import {
@@ -36,7 +37,7 @@ test('envio real usa a rota C6 e somente categoryId, questionId e texto/null, se
     },
     false,
   );
-  assert.equal(await api.submitAnswers(payload), serverResult);
+  assert.deepEqual(await api.submitAnswers(payload), serverResult);
   assert.deepEqual(calls, [{ path: '/api/v1/study-tracks/answers', body: payload }]);
 });
 
@@ -53,7 +54,31 @@ test('erro da API é propagado sem sucesso simulado ou fallback para mock', asyn
   await assert.rejects(api.submitAnswers({ categoryId: 'categoria', answers: [] }), failure);
 });
 
-test('modo demonstração usa as perguntas da própria trilha e respeita o lote completo', async () => {
+test('resposta real sem stars/correct (non_null do back) vira null', async () => {
+  const api = createStudyAnswersApi(
+    {
+      async post<T>(): Promise<T> {
+        return {
+          categoryId: 'categoria',
+          correctCount: 0,
+          gradableCount: 0,
+          answers: [{ questionId: 'leitura', submittedAt: '2026-11-12T00:00:00Z' }],
+        } as T;
+      },
+    },
+    false,
+  );
+  const result = await api.submitAnswers({
+    categoryId: 'categoria',
+    answers: [{ questionId: 'leitura', answer: null }],
+  });
+  assert.equal(result.stars, null);
+  assert.equal(result.answers[0].correct, null);
+  assert.equal(result.answers[0].answer, null);
+});
+
+test('modo demonstração usa as perguntas da própria trilha e acumula a rodada', async () => {
+  resetStudyProgressMock();
   const api = createStudyAnswersApi(
     {
       post: async () => {
@@ -83,6 +108,7 @@ test('modo demonstração usa as perguntas da própria trilha e respeita o lote 
   assert.equal(result.correctCount, 2);
   assert.equal(result.answers.filter((answer) => answer.correct === null).length, 3);
   await assert.rejects(api.submitAnswers({ categoryId, answers: [] }));
+  resetStudyProgressMock();
 });
 
 test('todos os mocks publicados pelo colega são aceitos sem modificar a trilha', () => {
