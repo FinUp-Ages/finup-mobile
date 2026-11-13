@@ -12,6 +12,10 @@ export type PaymentMethod = {
   name: string;
 };
 
+export type UpdateTransactionCategoryPayload = {
+  categoryId: string;
+};
+
 /**
  * Espelha CreateTransactionRequest.java. Sem userId: o back tira o usuario do
  * access token que o httpClient injeta.

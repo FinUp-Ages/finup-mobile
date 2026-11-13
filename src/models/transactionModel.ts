@@ -3,6 +3,7 @@ import type {
   CreateTransactionPayload,
   TransactionListResponse,
   TransactionResponse,
+  UpdateTransactionCategoryPayload,
 } from '@/types/transaction';
 
 const GENERIC_MESSAGE = 'Não foi possível concluir a operação. Tente novamente.';
@@ -33,6 +34,12 @@ export function transactionErrorMessage(error: unknown): string {
 
 /** MODEL - transacoes financeiras. Payload e parametros identicos ao contrato do backend. */
 export const transactionModel = {
+  changeCategory: (id: string, payload: UpdateTransactionCategoryPayload) =>
+    httpClient.patch<TransactionResponse>(
+      `/api/v1/transactions/${encodeURIComponent(id)}/category`,
+      payload,
+    ),
+
   create: (payload: CreateTransactionPayload) =>
     httpClient.post<TransactionResponse>('/api/v1/transactions', payload),
 
