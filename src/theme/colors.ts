@@ -117,6 +117,20 @@ export const darkColors = {
   // Análise: superfícies, barras e alerta.
   analiseCard: 'rgba(255, 255, 255, 0.05)',
   analiseBar: '#027dc4',
+  // Gráfico de categorias (Figma Análise): cor de cada categoria, em ordem, e trilha do donut.
+  analiseCategoryPalette: [
+    '#01B3BF',
+    '#34C7FA',
+    '#2C3093',
+    '#027DC4',
+    '#4F7CFF',
+    '#7C5CFF',
+    '#1B8FA6',
+    '#0B5FA5',
+  ] as const,
+  analiseDonutTrack: 'rgba(255, 255, 255, 0.06)',
+  analisePill: 'rgba(255, 255, 255, 0.12)',
+  analisePillBorder: 'rgba(255, 255, 255, 0.1)',
   analiseAlert: 'rgba(255, 174, 0, 0.1)',
   analiseAlertBorder: 'rgba(255, 174, 0, 0.32)',
   analiseAlertText: '#FFC038',

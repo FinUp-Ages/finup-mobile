@@ -143,8 +143,8 @@ function SessionExpiredState() {
 }
 
 const styles = StyleSheet.create({
-  content: { gap: 22, paddingBottom: 24, paddingHorizontal: 16, paddingTop: 16 },
-  eyebrow: { color: darkColors.textMuted, fontSize: 12 },
+  content: { flexGrow: 1, gap: 24, paddingBottom: 24, paddingHorizontal: 16, paddingTop: 16 },
+  eyebrow: { color: 'rgba(255, 255, 255, 0.5)', fontSize: 12, fontWeight: '600', letterSpacing: 0.24 },
   feedback: {
     alignItems: 'center',
     backgroundColor: darkColors.surface,
@@ -167,10 +167,10 @@ const styles = StyleSheet.create({
   headerIcon: {
     alignItems: 'center',
     backgroundColor: darkColors.surface,
-    borderRadius: 20,
-    height: 40,
+    borderRadius: 21,
+    height: 42,
     justifyContent: 'center',
-    width: 40,
+    width: 42,
   },
   headerIconPressed: { opacity: 0.8 },
   pressed: { opacity: 0.75 },
@@ -183,5 +183,5 @@ const styles = StyleSheet.create({
   },
   retryText: { color: darkColors.background, fontSize: 14, fontWeight: '700' },
   screen: { backgroundColor: colors.navy, flex: 1 },
-  title: { color: darkColors.textPrimary, fontSize: 16, fontWeight: '700' },
+  title: { color: darkColors.textPrimary, fontSize: 14, fontWeight: '600', letterSpacing: 0.28 },
 });
