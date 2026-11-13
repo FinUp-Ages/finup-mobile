@@ -72,6 +72,7 @@ export function useStudyTrackViewModel() {
     categoryId,
     selectedCategory,
     levels,
+    questions,
     status,
     questionStatus,
     openedLevel,

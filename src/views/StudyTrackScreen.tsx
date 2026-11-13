@@ -4,12 +4,12 @@ import { ActivityIndicator, Modal, ScrollView, StyleSheet, View } from 'react-na
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { LearningButton } from '@/components/learning/LearningButton';
-import { LearningLevelModal } from '@/components/learning/LearningLevelModal';
 import { LearningPath } from '@/components/learning/LearningPath';
 import { LearningProgress } from '@/components/learning/LearningProgress';
 import { Text } from '@/components/ui/AppText';
 import { colors, learningColors } from '@/theme/colors';
 import { useStudyTrackViewModel } from '@/viewmodels/useStudyTrackViewModel';
+import StudySessionScreen from '@/views/StudySessionScreen';
 
 export default function StudyTrackScreen() {
   const vm = useStudyTrackViewModel();
@@ -147,7 +147,20 @@ export default function StudyTrackScreen() {
           </View>
         </View>
       </Modal>
-      <LearningLevelModal level={vm.openedLevel} onClose={vm.closeLevel} />
+      {vm.openedLevel && vm.categoryId && (
+        <StudySessionScreen
+          key={`${vm.categoryId}:${vm.openedLevel.question.id}`}
+          categoryId={vm.categoryId}
+          topic={vm.topic}
+          questions={vm.questions}
+          startQuestionId={vm.openedLevel.question.id}
+          onSaved={vm.retryQuestions}
+          onClose={() => {
+            vm.closeLevel();
+            vm.retryQuestions();
+          }}
+        />
+      )}
     </SafeAreaView>
   );
 }
