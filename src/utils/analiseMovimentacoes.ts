@@ -31,6 +31,7 @@ export function mapearMovimentacoes(
           ? `- ${formatAmount(transaction.amount)}`
           : `+ ${formatAmount(transaction.amount)}`,
       amountValue: transaction.amount,
+      categoryId: transaction.categoryId,
       categoryName,
       createdAt: transaction.createdAt,
       date: formatShortDate(transaction.transactionDate),

@@ -7,6 +7,7 @@ export type AnaliseSortOrder = 'NEWEST' | 'HIGHEST_AMOUNT' | 'LOWEST_AMOUNT';
 
 export type AnaliseMovement = {
   id: string;
+  categoryId: string;
   type: TransactionType;
   amountValue: number;
   categoryName: string;
