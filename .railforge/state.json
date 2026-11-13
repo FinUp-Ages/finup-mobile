@@ -1,41 +1,52 @@
 {
-  "stage": "COMPLETED",
-  "task": "[Mobile] Trilha: responder perguntas (ClickUp 1dfcuabbdyv)",
-  "scope": "Telas de perguntas MULTIPLE_CHOICE, FILL_BLANK e LEARNING, feedback e persistência C6. Integrar à trilha da develop preservando os componentes, layout, progresso e regras do colega.",
-  "plan": [
-    "Partir da develop atualizada e transportar somente o fluxo de perguntas, preservando a branch anterior e seu backup.",
-    "Isolar tipos, validação, rodada e envio das respostas; conectar a abertura do nível e o retorno à trilha com alterações mínimas.",
-    "Verificar testes, tipos, lint, bundle Android e diff contra develop; conferir os três tipos no Expo com a API real.",
-    "Revisar o diff, registrar a pendência do contrato de progresso/estrelas e publicar a branch conforme autorização do usuário; MR será aberto pelo usuário."
+  "stage": "REVIEWING",
+  "task": "[ BUG ] - Permitir editar a categoria dos gastos (ClickUp 1dfcuabck3w)",
+  "objective": "Editar a categoria de despesas manuais e da IA entre quaisquer categorias de despesa disponiveis ao usuario, sem categorias fixas nem dependencia de migration.",
+  "decisions": [
+    "Ausencia da edicao reproduzida pelo usuario no Expo com uma saida de R$ 1,23.",
+    "Worktree isolado na branch fix/editar-categoria-gastos a partir da develop; branches anteriores da trilha preservadas.",
+    "Entrada pela lista completa de movimentacoes (Home ou Analise > Ver mais); receitas permanecem somente de leitura neste fluxo.",
+    "Editor separado do cadastro: envia somente categoryId via PATCH /transactions/{id}/category; nao depende dos meios de pagamento.",
+    "Cancelar descarta a selecao; falha preserva a escolha para retry; impedir envio e fechamento duplicados durante o salvamento.",
+    "Notificar transactionEvents apos persistir para atualizar Home, Analise e alertas; mostrar categoria separadamente da descricao.",
+    "Preparacao do PR: base atualizada para origin/develop 005e00e (PRs #30 e #31), preservando o novo header. Conflito apenas no estado do Railforge, resolvido mantendo a task atual.",
+    "Correcao de escopo: Educacao nao e categoria padrao obrigatoria. O editor usa as categorias retornadas pela API, incluindo as cadastradas pelo usuario, e nao depende de migration."
   ],
   "files_in_scope": [
-    "src/components/learning/StudyQuestionModal.tsx",
-    "src/models/studyAnswers*",
-    "src/types/studySession.ts",
-    "src/utils/studyQuestion*",
-    "src/utils/studySession*",
-    "src/viewmodels/useStudySessionViewModel.ts",
-    "src/views/StudySessionScreen.tsx",
-    "src/viewmodels/useStudyTrackViewModel.ts (expor perguntas)",
-    "src/views/StudyTrackScreen.tsx (abrir perguntas e atualizar dados ao retornar)",
-    "src/theme/studyQuestionColors.ts",
-    "docs/study-session-mobile.md"
+    "src/types/transaction.ts",
+    "src/types/analise.ts",
+    "src/models/transactionModel.ts",
+    "src/utils/analiseMovimentacoes.ts",
+    "src/utils/analiseMovimentacoes.test.ts",
+    "src/viewmodels/useEditExpenseCategoryViewModel.ts",
+    "src/components/analise/EditExpenseCategoryModal.tsx",
+    "src/components/analise/AnaliseMovimentacoesModal.tsx",
+    "src/views/AnaliseScreen.tsx",
+    "src/viewmodels/useSpendingAlertsViewModel.ts",
+    "docs/transaction-category-edit.md",
+    ".railforge/state.json"
   ],
-  "non_goals": [
-    "Implementar ou substituir tela, progresso, estrelas, bloqueios, assets ou mocks da trilha do colega.",
-    "Alterar backend, autenticação, funcionalidades de outras tasks ou abrir MR."
+  "plan": [
+    "Conectar PATCH e preservar ID da categoria nas movimentacoes.",
+    "Implementar editor e acao explicita na lista de despesas, com estados de carga, vazio, falha, selecao e envio.",
+    "Atualizar dados apos salvar e validar tipos, lint, testes e bundle Android.",
+    "Repetir no Expo o caso de R$ 1,23, conferir persistencia e preservacao dos dados.",
+    "Remover a dependencia documental da migration e validar o mapeamento com categoria pessoal de nome arbitrario; interface e fluxo existentes preservados."
   ],
   "validation": {
-    "tests": "47/47 passaram, incluindo os 31 testes da develop.",
-    "typecheck": "Passou após adequar apenas o ref do modal ao ScrollViewInstance do RN 0.88.",
-    "lint": "Passou.",
-    "android_bundle": "Export Android passou: 1850 módulos e 69 assets.",
-    "device": "Android/Expo Go com API real: usuário confirmou a rodada com os três tipos e resultado de 2/2; banco confirmou objetiva e lacuna corretas, leitura com answer/correct null e 3 estrelas. Usuário confirmou retorno à trilha, abertura no Lv. 2, feedback de erro, confirmação de saída e reabertura com campo vazio/Responder desabilitado.",
-    "diff": "16 arquivos da trilha idênticos à develop; ViewModel expõe perguntas e View conecta abertura/fechamento/callback.",
-    "limits": "Validação manual realizada no Android. iOS, fonte ampliada e leitor de tela não foram verificados nesta integração. Falha/retry coberta pelos testes automatizados; teste manual com API parada foi feito na implementação anterior.",
-    "release_review": "Diff final restrito a 16 arquivos no escopo. Revisão de entrega alterou somente documentação/estado; código funcional permanece igual ao validado em 47 testes. Sem protótipos, configurações locais ou dependências adicionais no diff."
+    "baseline": "Ausencia da acao de editar confirmada pelo usuario no Expo.",
+    "tests": "50/50 testes aprovados apos corrigir o escopo, com categoria pessoal de nome livre (isDefault false) nos casos de recarga, agrupamento e titulo.",
+    "typecheck": "npm run typecheck passou apos corrigir o escopo.",
+    "lint": "npm run lint passou apos corrigir o escopo, sem erros/avisos.",
+    "android_bundle": "Expo export Android apos atualizar a develop passou: bundle Hermes e assets exportados para diretorio temporario, sem artefatos no diff.",
+    "review": "Diff revisado e restrito a edicao de categoria. Sem credenciais, dependencias novas ou alteracoes nas branches anteriores. Usuario autorizou commit e push; abertura dos PRs sera manual pelo usuario.",
+    "device": "Android/Expo Go: usuario confirmou salvamento da troca de categoria e persistencia apos recarregar o app na despesa de R$ 1,23. Captura do editor fornecida; espacamento corrigido depois. iOS e falha de rede/cancelamento no aparelho nao executados.",
+    "category_picker_spacing": "Gap local de 12 dp entre seletor e opcoes; ESLint do componente, Prettier e diff check passaram.",
+    "clean_install": "Copia isolada dos arquivos preparados para commit, npm ci e Node 22.22.2: 50 testes, tipos, lint e Expo Doctor (19/19, com a mesma configuracao do CI) passaram.",
+    "ci_runtime": "Workflow atual usa Node 20.20.2: lint, tipos e Expo Doctor passaram, mas npm ci emitiu EBADENGINE porque React Native/Metro exigem ^22.13.0 || ^24.3.0 || >=26.0.0; npm test falhou na expansao de src/**/*.test.ts no Node 20. Configuracao preexistente, sem mudancas de dependencias/CI nesta task.",
+    "expo_versions": "expo install --check apontou patches pendentes em 10 pacotes Expo. Aviso nao bloqueante pelo workflow atual (continue-on-error); nenhuma dependencia foi atualizada nesta task.",
+    "generic_categories": "Documentacao descreve Categoria A <-> Categoria B e remove dependencia de migration. Editor ja usa GET /categories com filtro EXPENSE, sem nomes fixos; nenhuma alteracao de interface foi necessaria."
   },
-  "review": "Escopo aprovado atendido e diff revisado para publicação. Componentes, layout, regras, assets, mocks e testes da trilha preservados. Pendência do contrato de estrelas/progresso documentada e mantida fora da task. Push autorizado pelo usuário; MR será aberto pelo usuário.",
-  "updated_at": "2026-11-12",
-  "pending_integration": "Alinhar estrelas por categoria do backend com estrelas por nível da tela e distinguir percentual de acertos de conclusão antes de integrar o progresso real da trilha."
+  "review": "Escopo generico confirmado: categorias retornadas pela API, incluindo as cadastradas pelo usuario; sem categoria padrao adicional nem dependencia de migration. Testes (50/50), tipos e lint aprovados. Android ja confirmou salvamento/reload anteriormente; iOS e falha de rede/cancelamento no aparelho continuam nao executados. Commit/push na mesma branch dentro da publicacao autorizada.",
+  "updated_at": "2026-11-13"
 }

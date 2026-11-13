@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   ActivityIndicator,
@@ -15,9 +15,11 @@ import { AnaliseAlerta } from '@/components/analise/AnaliseAlerta';
 import { AnaliseGastoCategorias } from '@/components/analise/AnaliseGastoCategorias';
 import { AnaliseMovimentacoes } from '@/components/analise/AnaliseMovimentacoes';
 import { AnaliseMovimentacoesModal } from '@/components/analise/AnaliseMovimentacoesModal';
+import { EditExpenseCategoryModal } from '@/components/analise/EditExpenseCategoryModal';
 import { useTabBarClearance } from '@/components/navigation/TabBarClearance';
 import { Text } from '@/components/ui/AppText';
 import { colors, darkColors } from '@/theme/colors';
+import type { AnaliseMovement } from '@/types/analise';
 import { useAnaliseViewModel } from '@/viewmodels/useAnaliseViewModel';
 import { useSpendingAlertsViewModel } from '@/viewmodels/useSpendingAlertsViewModel';
 
@@ -29,16 +31,23 @@ export default function AnaliseScreen() {
   const tabBarClearance = useTabBarClearance();
   const spendingAlerts = useSpendingAlertsViewModel();
   const [movementsModalOpen, setMovementsModalOpen] = useState(false);
+  const [editingMovement, setEditingMovement] = useState<AnaliseMovement | null>(null);
   const movementsModalVisible = movementsModalOpen || view === 'movements';
   const closeMovementsModal = () => {
+    setEditingMovement(null);
     setMovementsModalOpen(false);
     router.setParams({ view: undefined });
   };
+  const closeCategoryEditor = useCallback(() => setEditingMovement(null), []);
 
   return (
     <SafeAreaView edges={['top']} style={styles.screen}>
       <StatusBar style="light" />
       <ScrollView
+        accessibilityElementsHidden={movementsModalVisible || editingMovement !== null}
+        importantForAccessibility={
+          movementsModalVisible || editingMovement ? 'no-hide-descendants' : 'auto'
+        }
         contentContainerStyle={[styles.content, { paddingBottom: 24 + tabBarClearance }]}
         refreshControl={
           <RefreshControl
@@ -76,6 +85,8 @@ export default function AnaliseScreen() {
         ) : null}
       </ScrollView>
       <AnaliseMovimentacoesModal
+        editingExpense={editingMovement !== null}
+        onEditExpense={setEditingMovement}
         movements={viewModel.movements}
         onClose={closeMovementsModal}
         onSelectPeriod={viewModel.setPeriodKey}
@@ -85,6 +96,13 @@ export default function AnaliseScreen() {
         sortOrder={viewModel.sortOrder}
         visible={movementsModalVisible}
       />
+      {editingMovement ? (
+        <EditExpenseCategoryModal
+          key={editingMovement.id}
+          movement={editingMovement}
+          onClose={closeCategoryEditor}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }
