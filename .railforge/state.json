@@ -41,12 +41,16 @@
     "lint": "Passou.",
     "prettier": "Arquivos alterados formatados (--end-of-line auto); sem mudança em código fora do escopo.",
     "paridade_back_real": "Script com as funções do app contra o back da branch (Postgres temporário): progresso real igual (deepEqual) ao calculado pelo mock sem respostas, com 1 acerto e com 1 erro; buildStudyLevels abre só o Lv. 1 e depois o Lv. 2, com 3 e 1 estrelas.",
-    "limits": "Não verificado em aparelho (Android/iOS), nem leitor de tela e fonte ampliada. As artes de 1 e 2 estrelas não foram vistas renderizadas."
+    "device_ios": "2026-11-13, iPhone com Expo Go e back real da branch (Docker local): usuário conferiu níveis liberados até o primeiro pendente, nuvem e caminho cinza, estrelas 3 e 1 (artes com estrelas cinza renderizadas), círculo em 50% e 67%, feedback de acerto e avanço ao fechar no meio.",
+    "circulo_100": "Corrigido depois do teste no iPhone (100% vazava do anel): fonte menor para 100% e texto limitado ao miolo. Typecheck, lint e prettier ok; não conferido no aparelho.",
+    "limits": "Android, leitor de tela e fonte ampliada não verificados."
   },
-  "review": "Diff revisado. Depende do PR do back (fix/trilha-progresso-por-nivel) estar na develop do finup-backend antes do merge. Pendente: conferência visual no aparelho e confirmação do design para estrelas por nível.",
-  "updated_at": "2026-11-12",
+  "review": "Diff revisado. Depende do PR do back (fix/trilha-progresso-por-nivel) estar na develop do finup-backend antes do merge. Pendente: confirmação do design para estrelas por nível e decisões de produto abaixo.",
+  "updated_at": "2026-11-13",
   "open_questions": [
-    "Design (Figma 185-20958, sem acesso pelo MCP): regra de estrelas por nível, estrelas em LEARNING e artes de 1 e 2 estrelas.",
-    "Produto: refazer um nível substitui a resposta (vale a última); confirmar se deveria valer a melhor."
+    "Design (Figma 185-20958, sem acesso pelo MCP): regra de estrelas por nível e artes de 1 e 2 estrelas.",
+    "Produto: refazer um nível substitui a resposta (vale a última); confirmar se deveria valer a melhor.",
+    "Produto (levantado no teste, implementação interrompida): nível como série de perguntas (estilo Duolingo, X perguntas por nível) em vez de uma pergunta por nível.",
+    "Produto (levantado no teste, implementação interrompida): conteúdo LEARNING hoje é um nível próprio que conta avanço sem nota; proposta de juntá-lo ao nível da pergunta seguinte. Exige decidir como o painel web associa leitura e pergunta."
   ]
 }
