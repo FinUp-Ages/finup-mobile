@@ -51,7 +51,17 @@ export function LearningProgress({
           />
         )}
       </Svg>
-      <Text style={[styles.value, value === null && styles.unavailable]}>
+      {/* O texto cabe no miolo do anel (56 px): "100%" usa fonte menor, e fonte ampliada encolhe. */}
+      <Text
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.6}
+        style={[
+          styles.value,
+          value !== null && value >= 100 && styles.full,
+          value === null && styles.unavailable,
+        ]}
+      >
         {value === null ? '—' : `${value}%`}
       </Text>
     </View>
@@ -60,6 +70,13 @@ export function LearningProgress({
 
 const styles = StyleSheet.create({
   container: { height: 78, width: 78, alignItems: 'center', justifyContent: 'center' },
-  value: { color: learningColors.progress, fontSize: 24, fontWeight: '700' },
+  value: {
+    color: learningColors.progress,
+    fontSize: 24,
+    fontWeight: '700',
+    maxWidth: 54,
+    textAlign: 'center',
+  },
+  full: { fontSize: 18 },
   unavailable: { color: colors.placeholderOnDark },
 });
