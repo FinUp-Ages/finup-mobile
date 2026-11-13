@@ -48,7 +48,7 @@ export default function TransacaoScreen() {
         <View
           accessibilityElementsHidden={modalVisible}
           importantForAccessibility={modalVisible ? 'no-hide-descendants' : 'auto'}
-          style={[styles.content, { paddingTop: insets.top + 24 }]}
+          style={[styles.content, { paddingTop: insets.top + 16 }]}
         >
           <View style={styles.header}>
             <Pressable
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
   },
   retryText: {
     color: colors.white,
