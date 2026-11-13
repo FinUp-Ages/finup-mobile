@@ -1,41 +1,52 @@
 {
-  "stage": "COMPLETED",
-  "task": "[Mobile] Trilha: responder perguntas (ClickUp 1dfcuabbdyv)",
-  "scope": "Telas de perguntas MULTIPLE_CHOICE, FILL_BLANK e LEARNING, feedback e persistência C6. Integrar à trilha da develop preservando os componentes, layout, progresso e regras do colega.",
-  "plan": [
-    "Partir da develop atualizada e transportar somente o fluxo de perguntas, preservando a branch anterior e seu backup.",
-    "Isolar tipos, validação, rodada e envio das respostas; conectar a abertura do nível e o retorno à trilha com alterações mínimas.",
-    "Verificar testes, tipos, lint, bundle Android e diff contra develop; conferir os três tipos no Expo com a API real.",
-    "Revisar o diff, registrar a pendência do contrato de progresso/estrelas e publicar a branch conforme autorização do usuário; MR será aberto pelo usuário."
+  "stage": "REVIEWING",
+  "task": "[BUG] Trilha: progresso por nível com o back real (ClickUp 1dfcuabd1ja)",
+  "scope": "Consumir o GET /study-tracks/progress do C6 (progresso por nível) na trilha: níveis alcançados, nuvem e bloqueio, estrelas por nível e círculo de avanço sem depender do mock; salvar cada resposta assim que é dada; mock com estado e as mesmas regras do back.",
+  "decisions": [
+    "Opção A aprovada pelo usuário em 2026-11-12: progresso por pergunta no back (PR fix/trilha-progresso-por-nivel no finup-backend).",
+    "Nível alcançado: até o primeiro nível não concluído; concluído é ter resposta, certa ou errada. Sem respostas, só o Lv. 1 abre.",
+    "Estrelas por nível: 3 no acerto, 1 no erro, nenhuma em leitura ou nível não respondido. Artes de 1 e 2 estrelas derivadas de stars.svg, provisórias até o design confirmar.",
+    "Círculo mostra completionPercentage (avanço), não percentage (acertos).",
+    "Sem progresso (erro ou formato inesperado), todos os níveis abrem: nunca travar conteúdo.",
+    "Rodada vai do nível aberto até o último, sem voltar ao início; cada resposta é salva ao responder (leitura ao avançar) e o fim da rodada reenvia o conjunto. Responder de novo substitui a resposta (vale a última)."
   ],
   "files_in_scope": [
-    "src/components/learning/StudyQuestionModal.tsx",
-    "src/models/studyAnswers*",
-    "src/types/studySession.ts",
+    "src/types/studyTrack.ts",
+    "src/utils/studyProgress*",
+    "src/utils/studyTrack*",
     "src/utils/studyQuestion*",
     "src/utils/studySession*",
+    "src/models/studyProgressMock*",
+    "src/models/studyAnswersApi*",
+    "src/models/studyTrackModel.ts",
+    "src/viewmodels/useStudyTrackViewModel.ts",
     "src/viewmodels/useStudySessionViewModel.ts",
-    "src/views/StudySessionScreen.tsx",
-    "src/viewmodels/useStudyTrackViewModel.ts (expor perguntas)",
-    "src/views/StudyTrackScreen.tsx (abrir perguntas e atualizar dados ao retornar)",
-    "src/theme/studyQuestionColors.ts",
-    "docs/study-session-mobile.md"
+    "src/views/StudyTrackScreen.tsx",
+    "src/components/learning/LearningPath.tsx",
+    "src/components/learning/LearningProgress.tsx",
+    "src/components/learning/StudyQuestionModal.tsx",
+    "assets/learning/stars-1.svg",
+    "assets/learning/stars-2.svg",
+    "docs/study-track-mobile.md",
+    "docs/study-session-mobile.md",
+    ".railforge/state.json"
   ],
   "non_goals": [
-    "Implementar ou substituir tela, progresso, estrelas, bloqueios, assets ou mocks da trilha do colega.",
-    "Alterar backend, autenticação, funcionalidades de outras tasks ou abrir MR."
+    "Mudar o layout da trilha, a hierarquia curso/tópico ou o fluxo visual das perguntas.",
+    "Alterar backend (feito no finup-backend), autenticação ou outras telas."
   ],
   "validation": {
-    "tests": "47/47 passaram, incluindo os 31 testes da develop.",
-    "typecheck": "Passou após adequar apenas o ref do modal ao ScrollViewInstance do RN 0.88.",
+    "tests": "64/64 passaram (47 da develop ajustados ao novo contrato + 17 novos de progresso, mock e rodada).",
+    "typecheck": "Passou.",
     "lint": "Passou.",
-    "android_bundle": "Export Android passou: 1850 módulos e 69 assets.",
-    "device": "Android/Expo Go com API real: usuário confirmou a rodada com os três tipos e resultado de 2/2; banco confirmou objetiva e lacuna corretas, leitura com answer/correct null e 3 estrelas. Usuário confirmou retorno à trilha, abertura no Lv. 2, feedback de erro, confirmação de saída e reabertura com campo vazio/Responder desabilitado.",
-    "diff": "16 arquivos da trilha idênticos à develop; ViewModel expõe perguntas e View conecta abertura/fechamento/callback.",
-    "limits": "Validação manual realizada no Android. iOS, fonte ampliada e leitor de tela não foram verificados nesta integração. Falha/retry coberta pelos testes automatizados; teste manual com API parada foi feito na implementação anterior.",
-    "release_review": "Diff final restrito a 16 arquivos no escopo. Revisão de entrega alterou somente documentação/estado; código funcional permanece igual ao validado em 47 testes. Sem protótipos, configurações locais ou dependências adicionais no diff."
+    "prettier": "Arquivos alterados formatados (--end-of-line auto); sem mudança em código fora do escopo.",
+    "paridade_back_real": "Script com as funções do app contra o back da branch (Postgres temporário): progresso real igual (deepEqual) ao calculado pelo mock sem respostas, com 1 acerto e com 1 erro; buildStudyLevels abre só o Lv. 1 e depois o Lv. 2, com 3 e 1 estrelas.",
+    "limits": "Não verificado em aparelho (Android/iOS), nem leitor de tela e fonte ampliada. As artes de 1 e 2 estrelas não foram vistas renderizadas."
   },
-  "review": "Escopo aprovado atendido e diff revisado para publicação. Componentes, layout, regras, assets, mocks e testes da trilha preservados. Pendência do contrato de estrelas/progresso documentada e mantida fora da task. Push autorizado pelo usuário; MR será aberto pelo usuário.",
+  "review": "Diff revisado. Depende do PR do back (fix/trilha-progresso-por-nivel) estar na develop do finup-backend antes do merge. Pendente: conferência visual no aparelho e confirmação do design para estrelas por nível.",
   "updated_at": "2026-11-12",
-  "pending_integration": "Alinhar estrelas por categoria do backend com estrelas por nível da tela e distinguir percentual de acertos de conclusão antes de integrar o progresso real da trilha."
+  "open_questions": [
+    "Design (Figma 185-20958, sem acesso pelo MCP): regra de estrelas por nível, estrelas em LEARNING e artes de 1 e 2 estrelas.",
+    "Produto: refazer um nível substitui a resposta (vale a última); confirmar se deveria valer a melhor."
+  ]
 }
