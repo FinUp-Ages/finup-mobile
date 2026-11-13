@@ -1,22 +1,21 @@
-import { Asset } from 'expo-asset';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
-import { SvgCssUri } from 'react-native-svg/css';
+import { SvgCss } from 'react-native-svg/css';
 import { Text } from '@/components/ui/AppText';
 import { LearningButton } from '@/components/learning/LearningButton';
+import {
+  cloudSvg,
+  levelSvg,
+  stars1Svg,
+  stars2Svg,
+  stars3Svg,
+} from '@/components/learning/learningSvgs';
 import { colors, learningColors } from '@/theme/colors';
 import type { StudyLevel } from '@/types/studyTrack';
 
-const levelUri = Asset.fromModule(require('../../../assets/learning/level.svg')).uri;
 // Índice = estrelas do nível. 1 e 2 são variantes provisórias da arte de 3 (a confirmar no Figma).
-const starsUris = [
-  null,
-  Asset.fromModule(require('../../../assets/learning/stars-1.svg')).uri,
-  Asset.fromModule(require('../../../assets/learning/stars-2.svg')).uri,
-  Asset.fromModule(require('../../../assets/learning/stars.svg')).uri,
-];
-const starsUriFor = (stars: number) => starsUris[Math.max(0, Math.min(3, Math.trunc(stars)))];
-const cloudUri = Asset.fromModule(require('../../../assets/learning/cloud.svg')).uri;
+const starsSvgs = [null, stars1Svg, stars2Svg, stars3Svg];
+const starsSvgFor = (stars: number) => starsSvgs[Math.max(0, Math.min(3, Math.trunc(stars)))];
 const positions = [60, 236, 112, 248, 93];
 const xFor = (index: number) => positions[index % positions.length];
 
@@ -74,18 +73,18 @@ export function LearningPath({
               style={styles.level}
             >
               <View pointerEvents="none" style={styles.art}>
-                <SvgCssUri uri={levelUri} />
+                <SvgCss xml={levelSvg} />
               </View>
               <Text style={styles.number}>Lv. {level.number}</Text>
             </LearningButton>
-            {starsUriFor(level.stars) && (
+            {starsSvgFor(level.stars) && (
               <View pointerEvents="none" accessible={false} style={styles.stars}>
-                <SvgCssUri uri={starsUriFor(level.stars)!} />
+                <SvgCss xml={starsSvgFor(level.stars)!} />
               </View>
             )}
             {!level.reached && (
               <View pointerEvents="none" style={styles.cloud}>
-                <SvgCssUri uri={cloudUri} />
+                <SvgCss xml={cloudSvg} />
               </View>
             )}
           </View>
