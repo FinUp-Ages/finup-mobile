@@ -6,7 +6,7 @@ import { calcularGastosCategorias } from './analiseGastosCategorias';
 
 const categories: Category[] = [
   { id: 'lazer', name: 'Lazer', type: 'EXPENSE', isDefault: true },
-  { id: 'educacao', name: 'Educação', type: 'EXPENSE', isDefault: true },
+  { id: 'pessoal', name: 'Manutenção da bicicleta', type: 'EXPENSE', isDefault: false },
 ];
 const expense: TransactionListResponse['transactions'][number] = {
   id: 'gasto',
@@ -28,12 +28,12 @@ test('a lista conserva o ID da categoria atual mesmo com descricao preenchida pe
   assert.equal(movement.title, expense.description);
 });
 
-test('a recarga apos reclassificar atualiza categoria e agrupamento sem mudar o gasto ou totais', () => {
-  const updated = { ...expense, categoryId: 'educacao' };
+test('a recarga apos trocar para categoria pessoal atualiza agrupamento sem mudar o gasto ou totais', () => {
+  const updated = { ...expense, categoryId: 'pessoal' };
   const [before] = mapearMovimentacoes([expense], categories);
   const [after] = mapearMovimentacoes([updated], categories);
-  assert.equal(after.categoryId, 'educacao');
-  assert.equal(after.categoryName, 'Educação');
+  assert.equal(after.categoryId, 'pessoal');
+  assert.equal(after.categoryName, 'Manutenção da bicicleta');
   assert.deepEqual(
     { ...after, categoryId: before.categoryId, categoryName: before.categoryName },
     before,
@@ -41,7 +41,7 @@ test('a recarga apos reclassificar atualiza categoria e agrupamento sem mudar o 
   const originalSummary = calcularGastosCategorias([expense], categories);
   const updatedSummary = calcularGastosCategorias([updated], categories);
   assert.equal(updatedSummary.total, originalSummary.total);
-  assert.equal(updatedSummary.expenses[0].name, 'Educação');
+  assert.equal(updatedSummary.expenses[0].name, 'Manutenção da bicicleta');
   assert.equal(updatedSummary.expenses[0].amount, originalSummary.expenses[0].amount);
   assert.equal(updatedSummary.expenses[0].percentage, 100);
   assert.equal(expense.categoryId, 'lazer');
@@ -49,9 +49,9 @@ test('a recarga apos reclassificar atualiza categoria e agrupamento sem mudar o 
 
 test('sem descricao a nova categoria passa a ser o titulo do gasto manual', () => {
   const [movement] = mapearMovimentacoes(
-    [{ ...expense, description: null, categoryId: 'educacao' }],
+    [{ ...expense, description: null, categoryId: 'pessoal' }],
     categories,
   );
-  assert.equal(movement.title, 'Educação');
-  assert.equal(movement.categoryName, 'Educação');
+  assert.equal(movement.title, 'Manutenção da bicicleta');
+  assert.equal(movement.categoryName, 'Manutenção da bicicleta');
 });

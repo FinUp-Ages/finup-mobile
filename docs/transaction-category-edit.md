@@ -9,8 +9,10 @@ Receitas permanecem somente de leitura neste fluxo.
 
 O ViewModel envia apenas `categoryId` para `PATCH /api/v1/transactions/{id}/category`.
 O editor não carrega meios de pagamento nem reutiliza o cadastro de transações.
-O backend deve conter esse endpoint e a migração de Educação descrita no repositório
-da API. As opções vêm de `GET /api/v1/categories` filtradas por `EXPENSE`.
+O backend deve conter esse endpoint. As opções vêm de `GET /api/v1/categories`
+filtradas por `EXPENSE`, incluindo as categorias cadastradas pelo usuário.
+A troca funciona independentemente do nome da categoria, não cria categorias
+automaticamente e não depende de migration.
 
 Estados: carregamento e falha das categorias com nova tentativa; lista vazia; categoria
 atual selecionada com salvar desabilitado; seleção alterada; salvamento com bloqueio
@@ -23,10 +25,12 @@ inclusive quando o assistente preencheu uma descrição.
 
 ## Conferência
 
-1. Criar uma saída de R$ 1,23 em Lazer e abrir na lista completa.
-2. Selecionar Educação e salvar. Conferir a categoria na lista e na Home.
-3. Fechar/reabrir o editor e recarregar o app: Educação deve continuar selecionada.
-4. Trocar Educação por Lazer; valor, data, descrição e pagamento devem continuar iguais.
+Usar duas categorias de despesa disponíveis (A e B), incluindo uma cadastrada pelo usuário.
+
+1. Criar uma saída de R$ 1,23 na categoria A e abrir na lista completa.
+2. Selecionar a categoria B e salvar. Conferir a categoria na lista e na Home.
+3. Fechar/reabrir o editor e recarregar o app: B deve continuar selecionada.
+4. Trocar B por A; valor, data, descrição e pagamento devem continuar iguais.
 5. Repetir com um gasto da IA. Os totais por categoria mudam e o saldo permanece igual.
 6. Cancelar uma seleção diferente e reabrir: a categoria original permanece.
 7. Com a API indisponível, conferir erro/retry da carga; parar a API após carregar,
