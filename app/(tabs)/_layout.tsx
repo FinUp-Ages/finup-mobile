@@ -52,8 +52,8 @@ export default function TabsLayout() {
       </NativeTabs.Trigger>
       <NativeTabs.Trigger disableTransparentOnScrollEdge name="chatbot">
         <NativeTabs.Trigger.Icon
-          sf="person.fill"
-          src={<NativeTabs.Trigger.VectorIcon family={MaterialIcons} name="person" />}
+          sf="message.fill"
+          src={<NativeTabs.Trigger.VectorIcon family={MaterialIcons} name="chat" />}
         />
         <NativeTabs.Trigger.Label>Chatbot</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
