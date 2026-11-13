@@ -3,12 +3,13 @@ import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BalanceCard } from '@/components/home/BalanceCard';
 import { ExpenseList } from '@/components/home/ExpenseList';
+import { HomeBanners } from '@/components/home/HomeBanners';
 import { HomeHeader } from '@/components/home/HomeHeader';
-import { ScoreBannerCard } from '@/components/home/ScoreBannerCard';
 import { SpendingAlertPopup } from '@/components/home/SpendingAlertPopup';
 import { TypeFilterPills } from '@/components/home/TypeFilterPills';
 import { Text } from '@/components/ui/AppText';
 import { darkColors } from '@/theme/colors';
+import { useHomeBannerViewModel } from '@/viewmodels/useHomeBannerViewModel';
 import { useHomeViewModel } from '@/viewmodels/useHomeViewModel';
 import { useSpendingAlertPopupViewModel } from '@/viewmodels/useSpendingAlertPopupViewModel';
 
@@ -19,8 +20,9 @@ import { useSpendingAlertPopupViewModel } from '@/viewmodels/useSpendingAlertPop
  * (useHomeViewModel). O filtro de tipo ('Todos' | 'Entrada' | 'Saida') filtra a listagem
  * de movimentacoes da Home de forma puramente reativa sem alterar o saldo ou totais.
  *
- * O banner do score abre a triagem (/triage): as respostas alimentam o calculo do FinUp
- * Score no back, e a Home recarrega o score ao voltar ao foco.
+ * Banner: enquanto a triagem nao foi respondida, alterna entre o do score (abre /triage: as
+ * respostas alimentam o FinUp Score no back, e a Home recarrega o score ao voltar ao foco) e o
+ * de aprendizado (abre a aba Educacional). Respondida a triagem, fica so o de aprendizado.
  */
 export default function HomeScreen() {
   const router = useRouter();
@@ -41,6 +43,7 @@ export default function HomeScreen() {
     retry,
     refresh,
   } = useHomeViewModel();
+  const { triage } = useHomeBannerViewModel();
   const spendingAlertPopup = useSpendingAlertPopupViewModel();
 
   const sectionTitle =
@@ -73,7 +76,11 @@ export default function HomeScreen() {
           userName={userName}
         />
 
-        <ScoreBannerCard onPress={() => router.push('/triage')} />
+        <HomeBanners
+          onPressLearning={() => router.navigate('/educacional')}
+          onPressScore={() => router.push('/triage')}
+          triage={triage}
+        />
 
         <BalanceCard
           balance={balance}

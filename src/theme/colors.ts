@@ -111,6 +111,11 @@ export const darkColors = {
   scoreBannerLight: '#B3DCF2',
   scoreBannerDeep: '#005586',
   scoreBannerButton: 'rgba(2, 23, 54, 0.1)',
+  // Banner "Tipo Duolingo, mas para finanças": degrade radial azul -> marinho e botão translucido.
+  learningBannerLight: '#014B90',
+  learningBannerDeep: '#00162A',
+  learningBannerSubtitle: 'rgba(255, 255, 255, 0.75)',
+  learningBannerButton: 'rgba(255, 255, 255, 0.1)',
   // Seletor de periodo: fundo escurecido atras da lista e opcao pressionada.
   overlay: 'rgba(0, 0, 0, 0.55)',
   pressed: 'rgba(255, 255, 255, 0.08)',
