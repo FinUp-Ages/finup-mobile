@@ -16,6 +16,7 @@ import { AnaliseGastoCategorias } from '@/components/analise/AnaliseGastoCategor
 import { AnaliseMovimentacoes } from '@/components/analise/AnaliseMovimentacoes';
 import { AnaliseMovimentacoesModal } from '@/components/analise/AnaliseMovimentacoesModal';
 import { EditExpenseCategoryModal } from '@/components/analise/EditExpenseCategoryModal';
+import { useTabBarClearance } from '@/components/navigation/TabBarClearance';
 import { Text } from '@/components/ui/AppText';
 import { colors, darkColors } from '@/theme/colors';
 import type { AnaliseMovement } from '@/types/analise';
@@ -27,6 +28,7 @@ export default function AnaliseScreen() {
   const { view } = useLocalSearchParams<{ view?: string }>();
   const router = useRouter();
   const viewModel = useAnaliseViewModel();
+  const tabBarClearance = useTabBarClearance();
   const spendingAlerts = useSpendingAlertsViewModel();
   const [movementsModalOpen, setMovementsModalOpen] = useState(false);
   const [editingMovement, setEditingMovement] = useState<AnaliseMovement | null>(null);
@@ -39,14 +41,14 @@ export default function AnaliseScreen() {
   const closeCategoryEditor = useCallback(() => setEditingMovement(null), []);
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={styles.screen}>
+    <SafeAreaView edges={['top']} style={styles.screen}>
       <StatusBar style="light" />
       <ScrollView
         accessibilityElementsHidden={movementsModalVisible || editingMovement !== null}
         importantForAccessibility={
           movementsModalVisible || editingMovement ? 'no-hide-descendants' : 'auto'
         }
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: 24 + tabBarClearance }]}
         refreshControl={
           <RefreshControl
             onRefresh={() => {
@@ -161,8 +163,8 @@ function SessionExpiredState() {
 }
 
 const styles = StyleSheet.create({
-  content: { gap: 22, paddingBottom: 24, paddingHorizontal: 16, paddingTop: 16 },
-  eyebrow: { color: darkColors.textMuted, fontSize: 12 },
+  content: { flexGrow: 1, gap: 24, paddingBottom: 24, paddingHorizontal: 16, paddingTop: 16 },
+  eyebrow: { color: 'rgba(255, 255, 255, 0.5)', fontSize: 12, fontWeight: '600', letterSpacing: 0.24 },
   feedback: {
     alignItems: 'center',
     backgroundColor: darkColors.surface,
@@ -185,10 +187,10 @@ const styles = StyleSheet.create({
   headerIcon: {
     alignItems: 'center',
     backgroundColor: darkColors.surface,
-    borderRadius: 20,
-    height: 40,
+    borderRadius: 21,
+    height: 42,
     justifyContent: 'center',
-    width: 40,
+    width: 42,
   },
   headerIconPressed: { opacity: 0.8 },
   pressed: { opacity: 0.75 },
@@ -201,5 +203,5 @@ const styles = StyleSheet.create({
   },
   retryText: { color: darkColors.background, fontSize: 14, fontWeight: '700' },
   screen: { backgroundColor: colors.navy, flex: 1 },
-  title: { color: darkColors.textPrimary, fontSize: 16, fontWeight: '700' },
+  title: { color: darkColors.textPrimary, fontSize: 14, fontWeight: '600', letterSpacing: 0.28 },
 });

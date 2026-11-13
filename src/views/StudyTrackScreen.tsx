@@ -7,6 +7,7 @@ import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { LearningButton } from '@/components/learning/LearningButton';
 import { LearningPath } from '@/components/learning/LearningPath';
 import { LearningProgress } from '@/components/learning/LearningProgress';
+import { useTabBarClearance } from '@/components/navigation/TabBarClearance';
 import { Text } from '@/components/ui/AppText';
 import { colors, darkColors, learningColors } from '@/theme/colors';
 import { useStudyTrackViewModel } from '@/viewmodels/useStudyTrackViewModel';
@@ -15,10 +16,14 @@ import StudySessionScreen from '@/views/StudySessionScreen';
 export default function StudyTrackScreen() {
   const router = useRouter();
   const vm = useStudyTrackViewModel();
+  const tabBarClearance = useTabBarClearance();
   return (
     <SafeAreaView edges={['top']} style={styles.screen}>
       <StatusBar style="light" />
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={[styles.content, { paddingBottom: 32 + tabBarClearance }]}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.header}>
           <Pressable
             accessibilityLabel="Abrir perfil"

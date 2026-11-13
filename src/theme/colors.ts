@@ -69,6 +69,38 @@ export const colors = {
   widgetSubtitle: 'rgba(255, 255, 255, 0.75)',
 } as const;
 
+/**
+ * Barra de abas flutuante do FinUp no estilo "liquid glass" da Apple: capsula de vidro
+ * translucido (a cor da tela aparece por baixo, escurecida pela tinta marinha), borda de luz em
+ * degrade, brilho especular no topo e uma lente de vidro na aba ativa. A acao central
+ * (Transacao) e um orbe azul fixo no centro que sai um pouco da barra.
+ */
+export const tabBarColors = {
+  // Tinta marinha translucida: mantem o contraste dos icones sobre fundos claros.
+  tint: 'rgba(10, 22, 48, 0.84)',
+  specularTop: 'rgba(255, 255, 255, 0.2)',
+  specularBottom: 'rgba(255, 255, 255, 0)',
+  // Reflexo azul suave na base, como a luz que atravessa o vidro.
+  glowBottom: 'rgba(70, 150, 255, 0.14)',
+  // Borda de luz: forte no canto superior esquerdo, some no meio, volta no canto inferior direito.
+  rimStart: 'rgba(255, 255, 255, 0.55)',
+  rimMiddle: 'rgba(255, 255, 255, 0.1)',
+  rimEnd: 'rgba(255, 255, 255, 0.28)',
+  icon: 'rgba(235, 235, 245, 0.62)',
+  label: 'rgba(235, 235, 245, 0.62)',
+  active: '#4DA3FF',
+  onAccent: '#ffffff',
+  // Lente (bolha de vidro) da aba ativa.
+  lensFill: 'rgba(255, 255, 255, 0.13)',
+  lensBorder: 'rgba(255, 255, 255, 0.3)',
+  lensShine: 'rgba(255, 255, 255, 0.24)',
+  orbTop: '#3B97FF',
+  orbBottom: '#0B63E6',
+  // O aro do orbe tem a cor da barra, como um recorte: ele "encaixa" nela.
+  orbRing: '#0C1B3C',
+  orbGlow: '#0A84FF',
+} as const;
+
 /** Trilha: valores extraidos do quadro Aprendizado (204:1350). */
 export const learningColors = {
   background: '#021736',
@@ -111,12 +143,31 @@ export const darkColors = {
   scoreBannerLight: '#B3DCF2',
   scoreBannerDeep: '#005586',
   scoreBannerButton: 'rgba(2, 23, 54, 0.1)',
+  // Banner "Tipo Duolingo, mas para finanças": degrade radial azul -> marinho e botão translucido.
+  learningBannerLight: '#014B90',
+  learningBannerDeep: '#00162A',
+  learningBannerSubtitle: 'rgba(255, 255, 255, 0.75)',
+  learningBannerButton: 'rgba(255, 255, 255, 0.1)',
   // Seletor de periodo: fundo escurecido atras da lista e opcao pressionada.
   overlay: 'rgba(0, 0, 0, 0.55)',
   pressed: 'rgba(255, 255, 255, 0.08)',
   // Análise: superfícies, barras e alerta.
   analiseCard: 'rgba(255, 255, 255, 0.05)',
   analiseBar: '#027dc4',
+  // Gráfico de categorias (Figma Análise): cor de cada categoria, em ordem, e trilha do donut.
+  analiseCategoryPalette: [
+    '#01B3BF',
+    '#34C7FA',
+    '#2C3093',
+    '#027DC4',
+    '#4F7CFF',
+    '#7C5CFF',
+    '#1B8FA6',
+    '#0B5FA5',
+  ] as const,
+  analiseDonutTrack: 'rgba(255, 255, 255, 0.06)',
+  analisePill: 'rgba(255, 255, 255, 0.12)',
+  analisePillBorder: 'rgba(255, 255, 255, 0.1)',
   analiseAlert: 'rgba(255, 174, 0, 0.1)',
   analiseAlertBorder: 'rgba(255, 174, 0, 0.32)',
   analiseAlertText: '#FFC038',

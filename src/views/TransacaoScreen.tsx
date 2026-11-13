@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeAreaView } from 'react-native-screens/experimental';
+import { useTabBarClearance } from '@/components/navigation/TabBarClearance';
 import { TransactionModal } from '@/components/common/TransactionModal';
 import { Text } from '@/components/ui/AppText';
 import { BrandGradient } from '@/components/ui/BrandGradient';
@@ -24,6 +25,7 @@ import { useTransacaoViewModel } from '@/viewmodels/useTransacaoViewModel';
 export default function TransacaoScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const tabBarClearance = useTabBarClearance();
   const {
     balance,
     balanceValue,
@@ -40,10 +42,9 @@ export default function TransacaoScreen() {
       <StatusBar style="light" />
       <BrandGradient />
 
-      {/* SafeAreaView do react-native-screens: respeita a barra de abas nativa
-          (no iOS 26 ela flutua por cima do conteudo), o que o useSafeAreaInsets
-          nao enxerga. O degrade acima continua indo ate o fim da tela. */}
-      <SafeAreaView edges={{ bottom: true }} style={styles.safeArea}>
+      {/* A barra de abas flutua por cima da tela: os botoes sobem a altura dela
+          (useTabBarClearance). O degrade acima continua indo ate o fim da tela. */}
+      <SafeAreaView edges={{ bottom: false }} style={styles.safeArea}>
         {/* Com o modal aberto por cima, o leitor de tela ignora o conteudo de tras. */}
         <View
           accessibilityElementsHidden={modalVisible}
@@ -85,7 +86,7 @@ export default function TransacaoScreen() {
             )}
           </View>
 
-          <View style={styles.actions}>
+          <View style={[styles.actions, { paddingBottom: 24 + tabBarClearance }]}>
             <Text style={styles.actionsTitle}>Registre uma transação</Text>
             <PillButton
               icon="plus"
