@@ -27,10 +27,12 @@ pela trilha. `answers` da lacuna contém alternativas textuais aceitas para uma
 resposta, não colunas independentes. O backend não possui um tipo `FEEDBACK`;
 o feedback de acerto/erro usa `explanation`, enquanto a leitura usa `LEARNING`.
 
-Uma rodada começa na pergunta do nível aberto, percorre todos os itens publicados
-da categoria e volta ao início quando necessário. Cada item é respondido/lido uma
-vez. O backend exige exatamente esse conjunto completo no POST
-`/api/v1/study-tracks/answers`, com `{categoryId, answers: [{questionId, answer}]}`.
+Uma rodada começa no nível aberto e vai até o último nível da categoria, sem voltar
+ao início. Cada item é respondido/lido uma vez. Cada resposta é salva assim que é
+dada (ao tocar em Responder; leituras, ao avançar), num POST
+`/api/v1/study-tracks/answers` com uma pergunta: o C6 aceita qualquer subconjunto
+das perguntas publicadas e substitui a resposta anterior da mesma pergunta. No fim
+da rodada, o app reenvia as respostas da rodada e mostra o resultado do servidor.
 Nenhuma nota local é enviada. A avaliação definitiva vem do servidor.
 
 Seleção única ou texto não vazio habilita Responder. O feedback bloqueia a edição
@@ -38,35 +40,26 @@ e habilita Próximo. A correção imediata ignora caixa e espaços externos, pre
 acentos e aceita qualquer alternativa marcada como correta no conteúdo publicado.
 Leituras não entram na nota. A barra do modal indica o andamento desta rodada.
 
-Fechar ou usar Voltar do Android confirma o descarte quando há respostas não salvas.
-Durante o envio, a saída fica bloqueada. Falhas preservam as respostas em memória
-para tentar salvar novamente. Depois do POST bem-sucedido, `onSaved(result)` recebe
-o resultado da API; o modal apresenta a conclusão. A conexão atual recarrega as
-perguntas ao salvar/fechar. A integração dos dados reais de progresso e estrelas
-na tela da trilha permanece como pendência separada, descrita abaixo.
+Fechar ou usar Voltar do Android só pede confirmação quando algo pode se perder: uma
+seleção ou lacuna ainda não respondida, ou resposta cujo envio individual falhou.
+O que já foi respondido continua salvo, e a trilha avança. Durante o envio final, a
+saída fica bloqueada. Falhas preservam as respostas em memória para tentar salvar
+novamente. Depois do POST bem-sucedido, `onSaved(result)` recebe o resultado da API;
+o modal apresenta a conclusão, com acertos e estrelas do curso. A trilha recarrega
+perguntas e progresso ao salvar/fechar.
 
 `studyAnswersModel` usa o cliente HTTP autenticado e a mesma flag
 `EXPO_PUBLIC_USE_MOCKS` da trilha. No modo real, erros nunca viram sucesso fictício.
-No modo de demonstração, avalia as próprias perguntas de exemplo da trilha sem
-persistência no backend. Não cria outro catálogo de mocks.
+No modo de demonstração, avalia as próprias perguntas de exemplo da trilha e guarda
+as respostas em memória (`studyProgressMock`), para a trilha mostrar o avanço como no
+modo real. Não cria outro catálogo de mocks. O POST real omite `stars` e `correct`
+nulos (`non_null` do back); `studyAnswersApi` os normaliza para `null`.
 
-## Pendência de integração da trilha
+## Progresso na trilha
 
-Na `develop`, progresso e estrelas da tela da trilha usam valores de demonstração;
-no modo real, o progresso aparece indisponível e os níveis ficam sem estrelas.
-Esse comportamento foi confirmado no código e no Android com a `develop` sem as
-alterações desta task.
-
-O backend retorna estrelas para a rodada/categoria inteira. O Figma e a trilha
-atual apresentam estrelas por nível, com cada pergunta publicada mapeada para um
-nível. Além disso, `percentage` em `GET /api/v1/study-tracks/progress` representa
-percentual de acertos, não de perguntas concluídas. Responder todas as questões
-incorretamente representa uma rodada concluída com 0% de acertos.
-
-Exibir esses dados nos níveis exige alinhar o contrato do backend ou o mapeamento
-dos níveis da trilha. Essa definição e implementação ficam fora deste MR.
-O modal de conclusão já apresenta a avaliação da rodada retornada pelo POST, e
-`onSaved(result)` disponibiliza esse resultado para uma futura integração.
+Resolvido na task [Trilha: back não registra progresso por nível](https://app.clickup.com/t/1dfcuabd1ja):
+o back passou a aceitar respostas parciais e a expor o progresso por nível. A tela da
+trilha usa esses dados (ver `docs/study-track-mobile.md`).
 
 ## Design e validação
 
@@ -79,7 +72,7 @@ tema recebido da trilha, pois a API atual não publica título para esse tipo.
 
 Checks: `npm test`, `npm run typecheck`, `npm run lint` e bundle Android Expo.
 Os testes anteriores da trilha são preservados; os novos verificam contrato,
-correção, seleção, lacuna, leitura, navegação circular, lote completo, falha/retry
+correção, seleção, lacuna, leitura, rodada do nível aberto até o fim, envio parcial, falha/retry
 e uso do resultado do servidor.
 
 No Expo com a API real, conferir abertura pelo nível, os três tipos, feedback,

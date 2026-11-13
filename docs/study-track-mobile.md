@@ -16,11 +16,23 @@ Contrato consultado no backend: `origin/develop`, `contracts/study-track-c6.md`,
 
 Cada categoria é um curso; cada item publicado é um nível, na ordem retornada. O C6 não define agrupamentos de tópicos nem ordem pedagógica. O seletor mostra o tópico único da categoria: seu nome no modo real, CDB na primeira categoria de demonstração. Uma futura hierarquia deve substituir esse mapeamento sem mudar o contrato de leitura.
 
-O contrato C6 de leitura usado nesta tela não fornece progresso e estrelas. O mock demonstra 81% e nível atual 2: o nível 1 tem três estrelas, nuvens cobrem os níveis 3 a 5 (todo nível não alcançado, que também não abre) e o caminho de 2 para 3 fica cinza; isso é identificado como demonstração na tela. No modo real, o círculo indica indisponibilidade e todos os itens publicados podem ser abertos, sem inventar conclusão nem bloquear conteúdo. Nenhum progresso é persistido. A API de progresso adicionada posteriormente ao backend ainda não está integrada nesta tela.
+## Progresso por nível (C6)
 
-Decisão de 11/11/2026: a integração ficou de fora. O back não tem progresso por nível: o `POST /api/v1/study-tracks/answers` só aceita todas as perguntas publicadas da categoria de uma vez, e as estrelas e o `percentage` do `GET /api/v1/study-tracks/progress` valem para a categoria inteira (o percentual é de acertos, não de avanço). Para a trilha travar níveis e mostrar nuvens no modo real, o back precisa expor progresso por pergunta, ou o mapeamento "pergunta = nível" precisa ser revisto.
+Fonte: `GET /api/v1/study-tracks/progress` (`contracts/study-track-answers-c6.md` do back). Cada categoria traz `levels` (um item por pergunta publicada, com `completed` e `stars`), `currentLevel` e `completionPercentage`. `buildStudyLevels` cruza esses itens com as perguntas por `questionId`:
 
-Abrir um nível apresenta o conteúdo LEARNING ou o enunciado das questões, ocultando respostas. Responder perguntas e registrar conclusão pertencem à task separada de exercícios.
+- **Alcançado:** até o primeiro nível não concluído, na ordem das perguntas. Sem respostas, só o Lv. 1 abre; os demais ficam com nuvem e caminho cinza e não abrem.
+- **Estrelas por nível:** 3 no acerto, 1 no erro, nenhuma em leitura (`LEARNING`) ou nível não respondido. A regra e as artes de 1 e 2 estrelas (`assets/learning/stars-1.svg` e `stars-2.svg`, derivadas de `stars.svg`) são provisórias até o design confirmar no Figma.
+- **Círculo:** `completionPercentage` arredondado, ou seja, avanço (níveis concluídos), não acertos. O `percentage` do C6 é de acertos e não é usado aqui.
+- **Sem progresso** (erro ou formato inesperado): todos os níveis abrem, sem estrelas, com aviso e "Tentar novamente". O app nunca trava conteúdo sem saber o que o usuário fez.
+- Pergunta que o progresso ainda não conhece (publicada entre as duas chamadas) conta como pendente.
+
+O progresso recarrega ao fechar a atividade. No primeiro carregamento a trilha espera o progresso, para não mostrar níveis abertos e travá-los em seguida.
+
+`EXPO_PUBLIC_USE_MOCKS=true` usa `src/models/studyProgressMock.ts`: respostas em memória (até recarregar o app) e progresso calculado por `buildCategoryProgress`, com as mesmas regras do back. A demonstração começa em Renda Fixa com o Lv. 1 lido e o Lv. 2 certo, então o Lv. 3 é o atual (nuvem nos níveis 3 a 5 e caminho cinza de 2 para 3, como no PR #28).
+
+Histórico: em 11/11/2026 a integração ficou de fora porque o back só aceitava o lote completo da categoria e não expunha progresso por nível. Resolvido pela task [Trilha: back não registra progresso por nível](https://app.clickup.com/t/1dfcuabd1ja).
+
+Abrir um nível apresenta o conteúdo LEARNING ou a questão. O fluxo de resposta está em `docs/study-session-mobile.md`.
 
 ## Verificação manual
 
