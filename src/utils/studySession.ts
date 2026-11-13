@@ -7,6 +7,8 @@ import { gradeStudySessionQuestion } from './studyQuestion';
 
 export type StudySession = {
   questions: StudySessionQuestion[];
+  /** Índice do nível aberto: a rodada vai dele até o último nível, sem voltar ao início. */
+  start: number;
   index: number;
   selected: number | null;
   input: string;
@@ -29,12 +31,14 @@ export function createStudySession(
   questions: StudySessionQuestion[],
   startQuestionId: string,
 ): StudySession {
+  const start = Math.max(
+    0,
+    questions.findIndex((question) => question.id === startQuestionId),
+  );
   return {
     questions,
-    index: Math.max(
-      0,
-      questions.findIndex((question) => question.id === startQuestionId),
-    ),
+    start,
+    index: start,
     selected: null,
     input: '',
     answers: {},
@@ -52,7 +56,11 @@ export function canRespond(session: StudySession): boolean {
   return content?.type === 'FILL_BLANK' && !!session.input.trim();
 }
 
-/** Uma rodada percorre todos os itens da categoria, inclusive os anteriores ao nível aberto. */
+/**
+ * Uma rodada vai do nível aberto até o último da categoria. Cada resposta é salva assim que é
+ * dada (ver o ViewModel); o envio do fim da rodada repete o conjunto, o que é seguro porque o
+ * back substitui a resposta da mesma pergunta.
+ */
 export function studySessionReducer(
   session: StudySession,
   action: StudySessionAction,
@@ -95,8 +103,7 @@ export function studySessionReducer(
         question.published.type === 'LEARNING'
           ? { ...session.answers, [question.id]: { answer: null, correct: null } }
           : session.answers;
-      for (let offset = 1; offset <= session.questions.length; offset++) {
-        const index = (session.index + offset) % session.questions.length;
+      for (let index = session.index + 1; index < session.questions.length; index++) {
         if (!Object.hasOwn(answers, session.questions[index].id)) {
           return { ...session, answers, index, selected: null, input: '', phase: 'answering' };
         }
@@ -118,21 +125,29 @@ export function studySessionReducer(
   }
 }
 
+/** Respostas dadas na rodada, na ordem dos níveis. O C6 aceita qualquer subconjunto. */
 export function studySessionPayload(
   session: StudySession,
   categoryId: string,
+  only?: string,
 ): StudyAnswersRequest {
-  if (
-    !session.questions.length ||
-    session.questions.some((question) => !Object.hasOwn(session.answers, question.id))
-  ) {
-    throw new Error('Conclua todas as questões antes de enviar suas respostas.');
+  const answered = session.questions.filter(
+    (question) =>
+      Object.hasOwn(session.answers, question.id) && (only === undefined || question.id === only),
+  );
+  if (!answered.length) {
+    throw new Error('Responda ao menos uma questão antes de enviar.');
   }
   return {
     categoryId,
-    answers: session.questions.map((question) => ({
+    answers: answered.map((question) => ({
       questionId: question.id,
       answer: session.answers[question.id].answer,
     })),
   };
+}
+
+/** Itens da rodada atual (do nível aberto até o fim), para a barra de andamento. */
+export function roundSize(session: StudySession): number {
+  return Math.max(0, session.questions.length - session.start);
 }

@@ -6,6 +6,7 @@ import type { StudyAnswersResponse } from '@/types/studySession';
 import {
   canRespond,
   createStudySession,
+  roundSize,
   studySessionPayload,
   studySessionReducer,
   type StudySession,
@@ -41,6 +42,8 @@ export function useStudySessionViewModel({
   const [session, setSession] = useState(() =>
     createStudySession(initial.questions, startQuestionId),
   );
+  // Respostas já dadas que o back ainda não confirmou (falha de rede no envio individual).
+  const [unsaved, setUnsaved] = useState<ReadonlySet<string>>(new Set());
   // Transições síncronas evitam responder, avançar ou enviar duas vezes em toques rápidos.
   const current = useRef(session);
   const mounted = useRef(true);
@@ -59,6 +62,29 @@ export function useStudySessionViewModel({
     return next;
   }
 
+  function markUnsaved(questionId: string, pending: boolean) {
+    if (!mounted.current) return;
+    setUnsaved((previous) => {
+      const next = new Set(previous);
+      if (pending) next.add(questionId);
+      else next.delete(questionId);
+      return next;
+    });
+  }
+
+  /**
+   * Salva a resposta assim que ela é dada, para o avanço na trilha não depender de terminar a
+   * rodada. Falha aqui não interrompe a atividade: o envio do fim da rodada repete o conjunto.
+   */
+  function saveAnswer(snapshot: StudySession, questionId: string) {
+    if (!Object.hasOwn(snapshot.answers, questionId)) return;
+    markUnsaved(questionId, true);
+    studyAnswersModel.submitAnswers(studySessionPayload(snapshot, categoryId, questionId)).then(
+      () => markUnsaved(questionId, false),
+      () => undefined,
+    );
+  }
+
   async function save(snapshot: StudySession) {
     if (saving.current || snapshot.phase !== 'submitting') return;
     saving.current = true;
@@ -67,6 +93,7 @@ export function useStudySessionViewModel({
         studySessionPayload(snapshot, categoryId),
       );
       if (!mounted.current) return;
+      setUnsaved(new Set());
       dispatch({ type: 'saved', result });
       onSaved(result);
     } catch (error) {
@@ -83,21 +110,41 @@ export function useStudySessionViewModel({
     }
   }
 
+  function respond() {
+    const before = current.current;
+    const next = dispatch({ type: 'respond' });
+    if (next !== before && next.phase === 'feedback') {
+      saveAnswer(next, next.questions[next.index].id);
+    }
+  }
+
   function advance() {
     const before = current.current;
+    const question = before.questions[before.index];
     const next = dispatch({ type: 'next' });
-    if (next !== before && next.phase === 'submitting') void save(next);
+    if (next === before) return;
+    // Leitura não tem "Responder": conta como concluída ao avançar.
+    if (question?.published.type === 'LEARNING' && next.phase !== 'submitting') {
+      saveAnswer(next, question.id);
+    }
+    if (next.phase === 'submitting') void save(next);
   }
+
+  const answeredInRound = session.questions
+    .slice(session.start)
+    .filter((question) => Object.hasOwn(session.answers, question.id)).length;
 
   return {
     session,
     contentError: initial.error,
     question: session.questions[session.index],
     canRespond: canRespond(session),
-    progress: completionPercentage(Object.keys(session.answers).length, session.questions.length),
+    progress: completionPercentage(answeredInRound, roundSize(session)),
+    /** Respostas já dadas que ainda não chegaram ao servidor. */
+    unsavedCount: unsaved.size,
     select: (index: number) => dispatch({ type: 'select', index }),
     setInput: (value: string) => dispatch({ type: 'input', value }),
-    respond: () => dispatch({ type: 'respond' }),
+    respond,
     advance,
     retry: () => {
       const next = dispatch({ type: 'retry' });
