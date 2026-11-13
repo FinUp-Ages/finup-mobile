@@ -1,27 +1,35 @@
 import { Feather } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { ActivityIndicator, Modal, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { LearningButton } from '@/components/learning/LearningButton';
 import { LearningPath } from '@/components/learning/LearningPath';
 import { LearningProgress } from '@/components/learning/LearningProgress';
 import { Text } from '@/components/ui/AppText';
-import { colors, learningColors } from '@/theme/colors';
+import { colors, darkColors, learningColors } from '@/theme/colors';
 import { useStudyTrackViewModel } from '@/viewmodels/useStudyTrackViewModel';
 import StudySessionScreen from '@/views/StudySessionScreen';
 
 export default function StudyTrackScreen() {
+  const router = useRouter();
   const vm = useStudyTrackViewModel();
   return (
     <SafeAreaView edges={['top']} style={styles.screen}>
       <StatusBar style="light" />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <View style={styles.avatar}>
-            <Feather name="user" size={22} color={colors.placeholderOnDark} />
-          </View>
-          <View style={styles.identity}>
+          <Pressable
+            accessibilityLabel="Abrir perfil"
+            accessibilityRole="button"
+            hitSlop={8}
+            onPress={() => router.navigate('/profile')}
+            style={({ pressed }) => [styles.avatar, pressed && styles.avatarPressed]}
+          >
+            <Feather name="user" size={20} color={darkColors.textMuted} />
+          </Pressable>
+          <View>
             <Text style={styles.eyebrow}>Sua conta</Text>
             <Text accessibilityRole="header" style={styles.headerTitle}>
               Trilha de aprendizado
@@ -198,21 +206,19 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   avatar: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: colors.glassSoft,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: darkColors.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  identity: { flex: 1, gap: 4 },
+  avatarPressed: { opacity: 0.8 },
   eyebrow: {
     fontSize: 12,
-    fontWeight: '600',
-    color: colors.placeholderOnDark,
-    letterSpacing: 0.24,
+    color: darkColors.textMuted,
   },
-  headerTitle: { fontSize: 14, fontWeight: '600', color: colors.white, letterSpacing: 0.28 },
+  headerTitle: { fontSize: 16, fontWeight: '700', color: darkColors.textPrimary },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',

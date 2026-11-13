@@ -50,7 +50,7 @@ export default function AnaliseScreen() {
         }
         showsVerticalScrollIndicator={false}
       >
-        <AnaliseHeader />
+        <AnaliseHeader onPressProfile={() => router.navigate('/profile')} />
         <AnaliseAlerta alert={spendingAlerts.alert} />
         {viewModel.status === 'loading' ? <LoadingState /> : null}
         {viewModel.status === 'error' ? <ErrorState onRetry={viewModel.retry} /> : null}
@@ -87,12 +87,18 @@ export default function AnaliseScreen() {
   );
 }
 
-function AnaliseHeader() {
+function AnaliseHeader({ onPressProfile }: { onPressProfile: () => void }) {
   return (
     <View style={styles.header}>
-      <View style={styles.headerIcon}>
-        <Feather color={darkColors.textMuted} name="user" size={21} />
-      </View>
+      <Pressable
+        accessibilityLabel="Abrir perfil"
+        accessibilityRole="button"
+        hitSlop={8}
+        onPress={onPressProfile}
+        style={({ pressed }) => [styles.headerIcon, pressed && styles.headerIconPressed]}
+      >
+        <Feather color={darkColors.textMuted} name="user" size={20} />
+      </Pressable>
       <View>
         <Text style={styles.eyebrow}>Sua conta</Text>
         <Text style={styles.title}>Análise personalizada</Text>
@@ -161,11 +167,12 @@ const styles = StyleSheet.create({
   headerIcon: {
     alignItems: 'center',
     backgroundColor: darkColors.surface,
-    borderRadius: 21,
-    height: 42,
+    borderRadius: 20,
+    height: 40,
     justifyContent: 'center',
-    width: 42,
+    width: 40,
   },
+  headerIconPressed: { opacity: 0.8 },
   pressed: { opacity: 0.75 },
   retry: {
     backgroundColor: darkColors.textPrimary,

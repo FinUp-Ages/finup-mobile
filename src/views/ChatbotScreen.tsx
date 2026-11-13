@@ -75,7 +75,7 @@ export default function ChatbotScreen() {
             quando o teclado abre e o composer ficava atras dele. Se a janela
             encolher mesmo assim, o KAV recalcula pelo layout e a sobra vira 0. */}
         <KeyboardAvoidingView behavior="padding" style={styles.keyboard}>
-          <View style={[styles.content, { paddingTop: insets.top + 13, paddingBottom: isKeyboardOpen ? 8 : 16 }]}>
+          <View style={[styles.content, { paddingTop: insets.top + 16, paddingBottom: isKeyboardOpen ? 8 : 16 }]}>
             <ChatbotHeader onOpenMenu={() => vm.setIsMenuOpen(true)} showAssistantStatus={hasConversation} />
 
             {vm.isLoadingMessages ? (
