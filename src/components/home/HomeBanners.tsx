@@ -4,7 +4,7 @@ import { AccessibilityInfo, Animated, Pressable, StyleSheet, View } from 'react-
 import { LearningBannerCard } from '@/components/home/LearningBannerCard';
 import { ScoreBannerCard } from '@/components/home/ScoreBannerCard';
 import { homeBannerKeys } from '@/utils/homeBanners';
-import type { HomeTriageStatus } from '@/viewmodels/useHomeBannerViewModel';
+import type { HomeTriageStatus } from '@/types/home';
 
 type HomeBannersProps = {
   onPressLearning: () => void;

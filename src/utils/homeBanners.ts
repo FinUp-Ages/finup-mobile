@@ -1,4 +1,4 @@
-import type { HomeTriageStatus } from '../viewmodels/useHomeBannerViewModel';
+import type { HomeTriageStatus } from '../types/home';
 
 export type HomeBannerKey = 'score' | 'learning';
 

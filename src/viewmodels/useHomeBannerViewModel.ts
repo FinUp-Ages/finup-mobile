@@ -1,9 +1,7 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { triageModel } from '@/models/triageModel';
-
-/** 'unknown' enquanto carrega ou se a consulta falhar: a Home mostra só o banner do score. */
-export type HomeTriageStatus = 'unknown' | 'pending' | 'completed';
+import type { HomeTriageStatus } from '@/types/home';
 
 /**
  * VIEWMODEL - qual banner a Home mostra.

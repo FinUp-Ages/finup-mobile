@@ -1,12 +1,12 @@
 import type { Answer, Answers, TriageQuestion } from '../types/triage';
 
-/** Pergunta da renda mensal (questionário v2): base do FinUp Score no back. */
+/** Monthly income question (questionnaire v2): the backend computes the FinUp Score from it. */
 export const MONTHLY_INCOME_QUESTION = 'MONTHLY_INCOME';
 
 /**
- * Pré-preenche a renda com a do perfil (GET /users/me), que é a atual: vale mais que a da
- * última triagem e cobre quem informou a renda no cadastro e ainda não fez a triagem. Sem
- * renda no perfil, mantém as respostas como estão e o usuário informa na pergunta.
+ * Prefill the income with the profile one (GET /users/me), which is the current value: it wins
+ * over the last triage and covers users who gave their income at sign-up and never took the
+ * triage. Without a profile income the answers are kept and the user fills in the question.
  */
 export function withCurrentIncome(answers: Answers, income: number | null | undefined): Answers {
   return typeof income === 'number' && Number.isFinite(income) && income >= 0

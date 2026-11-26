@@ -5,7 +5,13 @@ import { HttpError } from '@/config/httpClient';
 import { triageModel } from '@/models/triageModel';
 import { userModel } from '@/models/userModel';
 import type { Answer, Answers, AssessmentResponse, Questionnaire } from '@/types/triage';
-import { answerError, compatibleAnswers, submissionAnswers, visibleQuestions, withCurrentIncome } from '@/utils/triage';
+import {
+  answerError,
+  compatibleAnswers,
+  submissionAnswers,
+  visibleQuestions,
+  withCurrentIncome,
+} from '@/utils/triage';
 
 // Request-only function: it never reads or updates React state.
 // The user is only used to prefill the income: if it fails, the questionnaire still opens.
@@ -35,7 +41,9 @@ export function useTriageViewModel() {
     if (!alive.current) return;
     const outdated = !!saved && saved.version !== questions.version;
     setQuestionnaire(questions);
-    setAnswers(compatibleAnswers(questions.questions, withCurrentIncome(saved?.answers ?? {}, income)));
+    setAnswers(
+      compatibleAnswers(questions.questions, withCurrentIncome(saved?.answers ?? {}, income)),
+    );
     setAssessment(result);
     setIndex(0);
     setErrors({});

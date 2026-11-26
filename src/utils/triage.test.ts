@@ -1,7 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import type { TriageQuestion } from '../types/triage';
-import { answerError, compatibleAnswers, MONTHLY_INCOME_QUESTION, submissionAnswers, visibleQuestions, withCurrentIncome } from './triage';
+import {
+  answerError,
+  compatibleAnswers,
+  MONTHLY_INCOME_QUESTION,
+  submissionAnswers,
+  visibleQuestions,
+  withCurrentIncome,
+} from './triage';
 
 const flag: TriageQuestion = {
   id: 'HAS_DEBT', text: 'Dívidas?', type: 'BOOLEAN', required: true,
@@ -58,8 +65,13 @@ test('prefill retains compatible responses across versions without sending obsol
 
 test('income question is prefilled with the profile income, which wins over the last triage', () => {
   const income: TriageQuestion = { ...amount, id: MONTHLY_INCOME_QUESTION, requiredWhen: null };
-  assert.deepEqual(compatibleAnswers([income], withCurrentIncome({}, 5000)), { MONTHLY_INCOME: 5000 });
-  assert.deepEqual(withCurrentIncome({ MONTHLY_INCOME: 3000, HAS_DEBT: false }, 4200), { MONTHLY_INCOME: 4200, HAS_DEBT: false });
+  assert.deepEqual(compatibleAnswers([income], withCurrentIncome({}, 5000)), {
+    MONTHLY_INCOME: 5000,
+  });
+  assert.deepEqual(withCurrentIncome({ MONTHLY_INCOME: 3000, HAS_DEBT: false }, 4200), {
+    MONTHLY_INCOME: 4200,
+    HAS_DEBT: false,
+  });
   assert.deepEqual(withCurrentIncome({ MONTHLY_INCOME: 0 }, 0), { MONTHLY_INCOME: 0 });
 });
 
@@ -72,5 +84,7 @@ test('without profile income the answers are kept and the question stays to be a
 });
 
 test('an old questionnaire without the income question drops the prefilled value', () => {
-  assert.deepEqual(compatibleAnswers([flag], withCurrentIncome({ HAS_DEBT: false }, 5000)), { HAS_DEBT: false });
+  assert.deepEqual(compatibleAnswers([flag], withCurrentIncome({ HAS_DEBT: false }, 5000)), {
+    HAS_DEBT: false,
+  });
 });

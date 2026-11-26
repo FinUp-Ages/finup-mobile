@@ -7,7 +7,8 @@
     "Pre-preenchimento com a renda do GET /users/me, que vale mais que a da ultima triagem; falha nessa chamada nao impede abrir a triagem.",
     "Respostas salvas de versao antiga abrem o formulario, nao a avaliacao, com o aviso de questionario atualizado.",
     "Banner do score volta com triagem respondida e sem FinUp Score (regra em utils/homeBanners.ts). Com o usuario ainda carregando, nao volta.",
-    "Compativel com o back antigo: sem a pergunta no questionario, compatibleAnswers descarta o valor pre-preenchido."
+    "Compativel com o back antigo: sem a pergunta no questionario, compatibleAnswers descarta o valor pre-preenchido.",
+    "2026-11-25 (code review): HomeTriageStatus movido para src/types/home.ts, para utils nao depender de viewmodel; comentarios novos de utils/triage.ts em ingles, como o restante do arquivo."
   ],
   "files_in_scope": [
     "src/utils/triage.ts",
@@ -17,7 +18,10 @@
     "src/viewmodels/useTriageViewModel.ts",
     "src/viewmodels/useHomeViewModel.ts",
     "src/components/home/HomeBanners.tsx",
-    "src/views/HomeScreen.tsx"
+    "src/views/HomeScreen.tsx",
+    "src/types/home.ts",
+    "src/viewmodels/useHomeBannerViewModel.ts",
+    ".railforge/state.json"
   ],
   "non_goals": [
     "Campo de renda editavel fora da triagem.",
@@ -25,12 +29,12 @@
     "Reformatar arquivos que ja estavam fora do Prettier na develop (HomeScreen.tsx, useHomeViewModel.ts)."
   ],
   "validation": {
-    "typecheck": "2026-11-24: passou.",
-    "lint": "2026-11-24: passou.",
-    "test": "2026-11-24: 82 testes, 0 falhas (novos: pre-preenchimento da renda e regra dos banners).",
-    "prettier": "Arquivos novos formatados; os alterados seguem como estavam na develop.",
-    "limits": "Fluxo nao verificado no Expo Go/dispositivo: falta rodar contra o back da branch (sem renda no cadastro -> triagem -> score na Home)."
+    "typecheck": "2026-11-25: passou.",
+    "lint": "2026-11-25: passou.",
+    "test": "2026-11-25: 82 testes, 0 falhas (novos: pre-preenchimento da renda e regra dos banners).",
+    "prettier": "2026-11-25: linhas novas formatadas; divergencia restante do Prettier em cada arquivo alterado e a mesma que ja existia na develop.",
+    "limits": "2026-11-25: fluxo testado pelo usuario no celular (Expo Go) contra o back local da branch: renda informada no perfil existente. Sem teste automatizado de ViewModel/tela."
   },
-  "review": "pendente: revisao humana do diff e teste no dispositivo",
-  "updated_at": "2026-11-24"
+  "review": "2026-11-25: /code-review (standards e spec) feito; ajustes pequenos aplicados. Pendente: revisao humana no PR.",
+  "updated_at": "2026-11-25"
 }
