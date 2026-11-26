@@ -21,9 +21,10 @@ import { useSpendingAlertPopupViewModel } from '@/viewmodels/useSpendingAlertPop
  * (useHomeViewModel). O filtro de tipo ('Todos' | 'Entrada' | 'Saida') filtra a listagem
  * de movimentacoes da Home de forma puramente reativa sem alterar o saldo ou totais.
  *
- * Banner: enquanto a triagem nao foi respondida, alterna entre o do score (abre /triage: as
- * respostas alimentam o FinUp Score no back, e a Home recarrega o score ao voltar ao foco) e o
- * de aprendizado (abre a aba Educacional). Respondida a triagem, fica so o de aprendizado.
+ * Banner: enquanto a triagem nao foi respondida ou o usuario nao tem FinUp Score, alterna
+ * entre o do score (abre /triage: as respostas, inclusive a renda, alimentam o FinUp Score no
+ * back, e a Home recarrega o score ao voltar ao foco) e o de aprendizado (abre a aba
+ * Educacional). Com triagem e score, fica so o de aprendizado.
  */
 export default function HomeScreen() {
   const router = useRouter();
@@ -31,6 +32,7 @@ export default function HomeScreen() {
     status,
     userName,
     score,
+    hasScore,
     balance,
     income,
     expense,
@@ -79,6 +81,7 @@ export default function HomeScreen() {
         />
 
         <HomeBanners
+          hasScore={hasScore}
           onPressLearning={() => router.navigate('/educacional')}
           onPressScore={() => router.push('/triage')}
           triage={triage}

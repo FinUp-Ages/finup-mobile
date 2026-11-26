@@ -3,29 +3,29 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Pressable, StyleSheet, View } from 'react-native';
 import { LearningBannerCard } from '@/components/home/LearningBannerCard';
 import { ScoreBannerCard } from '@/components/home/ScoreBannerCard';
+import { homeBannerKeys } from '@/utils/homeBanners';
 import type { HomeTriageStatus } from '@/viewmodels/useHomeBannerViewModel';
-
-type BannerKey = 'score' | 'learning';
 
 type HomeBannersProps = {
   onPressLearning: () => void;
   onPressScore: () => void;
   triage: HomeTriageStatus;
+  /** null enquanto a Home nao carregou o usuario. */
+  hasScore: boolean | null;
 };
 
 const ROTATE_INTERVAL_MS = 6000;
 const FADE_MS = 280;
 
 /**
- * Banner da Home. Triagem respondida: so o de aprendizado. Triagem pendente: alterna entre
- * o do score (que leva a triagem) e o de aprendizado, com pontinhos para trocar na mao.
- * Enquanto o estado da triagem e desconhecido, fica so o do score.
+ * Banner da Home. Quais aparecem: `homeBannerKeys` (o do score leva a triagem e aparece
+ * enquanto ela esta pendente ou o usuario ainda nao tem FinUp Score). Com dois, alterna
+ * entre eles, com pontinhos para trocar na mao.
  *
  * Com "reduzir movimento" ligado nao ha troca automatica nem fade: so os pontinhos.
  */
-export function HomeBanners({ onPressLearning, onPressScore, triage }: HomeBannersProps) {
-  const banners: BannerKey[] =
-    triage === 'completed' ? ['learning'] : triage === 'pending' ? ['score', 'learning'] : ['score'];
+export function HomeBanners({ hasScore, onPressLearning, onPressScore, triage }: HomeBannersProps) {
+  const banners = homeBannerKeys(triage, hasScore);
   const [index, setIndex] = useState(0);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [opacity] = useState(() => new Animated.Value(1));

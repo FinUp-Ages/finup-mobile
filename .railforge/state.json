@@ -1,33 +1,36 @@
 {
-  "stage": "COMPLETED",
-  "task": "[BUG] Trilha sem círculo dos níveis, estrelas e nuvem no APK release do Android",
-  "scope": "Desenhar as artes da trilha a partir de SVG em texto (SvgCss xml), em vez de SvgCssUri com Asset.fromModule(...).uri, que no APK release vira nome de recurso do Android e não carrega.",
+  "stage": "REVIEWING",
+  "task": "[Mobile] Renda mensal pela triagem para o FinUp Score nao sumir (ClickUp 1dfcuabd3g7)",
+  "scope": "Quem pulou a renda no cadastro nao tinha onde informa-la e ficava sem FinUp Score. O back (finup-backend, branch feat/atualizar-renda-pelo-app) passa a perguntar a renda na triagem (questionario v2). O app pre-preenche essa pergunta com a renda atual, reabre o formulario quando as respostas salvas sao de versao antiga e volta a mostrar o banner do score na Home enquanto o usuario nao tiver score.",
   "decisions": [
-    "SVGs do nível, das estrelas e da nuvem passam a ser texto em src/components/learning/learningSvgs.ts, no padrão de src/widgets/widgetSvgs.ts; saem os .svg de assets/learning usados só pela trilha.",
-    "Marcação dos SVGs igual à dos arquivos do Figma, sem redesenho."
+    "2026-11-24: opcao recomendada do card (renda na triagem). O questionario continua vindo do back; o app so conhece o id MONTHLY_INCOME para pre-preencher.",
+    "Pre-preenchimento com a renda do GET /users/me, que vale mais que a da ultima triagem; falha nessa chamada nao impede abrir a triagem.",
+    "Respostas salvas de versao antiga abrem o formulario, nao a avaliacao, com o aviso de questionario atualizado.",
+    "Banner do score volta com triagem respondida e sem FinUp Score (regra em utils/homeBanners.ts). Com o usuario ainda carregando, nao volta.",
+    "Compativel com o back antigo: sem a pergunta no questionario, compatibleAnswers descarta o valor pre-preenchido."
   ],
   "files_in_scope": [
-    "src/components/learning/LearningPath.tsx",
-    "src/components/learning/learningSvgs.ts",
-    "assets/learning/level.svg",
-    "assets/learning/stars.svg",
-    "assets/learning/stars-1.svg",
-    "assets/learning/stars-2.svg",
-    "assets/learning/cloud.svg",
-    "docs/study-track-mobile.md",
-    ".railforge/state.json"
+    "src/utils/triage.ts",
+    "src/utils/triage.test.ts",
+    "src/utils/homeBanners.ts",
+    "src/utils/homeBanners.test.ts",
+    "src/viewmodels/useTriageViewModel.ts",
+    "src/viewmodels/useHomeViewModel.ts",
+    "src/components/home/HomeBanners.tsx",
+    "src/views/HomeScreen.tsx"
   ],
   "non_goals": [
-    "Mudar layout, regra de estrelas ou arte da trilha.",
-    "Remover cloud-left.svg e cloud-right.svg, que a trilha atual não usa."
+    "Campo de renda editavel fora da triagem.",
+    "Mudar o cadastro (renda continua opcional na Etapa 2).",
+    "Reformatar arquivos que ja estavam fora do Prettier na develop (HomeScreen.tsx, useHomeViewModel.ts)."
   ],
   "validation": {
-    "typecheck": "Passou.",
-    "lint": "Passou.",
-    "prettier": "Arquivos alterados formatados (--end-of-line auto).",
-    "device_android": "2026-11-13, APK release (EAS) em Android físico contra a API da AWS: usuário confirmou que a arte da trilha voltou a aparecer.",
-    "limits": "iOS/Expo Go não retestado depois da troca; o SvgCssUri já repassava o texto baixado para o SvgCss, então o render é o mesmo."
+    "typecheck": "2026-11-24: passou.",
+    "lint": "2026-11-24: passou.",
+    "test": "2026-11-24: 82 testes, 0 falhas (novos: pre-preenchimento da renda e regra dos banners).",
+    "prettier": "Arquivos novos formatados; os alterados seguem como estavam na develop.",
+    "limits": "Fluxo nao verificado no Expo Go/dispositivo: falta rodar contra o back da branch (sem renda no cadastro -> triagem -> score na Home)."
   },
-  "review": "Diff revisado. PR para a develop.",
-  "updated_at": "2026-11-13"
+  "review": "pendente: revisao humana do diff e teste no dispositivo",
+  "updated_at": "2026-11-24"
 }

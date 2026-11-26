@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import type { TriageQuestion } from '../types/triage';
-import { answerError, compatibleAnswers, submissionAnswers, visibleQuestions } from './triage';
+import { answerError, compatibleAnswers, MONTHLY_INCOME_QUESTION, submissionAnswers, visibleQuestions, withCurrentIncome } from './triage';
 
 const flag: TriageQuestion = {
   id: 'HAS_DEBT', text: 'Dívidas?', type: 'BOOLEAN', required: true,
@@ -54,4 +54,23 @@ test('prefill retains compatible responses across versions without sending obsol
     HAS_DEBT: true, DEBT_TOTAL_AMOUNT: 42.5, INTERESTS: ['OLD_OPTION'], OLD_QUESTION: 'old',
   }), { HAS_DEBT: true, DEBT_TOTAL_AMOUNT: 42.5 });
   assert.deepEqual(submissionAnswers([flag, choice], { HAS_DEBT: false, INTERESTS: [] }), { HAS_DEBT: false, INTERESTS: [] });
+});
+
+test('income question is prefilled with the profile income, which wins over the last triage', () => {
+  const income: TriageQuestion = { ...amount, id: MONTHLY_INCOME_QUESTION, requiredWhen: null };
+  assert.deepEqual(compatibleAnswers([income], withCurrentIncome({}, 5000)), { MONTHLY_INCOME: 5000 });
+  assert.deepEqual(withCurrentIncome({ MONTHLY_INCOME: 3000, HAS_DEBT: false }, 4200), { MONTHLY_INCOME: 4200, HAS_DEBT: false });
+  assert.deepEqual(withCurrentIncome({ MONTHLY_INCOME: 0 }, 0), { MONTHLY_INCOME: 0 });
+});
+
+test('without profile income the answers are kept and the question stays to be answered', () => {
+  const income: TriageQuestion = { ...amount, id: MONTHLY_INCOME_QUESTION, requiredWhen: null };
+  for (const missing of [null, undefined, NaN, -1]) {
+    assert.deepEqual(withCurrentIncome({ HAS_DEBT: true }, missing), { HAS_DEBT: true });
+  }
+  assert.ok(answerError(income, withCurrentIncome({}, null)[MONTHLY_INCOME_QUESTION]));
+});
+
+test('an old questionnaire without the income question drops the prefilled value', () => {
+  assert.deepEqual(compatibleAnswers([flag], withCurrentIncome({ HAS_DEBT: false }, 5000)), { HAS_DEBT: false });
 });
