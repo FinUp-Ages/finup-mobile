@@ -1,5 +1,19 @@
 import type { Answer, Answers, TriageQuestion } from '../types/triage';
 
+/** Monthly income question (questionnaire v2): the backend computes the FinUp Score from it. */
+export const MONTHLY_INCOME_QUESTION = 'MONTHLY_INCOME';
+
+/**
+ * Prefill the income with the profile one (GET /users/me), which is the current value: it wins
+ * over the last triage and covers users who gave their income at sign-up and never took the
+ * triage. Without a profile income the answers are kept and the user fills in the question.
+ */
+export function withCurrentIncome(answers: Answers, income: number | null | undefined): Answers {
+  return typeof income === 'number' && Number.isFinite(income) && income >= 0
+    ? { ...answers, [MONTHLY_INCOME_QUESTION]: income }
+    : answers;
+}
+
 export function visibleQuestions(questions: TriageQuestion[], answers: Answers) {
   const accepted: Answers = {};
   return questions.filter((question) => {

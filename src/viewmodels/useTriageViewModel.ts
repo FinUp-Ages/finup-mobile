@@ -3,16 +3,25 @@ import { useRouter } from 'expo-router';
 import { Alert } from 'react-native';
 import { HttpError } from '@/config/httpClient';
 import { triageModel } from '@/models/triageModel';
+import { userModel } from '@/models/userModel';
 import type { Answer, Answers, AssessmentResponse, Questionnaire } from '@/types/triage';
-import { answerError, compatibleAnswers, submissionAnswers, visibleQuestions } from '@/utils/triage';
+import {
+  answerError,
+  compatibleAnswers,
+  submissionAnswers,
+  visibleQuestions,
+  withCurrentIncome,
+} from '@/utils/triage';
 
 // Request-only function: it never reads or updates React state.
+// The user is only used to prefill the income: if it fails, the questionnaire still opens.
 async function fetchTriageData() {
-  const [questions, saved, result] = await Promise.all([
+  const [questions, saved, result, user] = await Promise.all([
     triageModel.getQuestions(), triageModel.getAnswers(), triageModel.getAssessment(),
+    userModel.getMe().catch(() => null),
   ]);
   if (!questions.questions.length) throw new Error('Questionnaire unavailable');
-  return { questions, saved, result };
+  return { questions, saved, result, income: user?.monthlyIncome ?? null };
 }
 
 export function useTriageViewModel() {
@@ -28,15 +37,19 @@ export function useTriageViewModel() {
   const busy = useRef(false);
   const alive = useRef(true);
   const dirty = useRef(false);
-  const applyLoadedData = useCallback(({ questions, saved, result }: Awaited<ReturnType<typeof fetchTriageData>>) => {
+  const applyLoadedData = useCallback(({ questions, saved, result, income }: Awaited<ReturnType<typeof fetchTriageData>>) => {
     if (!alive.current) return;
+    const outdated = !!saved && saved.version !== questions.version;
     setQuestionnaire(questions);
-    setAnswers(compatibleAnswers(questions.questions, saved?.answers ?? {}));
+    setAnswers(
+      compatibleAnswers(questions.questions, withCurrentIncome(saved?.answers ?? {}, income)),
+    );
     setAssessment(result);
     setIndex(0);
     setErrors({});
-    setStatus(result ? 'assessment' : 'form');
-    if (saved && saved.version !== questions.version) setNotice('O questionário foi atualizado. Revise suas respostas.');
+    // Outdated answers open the form: the new questions (e.g. the income) need an answer.
+    setStatus(result && !outdated ? 'assessment' : 'form');
+    if (outdated) setNotice('O questionário foi atualizado. Revise suas respostas.');
   }, []);
   useEffect(() => {
     let active = true;

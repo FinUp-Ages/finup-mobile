@@ -15,3 +15,6 @@ export type HomeExpense = {
   amount: string;
   type?: TransactionType;
 };
+
+/** 'unknown' enquanto carrega ou se a consulta falhar: a Home mostra só o banner do score. */
+export type HomeTriageStatus = 'unknown' | 'pending' | 'completed';

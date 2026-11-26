@@ -127,6 +127,7 @@ export function useHomeViewModel() {
     status,
     userName: data?.userName ?? null,
     score: formatFinUpScore(data?.finUpScore),
+    hasScore: data ? data.finUpScore !== null : null,
     balance: data?.balance ?? null,
     income: data?.income ?? null,
     expense: data?.expense ?? null,
