@@ -8,7 +8,8 @@
     "Respostas salvas de versao antiga abrem o formulario, nao a avaliacao, com o aviso de questionario atualizado.",
     "Banner do score volta com triagem respondida e sem FinUp Score (regra em utils/homeBanners.ts). Com o usuario ainda carregando, nao volta.",
     "Compativel com o back antigo: sem a pergunta no questionario, compatibleAnswers descarta o valor pre-preenchido.",
-    "2026-11-25 (code review): HomeTriageStatus movido para src/types/home.ts, para utils nao depender de viewmodel; comentarios novos de utils/triage.ts em ingles, como o restante do arquivo."
+    "2026-11-25 (code review): HomeTriageStatus movido para src/types/home.ts, para utils nao depender de viewmodel; comentarios novos de utils/triage.ts em ingles, como o restante do arquivo.",
+    "2026-11-25: decisao do usuario: renda zero continua aceita na triagem (minimo 0); quem informa 0 conclui a triagem e segue sem FinUp Score pelo gate renda > 0."
   ],
   "files_in_scope": [
     "src/utils/triage.ts",
